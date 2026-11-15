@@ -6,7 +6,7 @@
     <title>达一中 · 校园树洞</title>
     
     <style>
-        /* ================= 基础变量与主题 ================= */
+        /* ================= 核心变量与主题 ================= */
         :root {
             --bg-color: #121212; --panel-bg: rgba(30, 30, 30, 0.85); --text-main: #e0e0e0;
             --text-muted: #aaa; --border-color: #333; --accent-color: #ff7675;
@@ -18,6 +18,7 @@
             --accent-hover: #ff8a80; --header-bg: rgba(244, 246, 249, 0.95); --shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
+        /* ================= 基础样式 ================= */
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         
@@ -50,16 +51,27 @@
         .back-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; }
         .detail-body { max-width: 800px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
         .detail-content { font-size: 16px; line-height: 1.8; }
-        .detail-content img { width: 100%; border-radius: 8px; margin: 10px 0; cursor: zoom-in; }
 
-        /* 评论系统 UI */
+        /* ================= 详情页图片排版系统（朋友圈版） ================= */
+        .detail-content .img-container { display: grid; gap: 8px; margin: 15px 0; width: 100%; }
+        .detail-content .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--border-color); aspect-ratio: 1 / 1; }
+        
+        /* 单图：巨大化 */
+        .detail-content .img-container.single { grid-template-columns: 1fr; }
+        .detail-content .img-container.single img { aspect-ratio: auto; max-height: 500px; }
+        
+        /* 多图：九宫格 / 双图 */
+        .detail-content .img-container.multiple { grid-template-columns: repeat(3, 1fr); }
+        .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
+        .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
+
+        /* ================= 评论系统 UI ================= */
         .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
         .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
         .comment-item { background: var(--panel-bg); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); font-size: 14px; }
         .comment-meta { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
         .comment-author { color: var(--accent-color); font-weight: bold; }
         
-        /* 评论表单 */
         .comment-form { background: var(--panel-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         .comment-form input, .comment-form textarea { width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-family: inherit; outline: none; }
         .comment-form input:focus, .comment-form textarea:focus { border-color: var(--accent-color); }
@@ -81,6 +93,15 @@
     </style>
 </head>
 <body>
+
+    <!-- 🚨 暗号拦截遮罩层 🚨 -->
+    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+        <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
+        <input type="password" id="gate-input" placeholder="输入暗号..." style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-main); text-align: center; margin-bottom: 15px; outline: none;">
+        <button onclick="checkPassword()" style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: none; background: var(--accent-color); color: #fff; font-weight: bold; cursor: pointer;">进 入</button>
+        <p id="gate-error" style="color: #ff5252; font-size: 14px; margin-top: 15px; display: none;">暗号错误，请重试！</p>
+    </div>
 
     <header class="header">
         <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
@@ -116,14 +137,15 @@
     <script src="data/wall_data.js"></script>
     <script>
         // ==========================================
-        // 🌟 核心配置： Ziscus Worker 地址
+        // 🌟 核心配置
         // ==========================================
         const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev';
-
         let currentFilter = '全部';
         let currentPostId = '';
 
+        // ==========================================
         // 渲染列表
+        // ==========================================
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -160,19 +182,29 @@
             const overlay = document.getElementById('detail-overlay');
             const body = document.getElementById('detail-body');
 
-            // 解析内容
+            // 解析内容 + 图片网格（朋友圈排版）
             let contentHtml = post.content || '';
             contentHtml = contentHtml.replace(/<加粗>(.*?)<\/加粗>/g, '<strong>$1</strong>');
+            
             if (post.images && post.images.length > 0) {
-                post.images.forEach((imgPath, index) => {
-                    const tag = `<p${index + 1}>`;
-                    const imgHtml = `<br><img src="${imgPath}" onclick="openLightbox('${imgPath}')">`;
-                    contentHtml = contentHtml.replace(tag, imgHtml);
-                });
-            }
-            contentHtml = contentHtml.replace(/<p\d+>/g, '');
+                let imgGridClass = "multiple"; // 默认三图及以上是九宫格
+                if (post.images.length === 1) imgGridClass = "single";
+                if (post.images.length === 2) imgGridClass = "two-images";
 
-            // 基础渲染
+                let imgsHtml = `<div class="img-container ${imgGridClass}">`;
+                post.images.forEach((imgPath) => {
+                    imgsHtml += `<img src="${imgPath}" onclick="event.stopPropagation(); openLightbox('${imgPath}')">`;
+                });
+                imgsHtml += `</div>`;
+
+                if (contentHtml.includes('<p1>')) {
+                    contentHtml = contentHtml.replace(/<p1>/g, imgsHtml);
+                } else {
+                    contentHtml += imgsHtml;
+                }
+            }
+            contentHtml = contentHtml.replace(/<p[2-9]>/g, '');
+
             body.innerHTML = `
                 <div class="post-header" style="margin-bottom: 20px;">
                     <span class="post-tag">${post.category}</span>
@@ -198,7 +230,6 @@
             `;
 
             overlay.classList.add('active');
-            // 拉取评论
             fetchComments(id);
         }
 
@@ -207,7 +238,6 @@
             currentPostId = '';
         }
 
-        // 获取已审核的评论
         async function fetchComments(postId) {
             const listDiv = document.getElementById('comment-list');
             try {
@@ -241,7 +271,6 @@
             }
         }
 
-        // 提交新评论
         async function submitComment(event) {
             event.preventDefault();
             const name = document.getElementById('comment-name').value.trim();
@@ -266,7 +295,7 @@
 
                 if (res.ok) {
                     alert('✅ 提交成功！由于开启了人工审核，您的评论在站长审核通过后才会显示。');
-                    document.getElementById('comment-body').value = ''; // 清空内容
+                    document.getElementById('comment-body').value = '';
                 } else {
                     const errData = await res.json();
                     alert('❌ 提交失败: ' + (errData.error || '未知错误'));
@@ -280,15 +309,9 @@
             }
         }
 
-        // 图片放大
-        function openLightbox(src) {
-            event.stopPropagation();
-            document.getElementById('lightbox-img').src = src;
-            document.getElementById('lightbox').style.display = 'flex';
-        }
-        function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
-
-        // 筛选、主题、音乐 
+        // ==========================================
+        // 基础交互逻辑（筛选、明暗、音乐、放大）
+        // ==========================================
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -297,6 +320,7 @@
                 renderPosts();
             });
         });
+
         const themeBtn = document.getElementById('theme-toggle');
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-theme'); themeBtn.innerHTML = '☀️ 明亮'; }
         function toggleTheme() {
@@ -304,11 +328,54 @@
             if (document.body.classList.contains('light-theme')) { localStorage.setItem('theme', 'light'); themeBtn.innerHTML = '☀️ 明亮'; } 
             else { localStorage.setItem('theme', 'dark'); themeBtn.innerHTML = '🌙 暗黑'; }
         }
+
         const bgm = document.getElementById('bgm'); const musicBtn = document.getElementById('music-toggle'); let isPlaying = false;
         function toggleMusic() {
             if (isPlaying) { bgm.pause(); musicBtn.classList.remove('playing'); musicBtn.innerHTML = '🔇'; } 
             else { bgm.play().catch(() => alert("请先点击页面")); musicBtn.classList.add('playing'); musicBtn.innerHTML = '🎵'; }
             isPlaying = !isPlaying;
+        }
+
+        function openLightbox(src) {
+            event.stopPropagation();
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+        function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
+
+        // ==========================================
+        // 🚨 暗号拦截逻辑 🚨
+        // ==========================================
+        function checkPassword() {
+            const input = document.getElementById('gate-input').value.trim();
+            const errorMsg = document.getElementById('gate-error');
+            
+            // 👇 每周改这里就能换暗号！ 👇
+            const SECRET_CODE = "V50"; 
+
+            if (input === SECRET_CODE) {
+                // 暗号正确，记录状态，有效期 7 天
+                localStorage.setItem('wall_access_token', Date.now().toString());
+                document.getElementById('password-gate').style.display = 'none';
+                document.body.style.overflow = 'auto'; // 恢复滚动
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('gate-input').value = '';
+            }
+        }
+
+        // 页面加载时检查暗号状态
+        const savedToken = localStorage.getItem('wall_access_token');
+        if (savedToken) {
+            const isExpired = Date.now() - parseInt(savedToken) > 7 * 24 * 60 * 60 * 1000; // 7天过期
+            if (!isExpired) {
+                document.getElementById('password-gate').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
+        } else {
+            document.body.style.overflow = 'hidden';
         }
 
         window.onload = () => { renderPosts(); };
