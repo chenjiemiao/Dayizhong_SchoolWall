@@ -1,0 +1,7 @@
+node_modules/
+ziscus-0.7.0/
+package/
+*.tgz
+ziscus.config.json
+schema.sql
+wrangler.toml
