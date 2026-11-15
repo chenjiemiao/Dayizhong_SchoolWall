@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞1.0</title>
+    <title>达一中 · 校园树洞</title>
     
     <style>
         /* ================= 核心变量与主题 ================= */
@@ -89,8 +89,8 @@
 </head>
 <body>
 
-    <!-- 🚨 暗号拦截遮罩层 🚨 -->
-    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+    <!-- 🚨 暗号拦截遮罩层 (默认 display: flex，强制显示) 🚨 -->
+    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
         <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
         <input type="password" id="gate-input" placeholder="输入暗号..." style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-main); text-align: center; margin-bottom: 15px; outline: none;">
@@ -132,7 +132,7 @@
     <script src="data/wall_data.js"></script>
     <script>
         // ==========================================
-        // 🌟 核心配置 (默认 Ziscus 的接口都在 /api/ 路径下)
+        // 🌟 核心配置
         // ==========================================
         const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev/api';
         let currentFilter = '全部';
@@ -225,7 +225,7 @@
             currentPostId = '';
         }
 
-        // 获取评论 (修改为 /api/comments)
+        // 获取评论
         async function fetchComments(postId) {
             const listDiv = document.getElementById('comment-list');
             try {
@@ -259,7 +259,7 @@
             }
         }
 
-        // 提交评论 (修改为 /api/comments，字段名匹配 Ziscus)
+        // 提交评论
         async function submitComment(event) {
             event.preventDefault();
             const name = document.getElementById('comment-name').value.trim();
@@ -330,14 +330,18 @@
         }
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
 
-        // 暗号拦截逻辑
+        // ==========================================
+        // 🚨 纯暴力暗号拦截逻辑（无缓存，每次必填） 🚨
+        // ==========================================
         function checkPassword() {
             const input = document.getElementById('gate-input').value.trim();
             const errorMsg = document.getElementById('gate-error');
+            
+            // 👇 每周改这里就能换暗号！ 👇
             const SECRET_CODE = "V50"; 
 
             if (input === SECRET_CODE) {
-                localStorage.setItem('wall_access_token', Date.now().toString());
+                // 不存任何缓存，直接放行
                 document.getElementById('password-gate').style.display = 'none';
                 document.body.style.overflow = 'auto';
             } else {
@@ -346,20 +350,9 @@
             }
         }
 
-        const savedToken = localStorage.getItem('wall_access_token');
-        if (savedToken) {
-            const isExpired = Date.now() - parseInt(savedToken) > 7 * 24 * 60 * 60 * 1000;
-            if (!isExpired) {
-                document.getElementById('password-gate').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            } else {
-                document.getElementById('password-gate').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-        } else {
-            document.getElementById('password-gate').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+        // 页面加载时，永远锁住页面，显示暗号框
+        document.getElementById('password-gate').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
 
         window.onload = () => { renderPosts(); };
     </script>
