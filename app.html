@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞</title>
+    <title>达一中 · 校园树洞 v1.1</title>
     
     <style>
-        /* ================= 核心变量与主题 ================= */
         :root {
             --bg-color: #121212; --panel-bg: rgba(30, 30, 30, 0.85); --text-main: #e0e0e0;
             --text-muted: #aaa; --border-color: #333; --accent-color: #ff7675;
@@ -17,25 +16,20 @@
             --text-muted: #666; --border-color: #ddd; --accent-color: #ff5252;
             --accent-hover: #ff8a80; --header-bg: rgba(244, 246, 249, 0.95); --shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-
-        /* ================= 基础样式 ================= */
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         
-        /* 顶部导航 */
         .header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
         .logo { font-size: 18px; font-weight: bold; color: var(--accent-color); cursor: pointer; }
         .btn-icon { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-icon:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
-        /* 主体布局 */
         .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
         .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 14px; }
         .filter-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: bold; }
 
-        /* 列表卡片 */
         .post-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); transition: transform 0.2s; animation: fadeIn 0.4s ease; cursor: pointer; }
         .post-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -44,7 +38,6 @@
         body.light-theme .post-tag { background: rgba(255, 82, 82, 0.1); }
         .post-content { font-size: 15px; line-height: 1.6; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* 详情页遮罩层 (SPA 核心) */
         #detail-overlay { position: fixed; inset: 0; z-index: 200; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #detail-overlay.active { display: flex; transform: translateX(0); }
         .detail-header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
@@ -52,7 +45,6 @@
         .detail-body { max-width: 800px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
         .detail-content { font-size: 16px; line-height: 1.8; }
 
-        /* ================= 详情页图片排版系统（朋友圈版） ================= */
         .detail-content .img-container { display: grid; gap: 8px; margin: 15px 0; width: 100%; }
         .detail-content .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--border-color); aspect-ratio: 1 / 1; }
         .detail-content .img-container.single { grid-template-columns: 1fr; }
@@ -61,7 +53,6 @@
         .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
         .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
 
-        /* ================= 评论系统 UI ================= */
         .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
         .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
         .comment-item { background: var(--panel-bg); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); font-size: 14px; }
@@ -76,20 +67,17 @@
         .submit-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
         .comment-tip { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 10px; }
 
-        /* 悬浮按钮和音乐 */
         .fab-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); cursor: pointer; z-index: 90; }
         .music-btn { position: fixed; bottom: 90px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--panel-bg); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; z-index: 90; box-shadow: var(--shadow); }
         .music-btn.playing { animation: spin 3s linear infinite; color: var(--accent-color); border-color: var(--accent-color); }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Lightbox */
         #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <!-- 🚨 暗号拦截遮罩层 (默认 display: flex，强制显示) 🚨 -->
     <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
         <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
@@ -131,14 +119,11 @@
 
     <script src="data/wall_data.js"></script>
     <script>
-        // ==========================================
-        // 🌟 核心配置
-        // ==========================================
-        const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev/api';
+        // 🚨 注意：这里去掉了 /api，改为了直连根目录
+        const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev';
         let currentFilter = '全部';
         let currentPostId = '';
 
-        // 渲染列表
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -163,7 +148,6 @@
             });
         }
 
-        // 详情页与评论系统
         async function openDetail(id) {
             const post = wallData.find(p => p.id === id);
             if (!post) return;
@@ -225,10 +209,10 @@
             currentPostId = '';
         }
 
-        // 获取评论
         async function fetchComments(postId) {
             const listDiv = document.getElementById('comment-list');
             try {
+                // 路径改回 /comments
                 const res = await fetch(`${ZISCUS_API}/comments?slug=${postId}`);
                 if (!res.ok) throw new Error('网络错误');
                 const comments = await res.json();
@@ -255,11 +239,11 @@
 
             } catch (err) {
                 console.error(err);
-                listDiv.innerHTML = '<div style="color: #ff5252; font-size: 14px;">评论加载失败，请稍后再试。</div>';
+                // 这里加了详细报错，方便排查是不是跨域或路径问题
+                listDiv.innerHTML = `<div style="color: #ff5252; font-size: 14px;">评论加载失败: ${err.message}</div>`;
             }
         }
 
-        // 提交评论
         async function submitComment(event) {
             event.preventDefault();
             const name = document.getElementById('comment-name').value.trim();
@@ -272,9 +256,11 @@
             btn.innerText = '正在提交...';
 
             try {
+                // 路径改回 /comments
                 const res = await fetch(`${ZISCUS_API}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // 字段名严格匹配：slug, author, body
                     body: JSON.stringify({
                         slug: currentPostId,
                         author: name,
@@ -287,7 +273,8 @@
                     document.getElementById('comment-body').value = '';
                 } else {
                     const errData = await res.json().catch(()=>({}));
-                    alert('❌ 提交失败: ' + (errData.error || errData.message || '后端拒绝请求'));
+                    // 这里加了详细报错，如果是 400/500 错误，会直接弹出来
+                    alert(`❌ 提交失败: 状态码 ${res.status}\n${errData.error || errData.message || '后端拒绝请求'}`);
                 }
             } catch (err) {
                 console.error(err);
@@ -298,7 +285,6 @@
             }
         }
 
-        // 基础交互逻辑
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -330,18 +316,12 @@
         }
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
 
-        // ==========================================
-        // 🚨 纯暴力暗号拦截逻辑（无缓存，每次必填） 🚨
-        // ==========================================
         function checkPassword() {
             const input = document.getElementById('gate-input').value.trim();
             const errorMsg = document.getElementById('gate-error');
-            
-            // 👇 每周改这里就能换暗号！ 👇
             const SECRET_CODE = "V50"; 
 
             if (input === SECRET_CODE) {
-                // 不存任何缓存，直接放行
                 document.getElementById('password-gate').style.display = 'none';
                 document.body.style.overflow = 'auto';
             } else {
@@ -350,7 +330,6 @@
             }
         }
 
-        // 页面加载时，永远锁住页面，显示暗号框
         document.getElementById('password-gate').style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
