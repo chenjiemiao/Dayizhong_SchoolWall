@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞</title>
+    <title>达一中 · 校园树洞 V1.0</title>
     
     <style>
         /* ================= 核心变量与主题 ================= */
@@ -55,12 +55,8 @@
         /* ================= 详情页图片排版系统（朋友圈版） ================= */
         .detail-content .img-container { display: grid; gap: 8px; margin: 15px 0; width: 100%; }
         .detail-content .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--border-color); aspect-ratio: 1 / 1; }
-        
-        /* 单图：巨大化 */
         .detail-content .img-container.single { grid-template-columns: 1fr; }
         .detail-content .img-container.single img { aspect-ratio: auto; max-height: 500px; }
-        
-        /* 多图：九宫格 / 双图 */
         .detail-content .img-container.multiple { grid-template-columns: repeat(3, 1fr); }
         .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
         .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
@@ -71,7 +67,6 @@
         .comment-item { background: var(--panel-bg); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); font-size: 14px; }
         .comment-meta { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
         .comment-author { color: var(--accent-color); font-weight: bold; }
-        
         .comment-form { background: var(--panel-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         .comment-form input, .comment-form textarea { width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-family: inherit; outline: none; }
         .comment-form input:focus, .comment-form textarea:focus { border-color: var(--accent-color); }
@@ -137,15 +132,13 @@
     <script src="data/wall_data.js"></script>
     <script>
         // ==========================================
-        // 🌟 核心配置
+        // 🌟 核心配置 (默认 Ziscus 的接口都在 /api/ 路径下)
         // ==========================================
-        const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev';
+        const ZISCUS_API = 'https://ziscus-comments.chenjiemiao.workers.dev/api';
         let currentFilter = '全部';
         let currentPostId = '';
 
-        // ==========================================
         // 渲染列表
-        // ==========================================
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -156,7 +149,6 @@
                 const card = document.createElement('div');
                 card.className = 'post-card';
                 card.setAttribute('onclick', `openDetail('${item.id}')`);
-                
                 let shortContent = item.content.replace(/<[^>]+>/g, '');
                 if(shortContent.length > 50) shortContent = shortContent.substring(0, 50) + '...';
 
@@ -171,9 +163,7 @@
             });
         }
 
-        // ==========================================
         // 详情页与评论系统
-        // ==========================================
         async function openDetail(id) {
             const post = wallData.find(p => p.id === id);
             if (!post) return;
@@ -211,14 +201,12 @@
                 </div>
                 <div class="detail-content">${contentHtml}</div>
                 
-                <!-- 评论区 -->
                 <div class="comment-section">
                     <div class="comment-title">💬 评论区</div>
                     <div id="comment-list">
                         <div style="color: var(--text-muted); font-size: 14px;">正在加载评论...</div>
                     </div>
                     
-                    <!-- 评论表单 -->
                     <form class="comment-form" id="comment-form" onsubmit="submitComment(event)">
                         <input type="text" id="comment-name" placeholder="你的名字/昵称（必填）" required maxlength="20">
                         <textarea id="comment-body" placeholder="写下你的评论...（通过审核后才会展示）" required maxlength="200"></textarea>
@@ -237,6 +225,7 @@
             currentPostId = '';
         }
 
+        // 获取评论 (修改为 /api/comments)
         async function fetchComments(postId) {
             const listDiv = document.getElementById('comment-list');
             try {
@@ -270,6 +259,7 @@
             }
         }
 
+        // 提交评论 (修改为 /api/comments，字段名匹配 Ziscus)
         async function submitComment(event) {
             event.preventDefault();
             const name = document.getElementById('comment-name').value.trim();
@@ -296,8 +286,8 @@
                     alert('✅ 提交成功！由于开启了人工审核，您的评论在站长审核通过后才会显示。');
                     document.getElementById('comment-body').value = '';
                 } else {
-                    const errData = await res.json();
-                    alert('❌ 提交失败: ' + (errData.error || '未知错误'));
+                    const errData = await res.json().catch(()=>({}));
+                    alert('❌ 提交失败: ' + (errData.error || errData.message || '后端拒绝请求'));
                 }
             } catch (err) {
                 console.error(err);
@@ -308,9 +298,7 @@
             }
         }
 
-        // ==========================================
-        // 基础交互逻辑（筛选、明暗、音乐、放大）
-        // ==========================================
+        // 基础交互逻辑
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -342,14 +330,10 @@
         }
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
 
-        // ==========================================
-        // 🚨 暗号拦截逻辑 🚨
-        // ==========================================
+        // 暗号拦截逻辑
         function checkPassword() {
             const input = document.getElementById('gate-input').value.trim();
             const errorMsg = document.getElementById('gate-error');
-            
-            // 👇 每周改这里就能换暗号！ 👇
             const SECRET_CODE = "V50"; 
 
             if (input === SECRET_CODE) {
@@ -362,10 +346,9 @@
             }
         }
 
-        // 页面加载时检查暗号状态
         const savedToken = localStorage.getItem('wall_access_token');
         if (savedToken) {
-            const isExpired = Date.now() - parseInt(savedToken) > 7 * 24 * 60 * 60 * 1000; // 7天过期
+            const isExpired = Date.now() - parseInt(savedToken) > 7 * 24 * 60 * 60 * 1000;
             if (!isExpired) {
                 document.getElementById('password-gate').style.display = 'none';
                 document.body.style.overflow = 'auto';
