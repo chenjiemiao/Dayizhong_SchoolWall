@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞 v1.4</title>
+    <title>达一中 · 校园树洞 v1.5</title>
     
-    <!-- 引入 Waline 样式 -->
+    <!-- 引入 Waline 的样式 -->
     <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
 
     <style>
@@ -62,14 +62,13 @@
         .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
         .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
 
-        /* ================= 评论区容器 ================= */
+        /* ================= 评论区 ================= */
         .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
         .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
         
-        /* 覆盖 Waline 的一些默认颜色，适配暗黑模式 */
-        .wl-panel { background-color: var(--panel-bg) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; }
-        .wl-editor, .wl-input { background-color: var(--bg-color) !important; color: var(--text-main) !important; }
-        .wl-btn.primary { background-color: var(--accent-color) !important; }
+        /* 覆盖 Waline 的暗黑模式配色，完美融入你的网页 */
+        body.light-theme .wl-panel { background-color: var(--panel-bg) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; }
+        body.light-theme .wl-editor, body.light-theme .wl-input { background-color: var(--bg-color) !important; color: var(--text-main) !important; }
 
         /* 悬浮按钮和音乐 */
         .fab-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); cursor: pointer; z-index: 90; }
@@ -84,7 +83,7 @@
 </head>
 <body>
 
-    <!-- 🚨 暗号拦截遮罩层 (默认 display: flex，强制显示) 🚨 -->
+    <!-- 🚨 暗号拦截遮罩层 (默认强制显示) 🚨 -->
     <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
         <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
@@ -130,9 +129,8 @@
     
     <script>
         // ==========================================
-        // 🌟 核心配置
+        // 🌟 核心配置 (指向你的 Pages 反向代理)
         // ==========================================
-        // 注意：这里填你反代 Waline 的 Pages 地址，千万别带斜杠
         const WALINE_SERVER_URL = 'https://wtf-4ua.pages.dev';
         let currentFilter = '全部';
         let currentPostId = '';
@@ -214,12 +212,12 @@
             window.walineInstance = Waline.init({
                 el: '#waline',
                 serverURL: WALINE_SERVER_URL,
-                path: '/post/' + id,
+                path: '/post/' + id, // 每个帖子的独立 ID
                 requiredMeta: ['nick'], // 只强制要求填名字
-                login: 'disable', // 禁止邮箱登录，纯匿名
+                login: 'disable', // 纯匿名，禁止邮箱登录
                 lang: 'zh-CN',
                 placeholder: '留下你的评论...（站长审核后可见）',
-                dark: document.body.classList.contains('light-theme') ? false : true, // 适配暗黑模式
+                dark: document.body.classList.contains('light-theme') ? false : true, // 适配明暗主题
             });
         }
 
