@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>达一中 · 校园树洞 v1.4</title>
     
+    <!-- 引入 Waline 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
+
     <style>
+        /* ================= 核心变量与主题 ================= */
         :root {
             --bg-color: #121212; --panel-bg: rgba(30, 30, 30, 0.85); --text-main: #e0e0e0;
             --text-muted: #aaa; --border-color: #333; --accent-color: #ff7675;
@@ -19,17 +23,20 @@
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
         a { text-decoration: none; color: inherit; }
         
+        /* 顶部导航 */
         .header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
         .logo { font-size: 18px; font-weight: bold; color: var(--accent-color); cursor: pointer; }
         .btn-icon { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-icon:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
+        /* 主体布局 */
         .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
         .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
         .filter-bar::-webkit-scrollbar { display: none; }
         .filter-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 14px; }
         .filter-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: bold; }
 
+        /* 列表卡片 */
         .post-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); transition: transform 0.2s; animation: fadeIn 0.4s ease; cursor: pointer; }
         .post-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -38,6 +45,7 @@
         body.light-theme .post-tag { background: rgba(255, 82, 82, 0.1); }
         .post-content { font-size: 15px; line-height: 1.6; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
+        /* 详情页遮罩层 (SPA 核心) */
         #detail-overlay { position: fixed; inset: 0; z-index: 200; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #detail-overlay.active { display: flex; transform: translateX(0); }
         .detail-header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
@@ -45,6 +53,7 @@
         .detail-body { max-width: 800px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
         .detail-content { font-size: 16px; line-height: 1.8; }
 
+        /* ================= 详情页图片排版系统（朋友圈版） ================= */
         .detail-content .img-container { display: grid; gap: 8px; margin: 15px 0; width: 100%; }
         .detail-content .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--border-color); aspect-ratio: 1 / 1; }
         .detail-content .img-container.single { grid-template-columns: 1fr; }
@@ -53,31 +62,29 @@
         .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
         .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
 
+        /* ================= 评论区容器 ================= */
         .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
         .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
-        .comment-item { background: var(--panel-bg); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border-color); font-size: 14px; }
-        .comment-meta { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
-        .comment-author { color: var(--accent-color); font-weight: bold; }
-        .comment-form { background: var(--panel-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .comment-form input, .comment-form textarea { width: 100%; box-sizing: border-box; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 6px; font-family: inherit; outline: none; }
-        .comment-form input:focus, .comment-form textarea:focus { border-color: var(--accent-color); }
-        .comment-form textarea { resize: vertical; min-height: 80px; }
-        .submit-btn { background: var(--accent-color); color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .submit-btn:hover { background: var(--accent-hover); }
-        .submit-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
-        .comment-tip { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 10px; }
+        
+        /* 覆盖 Waline 的一些默认颜色，适配暗黑模式 */
+        .wl-panel { background-color: var(--panel-bg) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; }
+        .wl-editor, .wl-input { background-color: var(--bg-color) !important; color: var(--text-main) !important; }
+        .wl-btn.primary { background-color: var(--accent-color) !important; }
 
+        /* 悬浮按钮和音乐 */
         .fab-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); cursor: pointer; z-index: 90; }
         .music-btn { position: fixed; bottom: 90px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--panel-bg); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; z-index: 90; box-shadow: var(--shadow); }
         .music-btn.playing { animation: spin 3s linear infinite; color: var(--accent-color); border-color: var(--accent-color); }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* Lightbox */
         #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
     </style>
 </head>
 <body>
 
+    <!-- 🚨 暗号拦截遮罩层 (默认 display: flex，强制显示) 🚨 -->
     <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
         <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
@@ -117,13 +124,20 @@
     <audio id="bgm" loop><source src="https://music.163.com/song/media/outer/url?id=139774.mp3" type="audio/mpeg"></audio>
     <div id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
 
+    <!-- 引入 Waline JS -->
+    <script src="https://unpkg.com/@waline/client@v3/dist/waline.js"></script>
     <script src="data/wall_data.js"></script>
+    
     <script>
-        // 🚨 注意：这里去掉了 /api，改为了直连根目录
-        const ZISCUS_API = 'https://wtf-4ua.pages.dev';
+        // ==========================================
+        // 🌟 核心配置
+        // ==========================================
+        // 注意：这里填你反代 Waline 的 Pages 地址，千万别带斜杠
+        const WALINE_SERVER_URL = 'https://wtf-4ua.pages.dev';
         let currentFilter = '全部';
         let currentPostId = '';
 
+        // 渲染列表
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -148,6 +162,7 @@
             });
         }
 
+        // 详情页与评论系统
         async function openDetail(id) {
             const post = wallData.find(p => p.id === id);
             if (!post) return;
@@ -185,23 +200,27 @@
                 </div>
                 <div class="detail-content">${contentHtml}</div>
                 
+                <!-- Waline 评论区 -->
                 <div class="comment-section">
                     <div class="comment-title">💬 评论区</div>
-                    <div id="comment-list">
-                        <div style="color: var(--text-muted); font-size: 14px;">正在加载评论...</div>
-                    </div>
-                    
-                    <form class="comment-form" id="comment-form" onsubmit="submitComment(event)">
-                        <input type="text" id="comment-name" placeholder="你的名字/昵称（必填）" required maxlength="20">
-                        <textarea id="comment-body" placeholder="写下你的评论...（通过审核后才会展示）" required maxlength="200"></textarea>
-                        <button type="submit" class="submit-btn" id="submit-btn">提交评论</button>
-                        <div class="comment-tip">💡 评论需要站长人工审核，请文明发言。</div>
-                    </form>
+                    <div id="waline"></div>
                 </div>
             `;
 
             overlay.classList.add('active');
-            fetchComments(id);
+
+            // 初始化 Waline
+            if (window.walineInstance) window.walineInstance.destroy();
+            window.walineInstance = Waline.init({
+                el: '#waline',
+                serverURL: WALINE_SERVER_URL,
+                path: '/post/' + id,
+                requiredMeta: ['nick'], // 只强制要求填名字
+                login: 'disable', // 禁止邮箱登录，纯匿名
+                lang: 'zh-CN',
+                placeholder: '留下你的评论...（站长审核后可见）',
+                dark: document.body.classList.contains('light-theme') ? false : true, // 适配暗黑模式
+            });
         }
 
         function closeDetail() {
@@ -209,82 +228,7 @@
             currentPostId = '';
         }
 
-        async function fetchComments(postId) {
-            const listDiv = document.getElementById('comment-list');
-            try {
-                // 路径改回 /comments
-                const res = await fetch(`${ZISCUS_API}/comments?slug=${postId}`);
-                if (!res.ok) throw new Error('网络错误');
-                const comments = await res.json();
-                
-                if (comments.length === 0) {
-                    listDiv.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">还没有评论，快来抢沙发~</div>';
-                    return;
-                }
-
-                let html = '';
-                comments.forEach(c => {
-                    const dateStr = new Date(c.created_at).toLocaleDateString();
-                    html += `
-                        <div class="comment-item">
-                            <div class="comment-meta">
-                                <span class="comment-author">@${c.author}</span>
-                                <span>${dateStr}</span>
-                            </div>
-                            <div>${c.body}</div>
-                        </div>
-                    `;
-                });
-                listDiv.innerHTML = html;
-
-            } catch (err) {
-                console.error(err);
-                // 这里加了详细报错，方便排查是不是跨域或路径问题
-                listDiv.innerHTML = `<div style="color: #ff5252; font-size: 14px;">评论加载失败: ${err.message}</div>`;
-            }
-        }
-
-        async function submitComment(event) {
-            event.preventDefault();
-            const name = document.getElementById('comment-name').value.trim();
-            const body = document.getElementById('comment-body').value.trim();
-            const btn = document.getElementById('submit-btn');
-
-            if (!name || !body) return;
-
-            btn.disabled = true;
-            btn.innerText = '正在提交...';
-
-            try {
-                // 路径改回 /comments
-                const res = await fetch(`${ZISCUS_API}/comments`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // 字段名严格匹配：slug, author, body
-                    body: JSON.stringify({
-                        slug: currentPostId,
-                        author: name,
-                        body: body
-                    })
-                });
-
-                if (res.ok) {
-                    alert('✅ 提交成功！由于开启了人工审核，您的评论在站长审核通过后才会显示。');
-                    document.getElementById('comment-body').value = '';
-                } else {
-                    const errData = await res.json().catch(()=>({}));
-                    // 这里加了详细报错，如果是 400/500 错误，会直接弹出来
-                    alert(`❌ 提交失败: 状态码 ${res.status}\n${errData.error || errData.message || '后端拒绝请求'}`);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('❌ 提交失败，请检查网络或联系站长。');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = '提交评论';
-            }
-        }
-
+        // 基础交互逻辑
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -316,6 +260,7 @@
         }
         function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
 
+        // 暗号拦截逻辑
         function checkPassword() {
             const input = document.getElementById('gate-input').value.trim();
             const errorMsg = document.getElementById('gate-error');
