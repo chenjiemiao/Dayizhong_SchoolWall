@@ -95,7 +95,7 @@
 <body>
 
     <!-- 🚨 暗号拦截遮罩层 🚨 -->
-    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
         <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
         <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
         <input type="password" id="gate-input" placeholder="输入暗号..." style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-main); text-align: center; margin-bottom: 15px; outline: none;">
@@ -182,12 +182,11 @@
             const overlay = document.getElementById('detail-overlay');
             const body = document.getElementById('detail-body');
 
-            // 解析内容 + 图片网格（朋友圈排版）
             let contentHtml = post.content || '';
             contentHtml = contentHtml.replace(/<加粗>(.*?)<\/加粗>/g, '<strong>$1</strong>');
             
             if (post.images && post.images.length > 0) {
-                let imgGridClass = "multiple"; // 默认三图及以上是九宫格
+                let imgGridClass = "multiple"; 
                 if (post.images.length === 1) imgGridClass = "single";
                 if (post.images.length === 2) imgGridClass = "two-images";
 
@@ -354,10 +353,9 @@
             const SECRET_CODE = "V50"; 
 
             if (input === SECRET_CODE) {
-                // 暗号正确，记录状态，有效期 7 天
                 localStorage.setItem('wall_access_token', Date.now().toString());
                 document.getElementById('password-gate').style.display = 'none';
-                document.body.style.overflow = 'auto'; // 恢复滚动
+                document.body.style.overflow = 'auto';
             } else {
                 errorMsg.style.display = 'block';
                 document.getElementById('gate-input').value = '';
@@ -372,9 +370,11 @@
                 document.getElementById('password-gate').style.display = 'none';
                 document.body.style.overflow = 'auto';
             } else {
+                document.getElementById('password-gate').style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             }
         } else {
+            document.getElementById('password-gate').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
 
