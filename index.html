@@ -2,13 +2,20 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>达一中 · 校园树洞 / 表白墙</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>达一中 · 校园树洞 / 校园墙</title>
     <style>
-        /* 暗色系青春风，不再是纯赛博朋克 */
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #aaa;
+            --accent-color: #ff7675;
+            --accent-hover: #ff9f9e;
+        }
         body {
-            background-color: #121212;
-            color: #e0e0e0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: flex;
             justify-content: center;
@@ -21,16 +28,16 @@
         .container {
             max-width: 500px;
             width: 100%;
-            background: #1e1e1e;
+            background: var(--panel-bg);
             border-radius: 16px;
             padding: 30px 25px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
             border: 1px solid #2a2a2a;
         }
         h1 {
-            color: #ff7675;
+            color: var(--accent-color);
             text-align: center;
-            font-size: 22px;
+            font-size: 24px;
             margin-top: 0;
             margin-bottom: 20px;
             letter-spacing: 1px;
@@ -43,21 +50,29 @@
             border-radius: 0 8px 8px 0;
         }
         .warning-box h2 {
-            color: #ff7675;
+            color: var(--accent-color);
             font-size: 16px;
             margin-top: 0;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
         }
         .warning-box p {
             font-size: 13px;
             line-height: 1.6;
-            margin: 6px 0;
+            margin: 8px 0;
             color: #ccc;
         }
-        .warning-box strong {
-            color: #fff;
+        .warning-box strong { color: #fff; }
+        
+        .contact-info {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            line-height: 1.8;
         }
         .info-box {
             background: rgba(255, 255, 255, 0.05);
@@ -65,17 +80,17 @@
             padding: 12px;
             margin-bottom: 25px;
             font-size: 13px;
-            color: #aaa;
+            color: var(--text-muted);
             text-align: center;
             border: 1px dashed #444;
         }
-        .info-box strong {
-            color: #fdcb6e;
-        }
+        .info-box strong { color: #fdcb6e; }
+
         .btn-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
+            margin-bottom: 20px;
         }
         .btn {
             padding: 14px;
@@ -87,30 +102,116 @@
             transition: all 0.2s ease;
             cursor: pointer;
             display: block;
+            box-sizing: border-box;
         }
         .btn-submit {
-            background: #ff7675;
+            background: var(--accent-color);
             color: #121212;
             border: none;
         }
-        .btn-submit:hover {
-            background: #ff9f9e;
-        }
+        .btn-submit:hover { background: var(--accent-hover); }
         .btn-home {
             background: transparent;
-            color: #e0e0e0;
+            color: var(--text-main);
             border: 1px solid #555;
         }
         .btn-home:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: #888;
         }
+
+        /* 新增的小按钮组 */
+        .small-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .btn-small {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-small:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
         .footer {
             margin-top: 25px;
             text-align: center;
             font-size: 12px;
             color: #666;
+            line-height: 1.6;
+            border-top: 1px solid #2a2a2a;
+            padding-top: 15px;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+        .modal-content p {
+            font-size: 13px;
+            color: var(--text-muted);
             line-height: 1.5;
+        }
+        .modal-content img {
+            width: 100%;
+            max-width: 240px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #444;
+        }
+        .close-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .close-btn:hover {
+            color: #fff;
         }
     </style>
 </head>
@@ -122,29 +223,95 @@
     <div class="warning-box">
         <h2>⚠️ 投稿前必看风险提示</h2>
         <p>本墙支持<strong>实名 / 匿名</strong>两种发帖方式。</p>
-        <p>同时，我们<strong>绝不允许任何黄色、暴力、造谣等内容出现</strong>一旦违规将封禁发帖资格。</p>
+        <p>我们<strong>绝不允许任何黄色、暴力、造谣等内容出现</strong>，一旦违规将永久封禁发帖资格。</p>
         <p>如果你选择了<strong>实名</strong>（或在内容中露出了真实姓名、班级等关键信息），请务必知道：一旦内容被校领导认定为违规，他们大概率会顺着信息直接找到你本人。(寻物启事贴除外)</p>
         <p>是否实名请自己权衡。<strong>建议尽量匿名，保护好自己。</strong></p>
+        
+        <div class="contact-info">
+            <strong>站长联系方式：</strong><br>
+            微信：ChenjiemiaoClient<br>
+            QQ：1961643668<br>
+            Discord：@chenjiemiao<br>
+            <span style="font-size: 11px; color: #888; margin-top: 5px; display: block;">（想线下真实我？2025级9班陈xy👍到了直接说找菠萝）</span>
+        </div>
     </div>
 
     <div class="info-box">
-        🔑 本周投稿暗号：<strong>V50</strong><br>
-        <span style="font-size: 12px; color: #777; margin-top: 5px; display: inline-block;">（暗号每周更新，留意系统通知页最新帖子，过期不候）</span>
+        暗号每周更新，请留意系统通知页最新帖子。<br>
+        <span style="font-size: 12px; color: #777; margin-top: 5px; display: inline-block;">（暗号过期不候，请找站长获取）</span>
     </div>
 
+    <!-- 主按钮 -->
     <div class="btn-group">
-        <!-- 记得把链接换成你自己的腾讯文档收集表链接 -->
-        <a href="https://docs.qq.com/form/page/DYVhzTm9adHNmQ29t" target="_blank" class="btn btn-submit">前往投稿入口(48小时内审核完成)</a>
-        
-        <!-- 链接到你现在的 app.html 主页 -->
-        <a href="./app.html" class="btn btn-home">🚀 进入主页看墙</a>
+        <a href="https://docs.qq.com/form/page/DYVhzTm9adHNmQ29t" target="_blank" class="btn btn-submit">
+            ✍️ 前往投稿入口 (48小时内审核)
+        </a>
+        <a href="./app.html" class="btn btn-home">
+            🚀 进入主页看墙
+        </a>
+    </div>
+
+    <!-- 辅助按钮 -->
+    <div class="small-btn-group">
+        <button class="btn-small" onclick="openModal('modal-contact')">📝 申请注册账号</button>
+        <button class="btn-small" onclick="openModal('modal-sponsor')">☕ 请站长喝杯水</button>
     </div>
 
     <div class="footer">
-        <p>达一中校园墙 | 所有代码の网站部署均来自2025级九班 陈炫宇</p>
-        <p>内容均经人工审核，最终解释权归站长所有</p>
+        <p>达一中校园墙 | 技术支持：2025级9班 陈xy</p>
+        <p>所有内容均经人工审核，最终解释权归站长所有</p>
     </div>
 </div>
+
+<!-- 申请注册账号弹窗 -->
+<div id="modal-contact" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <h3>申请注册账号</h3>
+        <p>请联系站长获取邀请码<br>添加好友时请备注“校园墙注册”</p>
+        <!-- 这里换成你的微信/QQ二维码图片路径 -->
+        <img src="images/contact.png" alt="站长联系方式二维码" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换二维码图片'">
+        <br>
+        <button class="close-btn" onclick="closeModal(event)">关闭</button>
+    </div>
+</div>
+
+<!-- 赞助弹窗 -->
+<div id="modal-sponsor" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <h3>支持校园墙</h3>
+        <p>如果树洞帮到了你，可以请站长喝杯水~<br>赞助将用于服务器和域名费用</p>
+        <!-- 这里换成你的赞赏码图片路径 -->
+        <img src="images/sponsor.png" alt="赞助二维码" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换赞赏码图片'">
+        <br>
+        <button class="close-btn" onclick="closeModal(event)">关闭</button>
+    </div>
+</div>
+
+<script>
+    // 打开弹窗
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    // 关闭弹窗
+    function closeModal(event) {
+        // 如果点击的是遮罩层本身，或者点击了关闭按钮
+        if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-btn')) {
+            // 找到最近的弹窗并隐藏
+            const modal = event.target.closest('.modal-overlay');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+    }
+
+    // 阻止点击图片时关闭弹窗
+    document.querySelectorAll('.modal-content img').forEach(img => {
+        img.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    });
+</script>
 
 </body>
 </html>
