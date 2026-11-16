@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞 / 校园墙</title>
+    <title>达一中 · 校园树洞 by 陈羯喵Client</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -33,6 +33,7 @@
             padding: 30px 25px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
             border: 1px solid #2a2a2a;
+            box-sizing: border-box;
         }
         h1 {
             color: var(--accent-color);
@@ -120,7 +121,6 @@
             border-color: #888;
         }
 
-        /* 新增的小按钮组 */
         .small-btn-group {
             display: flex;
             gap: 10px;
@@ -133,7 +133,7 @@
             text-align: center;
             background: rgba(255,255,255,0.05);
             color: var(--text-main);
-            border: 1px solid var(--border-color);
+            border: 1px solid #333;
             border-radius: 8px;
             cursor: pointer;
             transition: 0.2s;
@@ -166,15 +166,13 @@
             z-index: 9999;
             padding: 20px;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .modal-content {
             background: var(--panel-bg);
             border: 1px solid #333;
             border-radius: 12px;
             padding: 20px;
-            max-width: 320px;
+            max-width: 340px;
             width: 100%;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -184,23 +182,41 @@
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
-        .modal-content h3 {
-            margin-top: 0;
-            color: var(--accent-color);
-            font-size: 18px;
+        .modal-content h3 { margin-top: 0; color: var(--accent-color); font-size: 18px; }
+        .modal-content p { font-size: 13px; color: var(--text-muted); line-height: 1.6; text-align: left; }
+        
+        .qr-group {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin: 15px 0;
         }
-        .modal-content p {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
+        .qr-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 48%;
         }
-        .modal-content img {
+        .qr-item img, .single-img { cursor: zoom-in; }
+        
+        .qr-item img {
+            width: 100%;
+            max-width: 130px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            margin-bottom: 5px;
+        }
+        .qr-item span { font-size: 12px; color: var(--text-muted); }
+
+        .modal-content img.single-img {
             width: 100%;
             max-width: 240px;
             border-radius: 8px;
-            margin: 15px 0;
+            margin: 15px auto;
             border: 1px solid #444;
+            display: block;
         }
+
         .close-btn {
             background: transparent;
             color: var(--text-muted);
@@ -210,8 +226,78 @@
             font-size: 14px;
             margin-top: 10px;
         }
-        .close-btn:hover {
+        .close-btn:hover { color: #fff; }
+
+        /* 全屏图片预览层 */
+        #image-viewer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            flex-direction: column;
+        }
+        #image-viewer.active { display: flex; }
+        #image-viewer img {
+            max-width: 95vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .viewer-tip {
             color: #fff;
+            font-size: 14px;
+            margin-top: 20px;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        /* ================= 炫酷流动渐变文字 ================= */
+        .gradient-text {
+            background: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 3s linear infinite;
+            font-weight: bold;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: -200% 50%; }
+        }
+
+        /* ================= 分辨率与设备适配 ================= */
+        
+        /* 针对手机端（特别是高度较短的屏幕），允许正常滚动，防止内容被截断 */
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start; /* 顶部对齐，不用强行居中 */
+                padding-top: 30px;
+                padding-bottom: 30px;
+            }
+        }
+
+        /* 针对电脑端/大屏平板 */
+        @media (min-width: 768px) {
+            .container {
+                padding: 40px 35px; 
+            }
+            h1 {
+                font-size: 28px; 
+            }
+            .btn:hover {
+                transform: translateY(-2px);
+            }
         }
     </style>
 </head>
@@ -224,8 +310,8 @@
         <h2>⚠️ 投稿前必看风险提示</h2>
         <p>本墙支持<strong>实名 / 匿名</strong>两种发帖方式。</p>
         <p>我们<strong>绝不允许任何黄色、暴力、造谣等内容出现</strong>，一旦违规将永久封禁发帖资格。</p>
-        <p>如果你选择了<strong>实名</strong>（或在内容中露出了真实姓名、班级等关键信息），请务必知道：一旦内容被校领导认定为违规，他们大概率会顺着信息直接找到你本人。(寻物启事贴除外)</p>
-        <p>是否实名请自己权衡。<strong>建议尽量匿名，保护好自己。</strong></p>
+        <p>如果您选择了<strong>实名</strong>（或在内容中露出了真实姓名、班级等关键信息），请务必知道：我们无法确定校领导是否允许此网站的存在，一旦被定性为违规，他们大概率会顺着信息直接找到您本人。(寻物启事贴除外)，因此为了安全请勿将暗号泄露给任何非本网站成员的人！</p>
+        <p>是否实名请自己权衡。<strong>建议尽量匿名。</strong></p>
         
         <div class="contact-info">
             <strong>站长联系方式：</strong><br>
@@ -238,28 +324,29 @@
 
     <div class="info-box">
         暗号每周更新，请留意系统通知页最新帖子。<br>
+        如果您因为疏忽遗忘了暗号/未第一时间查看最新暗号且联系不到其他人，可以通过站长/管理员的联系方式&在交流群内询问我们。<br>
         <span style="font-size: 12px; color: #777; margin-top: 5px; display: inline-block;">（暗号过期不候，请找站长获取）</span>
     </div>
 
     <!-- 主按钮 -->
     <div class="btn-group">
-        <a href="https://docs.qq.com/form/page/DYVhzTm9adHNmQ29t" target="_blank" class="btn btn-submit">
-            ✍️ 前往投稿入口 (48小时内审核)
+        <a href="app.html" target="_blank" class="btn btn-submit">
+            🚀 进入校园墙
         </a>
-        <a href="./app.html" class="btn btn-home">
-            🚀 进入主页看墙
+        <a href="https://chenjiemiao.github.io/PineAppleStars" class="btn btn-home">
+            🍍前往站长的个人自我介绍网站
         </a>
     </div>
 
     <!-- 辅助按钮 -->
     <div class="small-btn-group">
-        <button class="btn-small" onclick="openModal('modal-contact')">📝 申请注册账号</button>
-        <button class="btn-small" onclick="openModal('modal-sponsor')">☕ 请站长喝杯水</button>
+        <button class="btn-small" onclick="openModal('modal-contact')">📝 (注册)申请注册账号</button>
+        <button class="btn-small" onclick="openModal('modal-sponsor')">🍍 (赞助)请站长吃个菠萝</button>
     </div>
 
     <div class="footer">
-        <p>达一中校园墙 | 技术支持：2025级9班 陈xy</p>
-        <p>所有内容均经人工审核，最终解释权归站长所有</p>
+        <p>达一中校园墙 | 所有技术内容： 2025级9班 陈xy</p>
+		<p>©copyright 陈羯喵Client&🍍Stars工作室 2026 All Rights Reserved 最终解释权归站长所有<p>
     </div>
 </div>
 
@@ -267,10 +354,19 @@
 <div id="modal-contact" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content">
         <h3>申请注册账号</h3>
-        <p>请联系站长获取邀请码<br>添加好友时请备注“校园墙注册”</p>
-        <!-- 这里换成你的微信/QQ二维码图片路径 -->
-        <img src="images/contact.png" alt="站长联系方式二维码" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换二维码图片'">
-        <br>
+        <p style="text-align: center;">扫码添加站长，备注“校园墙注册”<br>通过后获取专属邀请码</p>
+        
+        <div class="qr-group">
+            <div class="qr-item">
+                <img src="images/wechat.jpg" alt="微信二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/130x130/333/fff?text=微信码'">
+                <span>微信扫码</span>
+            </div>
+            <div class="qr-item">
+                <img src="images/qq.jpg" alt="QQ二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/130x130/333/fff?text=QQ码'">
+                <span>QQ扫码</span>
+            </div>
+        </div>
+
         <button class="close-btn" onclick="closeModal(event)">关闭</button>
     </div>
 </div>
@@ -279,12 +375,35 @@
 <div id="modal-sponsor" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content">
         <h3>支持校园墙</h3>
-        <p>如果树洞帮到了你，可以请站长喝杯水~<br>赞助将用于服务器和域名费用</p>
-        <!-- 这里换成你的赞赏码图片路径 -->
-        <img src="images/sponsor.png" alt="赞助二维码" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换赞赏码图片'">
-        <br>
+        
+        <!-- 承诺部分 -->
+        <p style="text-align: center; font-size: 13px; color: #ff7675; margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
+            <strong>💖 站长承诺：</strong>您的每一笔赞赏，都将全部用于服务器、域名等网站基础维护开销。
+        </p>
+
+        <!-- 福利说明 -->
+        <p>
+            🎁 <strong>赞赏福利：</strong><br>
+            赞赏任意金额，截图私信发给站长，即可获得<b>专属头衔</b>（发帖/评论时展示）。<br>
+            请留下你想要的<b>头衔名</b>，不备注默认发放：<br>
+            <span style="display: inline-block; margin-top: 5px;">
+                <span class="gradient-text">✨🍍StarsPro✨</span>
+            </span>
+        </p>
+        <p style="text-align: center; font-size: 12px; color: #fdcb6e; margin-top: 10px;">
+            （赞赏档位：0.1 / 0.5 / 1 / 5 / 10 / 20）
+        </p>
+        
+        <img class="single-img" src="images/sponsor.jpg" alt="赞助二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换赞赏码'">
+        
         <button class="close-btn" onclick="closeModal(event)">关闭</button>
     </div>
+</div>
+
+<!-- 全屏图片预览层 -->
+<div id="image-viewer" onclick="closeImageViewer()">
+    <img id="viewer-img" src="" alt="二维码大图">
+    <div class="viewer-tip">长按图片保存 / 识别二维码<br>点击空白处关闭</div>
 </div>
 
 <script>
@@ -295,9 +414,7 @@
 
     // 关闭弹窗
     function closeModal(event) {
-        // 如果点击的是遮罩层本身，或者点击了关闭按钮
         if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-btn')) {
-            // 找到最近的弹窗并隐藏
             const modal = event.target.closest('.modal-overlay');
             if (modal) {
                 modal.classList.remove('active');
@@ -305,12 +422,26 @@
         }
     }
 
-    // 阻止点击图片时关闭弹窗
+    // 阻止点击弹窗内的图片时，触发弹窗的关闭事件
     document.querySelectorAll('.modal-content img').forEach(img => {
         img.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); 
         });
     });
+
+    // 全屏图片查看器逻辑
+    const imageViewer = document.getElementById('image-viewer');
+    const viewerImg = document.getElementById('viewer-img');
+
+    function openImageViewer(src) {
+        viewerImg.src = src;
+        imageViewer.classList.add('active');
+    }
+
+    function closeImageViewer() {
+        imageViewer.classList.remove('active');
+        setTimeout(() => { viewerImg.src = ''; }, 300);
+    }
 </script>
 
 </body>
