@@ -1,180 +1,44 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞 v1.7</title>
-    
-    <!-- 引入 Waline 样式 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.css" />
-
-    <style>
-        /* ================= 核心变量与主题 ================= */
-        :root {
-            --bg-color: #121212; --panel-bg: rgba(30, 30, 30, 0.85); --text-main: #e0e0e0;
-            --text-muted: #aaa; --border-color: #333; --accent-color: #ff7675;
-            --accent-hover: #ff9f9e; --header-bg: rgba(18, 18, 18, 0.9); --shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        body.light-theme {
-            --bg-color: #f4f6f9; --panel-bg: rgba(255, 255, 255, 0.95); --text-main: #333;
-            --text-muted: #666; --border-color: #ddd; --accent-color: #ff5252;
-            --accent-hover: #ff8a80; --header-bg: rgba(244, 246, 249, 0.95); --shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
-        a { text-decoration: none; color: inherit; }
-        
-        /* 顶部导航 */
-        .header { position: sticky; top: 0; z-index: 100; background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
-        .logo { font-size: 18px; font-weight: bold; color: var(--accent-color); cursor: pointer; }
-        .btn-icon { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-icon:hover { border-color: var(--accent-color); color: var(--accent-color); }
-
-        /* 主体布局 */
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
-        .filter-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; scrollbar-width: none; }
-        .filter-bar::-webkit-scrollbar { display: none; }
-        .filter-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 14px; }
-        .filter-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: bold; }
-
-        /* 列表卡片 */
-        .post-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow); transition: transform 0.2s; animation: fadeIn 0.4s ease; cursor: pointer; }
-        .post-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .post-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-muted); }
-        .post-tag { background: rgba(255, 118, 117, 0.15); color: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
-        body.light-theme .post-tag { background: rgba(255, 82, 82, 0.1); }
-        .post-content { font-size: 15px; line-height: 1.6; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* 详情页遮罩层 */
-        #detail-overlay { position: fixed; inset: 0; z-index: 200; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
-        #detail-overlay.active { display: flex; transform: translateX(0); }
-        .detail-header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
-        .back-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; }
-        .detail-body { max-width: 800px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
-        .detail-content { font-size: 16px; line-height: 1.8; }
-
-        /* 朋友圈九宫格图片 */
-        .detail-content .img-container { display: grid; gap: 8px; margin: 15px 0; width: 100%; }
-        .detail-content .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; cursor: zoom-in; border: 1px solid var(--border-color); aspect-ratio: 1 / 1; }
-        .detail-content .img-container.single { grid-template-columns: 1fr; }
-        .detail-content .img-container.single img { aspect-ratio: auto; max-height: 500px; }
-        .detail-content .img-container.multiple { grid-template-columns: repeat(3, 1fr); }
-        .detail-content .img-container.two-images { grid-template-columns: repeat(2, 1fr); }
-        .detail-content .img-container.two-images img { aspect-ratio: auto; max-height: 300px; }
-
-        /* 评论区容器 */
-        .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
-        .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
-        
-        /* 覆盖 Waline 样式适配暗黑 */
-        body.light-theme .wl-panel { background-color: var(--panel-bg) !important; border-color: var(--border-color) !important; color: var(--text-main) !important; }
-        body.light-theme .wl-editor, body.light-theme .wl-input { background-color: var(--bg-color) !important; color: var(--text-main) !important; }
-
-        .fab-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); cursor: pointer; z-index: 90; }
-        .music-btn { position: fixed; bottom: 90px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--panel-bg); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; z-index: 90; box-shadow: var(--shadow); }
-        .music-btn.playing { animation: spin 3s linear infinite; color: var(--accent-color); border-color: var(--accent-color); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        #lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
-    </style>
-</head>
-<body>
-
-    <!-- 暗号拦截 -->
-    <div id="password-gate" style="position: fixed; inset: 0; z-index: 99999; background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
-        <h1 style="color: var(--accent-color); font-size: 24px; margin-bottom: 10px;">🍍 达一中 · 内部空间</h1>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">请输入本周内部暗号</p>
-        <input type="password" id="gate-input" placeholder="输入暗号..." style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--panel-bg); color: var(--text-main); text-align: center; margin-bottom: 15px; outline: none;">
-        <button onclick="checkPassword()" style="width: 100%; max-width: 250px; padding: 12px; border-radius: 8px; border: none; background: var(--accent-color); color: #fff; font-weight: bold; cursor: pointer;">进 入</button>
-        <p id="gate-error" style="color: #ff5252; font-size: 14px; margin-top: 15px; display: none;">暗号错误，请重试！</p>
-    </div>
-
-    <header class="header">
-        <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
-        <div class="controls">
-            <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()">🌙 暗黑</button>
-        </div>
-    </header>
-
-    <div class="container" id="home-container">
-        <div class="filter-bar" id="filter-bar">
-            <button class="filter-btn active" data-filter="全部">🌟 全部</button>
-            <button class="filter-btn" data-filter="通知">📢 通知</button>
-            <button class="filter-btn" data-filter="日常">💬 日常</button>
-            <button class="filter-btn" data-filter="表白">❤️ 表白</button>
-            <button class="filter-btn" data-filter="交友">🤝 交友</button>
-            <button class="filter-btn" data-filter="寻物">🔍 寻物</button>
-        </div>
-        <div id="posts-container"></div>
-    </div>
-
-    <div id="detail-overlay">
-        <div class="detail-header">
-            <button class="back-btn" onclick="closeDetail()">⬅ 返回列表</button>
-        </div>
-        <div class="detail-body" id="detail-body"></div>
-    </div>
-
-    <a href="https://docs.qq.com/form/page/你的腾讯文档ID" target="_blank" class="fab-btn">✍️ 写树洞</a>
-    <div class="music-btn" id="music-toggle" onclick="toggleMusic()">🎵</div>
-    <audio id="bgm" loop><source src="https://music.163.com/song/media/outer/url?id=139774.mp3" type="audio/mpeg"></audio>
-    <div id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
-
-    <script src="data/wall_data.js"></script>
-    
-    <!-- 引入 Waline UMD 脚本 -->
-    <script src="https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.umd.js"></script>
-
-    <script>
-        // ==========================================
-        // 🚀 暴力拦截器：强行绕过浏览器的跨域检查
-        // ==========================================
-        const originalFetch = window.fetch;
-        window.fetch = async function(...args) {
-            let url = args[0];
-            let options = args[1] || {};
-            
-            // 拦截所有 OPTIONS 预检请求，直接返回 200 放行
-            if (options.method === 'OPTIONS' || (options.method && options.method.toUpperCase() === 'OPTIONS')) {
-                return new Response(null, {
-                    status: 200,
-                    headers: {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': '*',
-                        'Access-Control-Allow-Headers': '*'
-                    }
-                });
-            }
-            
-            // 对于正常的 GET/POST 请求，强行给返回值打上跨域通行证
-            try {
-                const response = await originalFetch(...args);
-                const newHeaders = new Headers(response.headers);
-                newHeaders.set('Access-Control-Allow-Origin', '*');
-                
-                return new Response(response.body, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: newHeaders
-                });
-            } catch (err) {
-                console.error("Fetch 拦截器捕获到网络错误:", err);
-                throw err;
-            }
-        };
-
         // ==========================================
         // 核心配置
         // ==========================================
-        // 填写你的 Pages 反向代理地址
-        const WALINE_SERVER_URL = 'https://wtf-4ua.pages.dev';
+        // 这里填我们刚刚拼好的、绝对正确的云函数地址
+        const API_BASE_URL = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/getPosts';
         let currentFilter = '全部';
         let currentPostId = '';
+        let wallData = []; // 用来存从数据库拉下来的数据
+
+        // 从腾讯云拉取数据的函数
+        async function fetchPosts() {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">数据加载中...</div>';
+            
+            try {
+                const response = await fetch(API_BASE_URL);
+                const result = await response.json();
+                
+                // 检查是否成功返回
+                if (result.code === 200 && result.data) {
+                    // 把拉到的数据存到 wallData 里
+                    wallData = result.data;
+                    renderPosts(); // 重新渲染页面
+                } else {
+                    container.innerHTML = `<div style="text-align: center; color: red;">加载失败: ${result.message}</div>`;
+                }
+            } catch (error) {
+                console.error("请求出错:", error);
+                container.innerHTML = `<div style="text-align: center; color: red;">网络请求失败，请检查控制台。</div>`;
+            }
+        }
 
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
+            
+            if (wallData.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">还没有帖子哦~</div>';
+                return;
+            }
+
             let sortedData = [...wallData].sort((a, b) => new Date(b.date) - new Date(a.date));
             const filteredData = currentFilter === '全部' ? sortedData : sortedData.filter(item => item.category === currentFilter);
 
@@ -182,7 +46,8 @@
                 const card = document.createElement('div');
                 card.className = 'post-card';
                 card.setAttribute('onclick', `openDetail('${item.id}')`);
-                let shortContent = item.content.replace(/<[^>]+>/g, '');
+                // 安全地截取纯文本内容
+                let shortContent = (item.content || '').replace(/<[^>]+>/g, '');
                 if(shortContent.length > 50) shortContent = shortContent.substring(0, 50) + '...';
 
                 card.innerHTML = `
@@ -207,6 +72,7 @@
             let contentHtml = post.content || '';
             contentHtml = contentHtml.replace(/<加粗>(.*?)<\/加粗>/g, '<strong>$1</strong>');
             
+            // 处理图片九宫格
             if (post.images && post.images.length > 0) {
                 let imgGridClass = "multiple"; 
                 if (post.images.length === 1) imgGridClass = "single";
@@ -235,27 +101,12 @@
                 
                 <div class="comment-section">
                     <div class="comment-title">💬 评论区</div>
-                    <div id="waline"></div>
+                    <!-- 这里暂时空着，下一步我们再接评论 -->
+                    <div style="color: var(--text-muted); font-size: 14px;">评论功能开发中...</div>
                 </div>
             `;
 
             overlay.classList.add('active');
-
-            if (typeof Waline !== 'undefined') {
-                if (window.walineInstance) window.walineInstance.destroy();
-                window.walineInstance = Waline.init({
-                    el: '#waline',
-                    serverURL: WALINE_SERVER_URL,
-                    path: '/post/' + id,
-                    requiredMeta: ['nick'],
-                    login: 'disable',
-                    lang: 'zh-CN',
-                    placeholder: '留下你的评论...（站长审核后可见）',
-                    dark: document.body.classList.contains('light-theme') ? false : true,
-                });
-            } else {
-                document.getElementById('waline').innerHTML = '<div style="color:red; font-size:14px;">评论组件加载失败，请刷新页面重试。</div>';
-            }
         }
 
         function closeDetail() {
@@ -302,6 +153,8 @@
             if (input === SECRET_CODE) {
                 document.getElementById('password-gate').style.display = 'none';
                 document.body.style.overflow = 'auto';
+                // 密码输入正确后，立刻去拉取帖子数据
+                fetchPosts();
             } else {
                 errorMsg.style.display = 'block';
                 document.getElementById('gate-input').value = '';
@@ -310,8 +163,3 @@
 
         document.getElementById('password-gate').style.display = 'flex';
         document.body.style.overflow = 'hidden';
-
-        window.onload = () => { renderPosts(); };
-    </script>
-</body>
-</html>
