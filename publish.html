@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>投稿 · 达一中校园树洞</title>
+    <style>
+        :root { --bg:#121212; --panel:#1e1e1e; --text:#e0e0e0; --muted:#aaa; --accent:#ff7675; }
+        * { box-sizing: border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding:24px 18px; }
+        .wrap { max-width:520px; margin:0 auto; }
+        .back { color:var(--muted); text-decoration:none; font-size:14px; }
+        h1 { color:var(--accent); font-size:22px; margin:16px 0 6px; }
+        .sub { color:var(--muted); font-size:13px; margin:0 0 18px; }
+        .card { background:var(--panel); border:1px solid #2a2a2a; border-radius:12px; padding:18px; margin-bottom:16px; }
+        .q { font-size:14px; font-weight:bold; margin:18px 0 6px; }
+        .q:first-child { margin-top:0; }
+        .q small { font-weight:normal; color:#777; margin-left:4px; font-size:12px; }
+        .tip { font-size:12px; color:#777; line-height:1.7; margin:0 0 8px; }
+        input, textarea, select { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; font-family:inherit; outline:none; }
+        textarea { min-height:150px; resize:vertical; line-height:1.7; }
+        input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+        .btn { width:100%; margin-top:18px; padding:13px; border:none; border-radius:8px; background:var(--accent); color:#121212; font-weight:bold; font-size:15px; cursor:pointer; }
+        .msg { margin-top:12px; font-size:13px; line-height:1.6; display:none; }
+        .msg.ok { display:block; color:#55efc4; }
+        .msg.err { display:block; color:#ff6b6b; }
+        .mine { border:1px solid #2a2a2a; border-radius:10px; padding:12px; margin-bottom:10px; background:#181818; }
+        .mine .meta { font-size:12px; color:var(--muted); margin-bottom:6px; }
+        .mine .txt { font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+        .st { display:inline-block; padding:1px 8px; border-radius:4px; font-size:12px; margin-left:6px; }
+        .st.pending { background:rgba(253,203,110,.15); color:#fdcb6e; }
+        .st.approved { background:rgba(85,239,196,.15); color:#55efc4; }
+        .st.rejected { background:rgba(255,107,107,.15); color:#ff6b6b; }
+        .empty { color:var(--muted); font-size:13px; }
+        .tag { display:inline-block; padding:1px 8px; border-radius:4px; background:rgba(255,118,117,.15); color:var(--accent); font-size:12px; margin-right:6px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <a class="back" href="./app.html">← 返回校园墙</a>
+    <h1>达一中校园树洞の投稿入口</h1>
+    <p class="sub">内容需经过站长人工审核，通过后才会出现。</p>
+
+    <div class="card">
+        <div class="q">01 请填写姓名 <small>可选</small></div>
+        <p class="tip">留空就是匿名；填了就显示你的名字。建议别填真名。</p>
+        <input id="real-name" placeholder="请输入">
+
+        <div class="q">02 请填写您的班级 <small>可选</small></div>
+        <input id="class-name" placeholder="请输入">
+
+        <div class="q">03 请选择您想发布的主题</div>
+        <select id="category">
+            <option value="寻物">寻物启事</option>
+            <option value="日常">日常分享</option>
+            <option value="交友">交友dd</option>
+            <option value="表白">表白墙</option>
+            <option value="反馈">意见反馈</option>
+        </select>
+
+        <div class="q">04 请输入您要发布的主题的正文</div>
+        <p class="tip">需要加粗：&lt;加粗&gt;这段内容需要加粗&lt;/加粗&gt;</p>
+        <textarea id="content" placeholder="请输入"></textarea>
+
+        <div class="q">05 携带图片 <small>可选</small></div>
+        <p class="tip">
+            暂时只能贴图片链接，一行一个，最多 6 张。<br>
+            正文里写 &lt;p1&gt; 就会在那个位置显示图片。
+        </p>
+        <textarea id="images" style="min-height:70px" placeholder="https://...jpg"></textarea>
+
+        <div class="q">06 备注内容 <small>非必要情况勿填</small></div>
+        <input id="note" placeholder="只有站长看得到">
+
+        <button class="btn" onclick="submitPost()">提交，等站长审核</button>
+        <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="card">
+        <div class="q" style="margin-top:0">我的投稿</div>
+        <div id="mine"><div class="empty">加载中…</div></div>
+    </div>
+</div>
+
+<script>
+    const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
+    const token = localStorage.getItem('wall_token');
+
+    if (!token) location.replace('./account.html');
+
+    function api(action, data) {
+        return fetch(API + '?action=' + action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data || {})
+        }).then(r => r.json());
+    }
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    async function submitPost() {
+        const realName = document.getElementById('real-name').value.trim();
+        const content = document.getElementById('content').value.trim();
+        const msg = document.getElementById('msg');
+
+        if (!content) {
+            msg.textContent = '正文不能空';
+            msg.className = 'msg err';
+            return;
+        }
+
+        const images = document.getElementById('images').value
+            .split('\n').map(s => s.trim()).filter(Boolean).slice(0, 6);
+
+        const res = await api('createPost', {
+            token,
+            category: document.getElementById('category').value,
+            content,
+            images,
+            realName,
+            className: document.getElementById('class-name').value.trim(),
+            note: document.getElementById('note').value.trim(),
+            anonymous: !realName
+        });
+
+        if (res.code === 200) {
+            msg.textContent = res.message;
+            msg.className = 'msg ok';
+            document.getElementById('content').value = '';
+            document.getElementById('images').value = '';
+            loadMine();
+        } else if (res.code === 401) {
+            location.replace('./account.html');
+        } else {
+            msg.textContent = res.message || '提交失败';
+            msg.className = 'msg err';
+        }
+    }
+
+    const STATUS = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
+
+    async function loadMine() {
+        const box = document.getElementById('mine');
+        const res = await api('myPosts', { token });
+        if (res.code === 401) { location.replace('./account.html'); return; }
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">加载失败</div>'; return; }
+        if (!res.data.length) { box.innerHTML = '<div class="empty">还没投过稿</div>'; return; }
+        box.innerHTML = res.data.map(p => `
+            <div class="mine">
+                <div class="meta">
+                    <span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)}
+                    <span class="st ${esc(p.status)}">${STATUS[p.status] || p.status}</span>
+                </div>
+                <div class="txt">${esc(p.content.slice(0, 120))}${p.content.length > 120 ? '…' : ''}</div>
+            </div>`).join('');
+    }
+
+    loadMine();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>账号 · 达一中校园树洞</title>
+    <style>
+        :root { --bg:#121212; --panel:#1e1e1e; --text:#e0e0e0; --muted:#aaa; --accent:#ff7675; }
+        * { box-sizing: border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding:24px 18px; display:flex; justify-content:center; }
+        .wrap { width:100%; max-width:420px; }
+        .back { color:var(--muted); text-decoration:none; font-size:14px; }
+        h1 { color:var(--accent); font-size:22px; margin:16px 0 20px; letter-spacing:1px; }
+        .tabs { display:flex; gap:8px; margin-bottom:14px; }
+        .tab { flex:1; padding:10px; border-radius:8px; border:1px solid #333; background:transparent; color:var(--muted); cursor:pointer; font-size:14px; }
+        .tab.active { background:var(--accent); color:#121212; border-color:var(--accent); font-weight:bold; }
+        .card { background:var(--panel); border:1px solid #2a2a2a; border-radius:12px; padding:18px; }
+        label { display:block; font-size:13px; color:var(--muted); margin:12px 0 6px; }
+        input, textarea { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; font-family:inherit; outline:none; }
+        input:focus, textarea:focus { border-color:var(--accent); }
+        .btn { width:100%; margin-top:16px; padding:12px; border:none; border-radius:8px; background:var(--accent); color:#121212; font-weight:bold; font-size:15px; cursor:pointer; }
+        .btn.ghost { background:transparent; border:1px solid #555; color:var(--text); }
+        .msg { margin-top:12px; font-size:13px; line-height:1.6; display:none; }
+        .msg.ok { display:block; color:#55efc4; }
+        .msg.err { display:block; color:#ff6b6b; }
+        .hint { font-size:12px; color:#777; line-height:1.7; margin-top:14px; }
+        .who { font-size:15px; margin:0 0 14px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <a class="back" href="./index.html">← 返回首页</a>
+    <h1>🍍 账号</h1>
+
+    <div id="logged" class="card" hidden>
+        <p class="who">已登录：<b id="who"></b></p>
+        <button class="btn ghost" onclick="logout()">退出登录</button>
+    </div>
+
+    <div id="forms">
+        <div class="tabs">
+            <button class="tab active" data-tab="login">登录</button>
+            <button class="tab" data-tab="reg">申请注册</button>
+        </div>
+
+        <div class="card" id="pane-login">
+            <label>用户名</label>
+            <input id="login-name" autocomplete="username" placeholder="注册时填的用户名">
+            <label>密码</label>
+            <input id="login-pass" type="password" autocomplete="current-password" placeholder="密码">
+            <button class="btn" onclick="doLogin()">登录</button>
+            <div class="msg" id="login-msg"></div>
+            <p class="hint">忘密码了？找站长。</p>
+        </div>
+
+        <div class="card" id="pane-reg" hidden>
+            <label>用户名</label>
+            <input id="reg-name" placeholder="2 到 24 位，字母数字下划线或中文">
+            <label>昵称（发帖时显示）</label>
+            <input id="reg-nick" placeholder="比如：菠萝、9班某人">
+            <label>密码</label>
+            <input id="reg-pass" type="password" placeholder="至少 6 位">
+            <label>联系方式（微信 / QQ，方便站长找到你）</label>
+            <input id="reg-contact" placeholder="选填，但建议留">
+            <label>申请理由</label>
+            <input id="reg-reason" placeholder="选填，比如：9 班同学，想发寻物启事">
+            <button class="btn" onclick="doRegister()">提交申请</button>
+            <div class="msg" id="reg-msg"></div>
+            <p class="hint">提交后不会立刻能用，要等站长在后台点通过。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
+
+    function api(action, data) {
+        return fetch(API + '?action=' + action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data || {})
+        }).then(r => r.json());
+    }
+
+    function showMsg(id, text, ok) {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            document.getElementById('pane-login').hidden = t.dataset.tab !== 'login';
+            document.getElementById('pane-reg').hidden = t.dataset.tab !== 'reg';
+        });
+    });
+
+    async function doLogin() {
+        const username = document.getElementById('login-name').value.trim();
+        const password = document.getElementById('login-pass').value;
+        if (!username || !password) return showMsg('login-msg', '用户名和密码都要填', false);
+        const res = await api('login', { username, password });
+        if (res.code === 200) {
+            localStorage.setItem('wall_token', res.token);
+            localStorage.setItem('wall_user', JSON.stringify(res.user));
+            showMsg('login-msg', '登录成功，正在跳转…', true);
+            setTimeout(() => location.href = './app.html', 600);
+        } else {
+            showMsg('login-msg', res.message || '登录失败', false);
+        }
+    }
+
+    async function doRegister() {
+        const body = {
+            username: document.getElementById('reg-name').value.trim(),
+            nickname: document.getElementById('reg-nick').value.trim(),
+            password: document.getElementById('reg-pass').value,
+            contact: document.getElementById('reg-contact').value.trim(),
+            reason: document.getElementById('reg-reason').value.trim()
+        };
+        const res = await api('register', body);
+        showMsg('reg-msg', res.message || (res.code === 200 ? '已提交' : '提交失败'), res.code === 200);
+    }
+
+    function logout() {
+        localStorage.removeItem('wall_token');
+        localStorage.removeItem('wall_user');
+        location.reload();
+    }
+
+    (function init() {
+        const token = localStorage.getItem('wall_token');
+        if (!token) return;
+        api('me', { token }).then(res => {
+            if (res.code === 200) {
+                document.getElementById('logged').hidden = false;
+                document.getElementById('forms').hidden = true;
+                document.getElementById('who').textContent = res.user.nickname + '（' + res.user.username + '）';
+            } else {
+                localStorage.removeItem('wall_token');
+                localStorage.removeItem('wall_user');
+            }
+        }).catch(() => {});
+    })();
+</script>
+</body>
+</html>

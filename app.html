@@ -117,6 +117,7 @@
     <header class="header">
         <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
         <div class="controls">
+            <a class="btn-icon" href="./account.html" id="account-btn" style="margin-right:8px;">👤 登录</a>
             <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()">🌙 暗黑</button>
         </div>
     </header>
@@ -129,6 +130,7 @@
             <button class="filter-btn" data-filter="表白">❤️ 表白</button>
             <button class="filter-btn" data-filter="交友">🤝 交友</button>
             <button class="filter-btn" data-filter="寻物">🔍 寻物</button>
+            <button class="filter-btn" data-filter="反馈">📮 反馈</button>
         </div>
         <div id="posts-container"></div>
     </div>
@@ -140,7 +142,7 @@
         <div class="detail-body" id="detail-body"></div>
     </div>
 
-    <a href="https://docs.qq.com/form/page/你的腾讯文档ID" target="_blank" class="fab-btn">✍️ 写树洞</a>
+    <a href="./publish.html" class="fab-btn">✍️ 写树洞</a>
     <div class="music-btn" id="music-toggle" onclick="toggleMusic()">🔇</div>
     <audio id="bgm" loop preload="none">
         <source src="images/bgm.m4a" type="audio/mp4">
@@ -362,6 +364,15 @@
         // 初始化时隐藏滚动条
         document.getElementById('password-gate').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        // 顶部显示登录状态
+        (function () {
+            const btn = document.getElementById('account-btn');
+            const raw = localStorage.getItem('wall_user');
+            if (btn && raw) {
+                try { btn.textContent = '👤 ' + JSON.parse(raw).nickname; } catch (e) {}
+            }
+        })();
 
     </script>
 </body>
