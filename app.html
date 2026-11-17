@@ -928,9 +928,16 @@
             return (pfMe.role === 'admin' || owned.some((t) => /Master|Admin/i.test(t))) ? 4 : 3;
         }
 
+        function titleRank(t) {
+            if (t.indexOf('StarsPro') >= 0) return 1;
+            if (t.indexOf('Stars++') >= 0) return 2;
+            if (/Master|Admin/.test(t)) return 4;
+            return 3;
+        }
+
         function pfRenderTitles() {
             const box = document.getElementById('pf-titles');
-            const owned = pfMe.titles || [];
+            const owned = (pfMe.titles || []).slice().sort((a, b) => titleRank(a) - titleRank(b));
             const equipped = pfMe.equipped || [];
             if (!owned.length) {
                 box.innerHTML = '<div class="pf-empty">还没有头衔，去首页赞助页申请</div>';
