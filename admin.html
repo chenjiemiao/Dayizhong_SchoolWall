@@ -56,9 +56,7 @@
             <div id="post-list"><div class="empty">加载中…</div></div>
         </div>
         <div class="card">
-            <h2>头衔发放 <span class="tag">不用申请，你直接给</span></h2>
-            <label>账号用户名</label>
-            <input id="grant-user" placeholder="比如 test_demo_001">
+            <h2>头衔发放 <span class="tag">选好头衔，点人后面的授予</span></h2>
             <label>选头衔</label>
             <select id="grant-type" onchange="onGrantType()">
                 <option value="🍍StarsPro">🍍StarsPro</option>
@@ -69,11 +67,7 @@
                 <option value="自定义">自定义…</option>
             </select>
             <input id="grant-custom" placeholder="自定义头衔，最多 10 字" maxlength="10" hidden>
-            <div class="row">
-                <button class="btn" onclick="grantTitle()">授予</button>
-                <button class="btn ghost" onclick="findUser()">查看该账号</button>
-            </div>
-            <div id="grant-result" class="meta" style="margin-top:10px"></div>
+            <div id="grant-users"><div class="empty">加载中…</div></div>
         </div>
 
         <div class="card">
@@ -135,6 +129,7 @@
         reloadPosts();
         reloadTitles();
         reloadApproved();
+        reloadGrantUsers();
     }
 
     async function reload() {
@@ -143,6 +138,7 @@
         reloadPosts();
         reloadTitles();
         reloadApproved();
+        reloadGrantUsers();
     }
 
     async function reloadPosts() {
@@ -206,33 +202,32 @@
         document.getElementById('grant-custom').hidden = document.getElementById('grant-type').value !== '自定义';
     }
 
-    async function grantTitle() {
-        const username = document.getElementById('grant-user').value.trim();
+    async function reloadGrantUsers() {
+        const box = document.getElementById('grant-users');
+        const res = await api('adminListUsers');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
+        const list = res.data || [];
+        if (!list.length) { box.innerHTML = '<div class="empty">还没有注册用户</div>'; return; }
+        box.innerHTML = list.map(u => `
+            <div class="item">
+                <div class="meta">${esc(u.nickname)}（${esc(u.username)}）${u.class_name ? ' · ' + esc(u.class_name) : ''}${u.role === 'admin' ? ' · 管理员' : ''}</div>
+                <div class="meta">${u.titles.length ? u.titles.map(t => `<span class="tag">${esc(t)}<a href="javascript:void(0)" onclick="revokeTitle('${esc(u.username)}','${esc(t)}')" style="color:#ff6b6b;margin-left:4px;text-decoration:none">×</a></span>`).join('') : '无头衔'}</div>
+                <div class="row"><button class="btn" onclick="grantTo('${esc(u.username)}')">授予</button></div>
+            </div>`).join('');
+    }
+
+    async function grantTo(username) {
         const type = document.getElementById('grant-type').value;
         const custom = document.getElementById('grant-custom').value.trim();
         const title = type === '自定义' ? custom : type;
-        if (!username || !title) return alert('账号和头衔都要填');
+        if (!title) return alert('先选好头衔');
         const res = await api('adminGrantTitle', { username, title });
-        alert(res.message || '完成');
-        findUser();
-    }
-
-    async function findUser() {
-        const username = document.getElementById('grant-user').value.trim();
-        if (!username) return;
-        const res = await api('adminFindUser', { username });
-        const box = document.getElementById('grant-result');
-        if (res.code !== 200) { box.textContent = res.message || '查询失败'; return; }
-        const titles = res.user.titles || [];
-        box.innerHTML = esc(username) + '（' + esc(res.user.nickname) + '）的头衔：' +
-            (titles.length
-                ? titles.map(t => `<span class="tag">${esc(t)}<a href="javascript:void(0)" onclick="revokeTitle('${esc(username)}','${esc(t)}')" style="color:#ff6b6b;margin-left:6px;text-decoration:none">×</a></span>`).join('')
-                : '无');
+        if (res.code === 200) reloadGrantUsers(); else alert(res.message || '授予失败');
     }
 
     async function revokeTitle(username, title) {
         const res = await api('adminRevokeTitle', { username, title });
-        if (res.code === 200) findUser(); else alert(res.message);
+        if (res.code === 200) reloadGrantUsers(); else alert(res.message);
     }
 
     function renderUsers(list) {

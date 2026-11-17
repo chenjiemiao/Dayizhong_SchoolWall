@@ -458,24 +458,32 @@
             musicBtn.innerHTML = playing ? '🎵' : '🔇';
         }
 
+        // 按钮状态直接跟着 audio 的真实状态走，别再自己猜
+        bgm.addEventListener('play', () => setMusicUI(true));
+        bgm.addEventListener('pause', () => { if (!userPaused) setMusicUI(false); });
+        bgm.addEventListener('error', () => {
+            musicBtn.classList.remove('playing');
+            musicBtn.innerHTML = '🚫';
+        });
+
         // 浏览器不允许无交互自动播放，所以只要有第一次点击/按键就开播
         function tryPlayMusic() {
-            if (isPlaying || userPaused) return;
-            bgm.play().then(() => setMusicUI(true)).catch(() => {});
+            if (!bgm.paused || userPaused) return;
+            bgm.play().catch(() => {});
         }
 
         function toggleMusic() {
-            if (isPlaying) {
-                bgm.pause();
+            if (!bgm.paused) {
                 userPaused = true;
+                bgm.pause();
                 setMusicUI(false);
-            } else {
-                userPaused = false;
-                bgm.play().then(() => setMusicUI(true)).catch(() => {
-                    musicBtn.innerHTML = '🚫';
-                    setTimeout(() => { musicBtn.innerHTML = '🔇'; }, 1500);
-                });
+                return;
             }
+            userPaused = false;
+            bgm.play().then(() => setMusicUI(true)).catch(() => {
+                musicBtn.innerHTML = '🚫';
+                setTimeout(() => { if (bgm.paused) musicBtn.innerHTML = '🔇'; }, 1500);
+            });
         }
 
         ['pointerdown', 'touchstart', 'keydown'].forEach((evt) => {
@@ -489,12 +497,14 @@
             if (document.visibilityState !== 'visible') return;
             if (bgVideoEl && bgVideoEl.paused) bgVideoEl.play().catch(() => {});
             if (mediaStarted && !userPaused && bgm.paused) {
-                bgm.play().then(() => setMusicUI(true)).catch(() => {});
+                bgm.play().catch(() => {});
             }
         }
 
         document.addEventListener('visibilitychange', () => setTimeout(keepMediaAlive, 300));
-        setInterval(keepMediaAlive, 4000);
+        window.addEventListener('focus', () => setTimeout(keepMediaAlive, 300));
+        window.addEventListener('pageshow', () => setTimeout(keepMediaAlive, 300));
+        setInterval(keepMediaAlive, 1500);
 
         if (bgVideoEl) {
             ['pause', 'stalled', 'suspend'].forEach((evt) => {
@@ -503,6 +513,12 @@
                         if (bgVideoEl.paused) bgVideoEl.play().catch(() => {});
                     }, 600);
                 });
+            });
+            bgVideoEl.addEventListener('ended', () => {
+                bgVideoEl.play().catch(() => {});
+            });
+            bgVideoEl.addEventListener('error', () => {
+                bgVideoEl.style.display = 'none';
             });
         }
 
