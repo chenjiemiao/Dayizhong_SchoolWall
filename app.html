@@ -66,6 +66,8 @@
         .btn-del { padding: 10px 16px; border-radius: 8px; border: 1px solid #ff6b6b; background: transparent; color: #ff6b6b; font-size: 13px; cursor: pointer; }
         .post-title { font-size: 16px; font-weight: bold; margin: 0 0 8px; line-height: 1.4; }
         .post-footer { margin-top: 10px; font-size: 12px; color: var(--text-muted); }
+        .card-imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+        .card-imgs img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); }
         .detail-title { font-size: 22px; margin: 0 0 14px; line-height: 1.4; }
         .like-bar { margin: 18px 0; }
         .like-btn { padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 14px; cursor: pointer; }
@@ -431,6 +433,7 @@
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
                     <div class="post-content">${shortContent}</div>
+                    ${(item.images && item.images.length) ? `<div class="card-imgs">${item.images.slice(0, 9).map((src) => `<img src="${esc(src)}" alt="">`).join('')}</div>` : ''}
                     <div class="post-footer">
                         <span class="like-count">👍 ${(item.likes || []).length}</span>
                     </div>
