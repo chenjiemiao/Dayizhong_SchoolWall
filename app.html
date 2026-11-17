@@ -303,6 +303,14 @@
         if (!localStorage.getItem('wall_token')) {
             location.replace('./account.html');
         }
+
+        // 暗号由后台控制，取不到就用默认的
+        (function loadGate() {
+            fetch(API_ROOT + '?action=getGate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+                .then((r) => r.json())
+                .then((d) => { if (d && d.gate) window.__GATE_CODE = d.gate; })
+                .catch(() => {});
+        })();
         
         let currentFilter = '全部';
         let currentPostId = '';
@@ -677,7 +685,7 @@
         function checkPassword() {
             const input = document.getElementById('gate-input').value.trim();
             const errorMsg = document.getElementById('gate-error');
-            const SECRET_CODE = "V50"; 
+            const SECRET_CODE = window.__GATE_CODE || "V50";
 
             if (input === SECRET_CODE) {
                 document.getElementById('password-gate').style.display = 'none';

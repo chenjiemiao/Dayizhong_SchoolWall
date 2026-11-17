@@ -97,6 +97,20 @@
             <div id="title-list"><div class="empty">加载中…</div></div>
         </div>
 
+        <div class="card" id="sec-gate" hidden>
+            <h2>更改暗号 <span class="tag">只有站长</span></h2>
+            <input id="gate-input" placeholder="新的暗号，改完要通知大家">
+            <div class="row"><button class="btn" onclick="saveGate()">保存暗号</button></div>
+            <div class="msg" id="gate-msg"></div>
+        </div>
+
+        <div class="card" id="sec-broadcast" hidden>
+            <h2>全局通知 <span class="tag">发给所有人</span></h2>
+            <textarea id="broadcast-text" placeholder="比如：本周暗号已更新，进墙前请先看最新通知"></textarea>
+            <div class="row"><button class="btn" onclick="sendBroadcast()">发给所有人</button></div>
+            <div class="msg" id="broadcast-msg"></div>
+        </div>
+
         <div class="row">
             <button class="btn ghost" onclick="reload()">刷新</button>
             <button class="btn ghost" onclick="logoutAdmin()">退出后台</button>
@@ -158,6 +172,8 @@
         document.getElementById('sec-requests').hidden = !owner;
         document.getElementById('sec-posts').hidden = !owner;
         document.getElementById('sec-titles').hidden = !owner;
+        document.getElementById('sec-gate').hidden = !owner;
+        document.getElementById('sec-broadcast').hidden = !owner;
         reload();
     }
 
@@ -297,6 +313,26 @@
         if (!confirm('删了就找不回来了，确定？')) return;
         const res = await api('deletePost', { postId: id });
         if (res.code === 200) loadApproved(); else alert(res.message || '失败');
+    }
+
+    async function saveGate() {
+        const gate = document.getElementById('gate-input').value.trim();
+        const msg = document.getElementById('gate-msg');
+        if (!gate) { msg.textContent = '暗号不能空'; msg.className = 'msg err'; return; }
+        const res = await api('setGate', { gate });
+        msg.textContent = res.message || '完成';
+        msg.className = 'msg ' + (res.code === 200 ? 'ok' : 'err');
+        if (res.code === 200) document.getElementById('gate-input').value = '';
+    }
+
+    async function sendBroadcast() {
+        const text = document.getElementById('broadcast-text').value.trim();
+        const msg = document.getElementById('broadcast-msg');
+        if (!text) { msg.textContent = '内容不能空'; msg.className = 'msg err'; return; }
+        const res = await api('adminBroadcastNotice', { text });
+        msg.textContent = res.message || '完成';
+        msg.className = 'msg ' + (res.code === 200 ? 'ok' : 'err');
+        if (res.code === 200) document.getElementById('broadcast-text').value = '';
     }
 
     async function sendNotice() {
