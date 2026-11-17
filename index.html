@@ -85,13 +85,13 @@
             text-align: center;
             border: 1px dashed #444;
         }
-        .info-box strong { color: #fdcb6e; }
 
+        /* 主按钮组与辅助按钮组 */
         .btn-group {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .btn {
             padding: 14px;
@@ -111,37 +111,23 @@
             border: none;
         }
         .btn-submit:hover { background: var(--accent-hover); }
+        
         .btn-home {
             background: transparent;
             color: var(--text-main);
             border: 1px solid #555;
         }
-        .btn-home:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: #888;
-        }
+        .btn-home:hover { background: rgba(255, 255, 255, 0.05); border-color: #888; }
 
-        .small-btn-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+        /* 专属头衔按钮的特调样式 */
+        .btn-title-view {
+            background: rgba(253, 203, 110, 0.1);
+            color: #fdcb6e;
+            border: 1px solid #fdcb6e;
         }
-        .btn-small {
-            flex: 1;
-            padding: 10px;
-            font-size: 13px;
-            text-align: center;
-            background: rgba(255,255,255,0.05);
-            color: var(--text-main);
-            border: 1px solid #333;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-small:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: var(--accent-color);
-            color: var(--accent-color);
+        .btn-title-view:hover {
+            background: rgba(253, 203, 110, 0.2);
+            box-shadow: 0 0 10px rgba(253, 203, 110, 0.3);
         }
 
         .footer {
@@ -154,7 +140,7 @@
             padding-top: 15px;
         }
 
-        /* 弹窗样式 */
+        /* ================= 弹窗与头衔样式 ================= */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -171,12 +157,14 @@
             background: var(--panel-bg);
             border: 1px solid #333;
             border-radius: 12px;
-            padding: 20px;
-            max-width: 340px;
+            padding: 25px 20px;
+            max-width: 360px;
             width: 100%;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             animation: fadeIn 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
@@ -220,13 +208,15 @@
         .close-btn {
             background: transparent;
             color: var(--text-muted);
-            border: none;
-            padding: 8px 16px;
+            border: 1px solid #444;
+            border-radius: 20px;
+            padding: 8px 24px;
             cursor: pointer;
             font-size: 14px;
-            margin-top: 10px;
+            margin-top: 20px;
+            transition: 0.2s;
         }
-        .close-btn:hover { color: #fff; }
+        .close-btn:hover { color: #fff; border-color: #fff; }
 
         /* 全屏图片预览层 */
         #image-viewer {
@@ -252,23 +242,82 @@
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-        .viewer-tip {
-            color: #fff;
-            font-size: 14px;
-            margin-top: 20px;
-            opacity: 0.7;
+        .viewer-tip { color: #fff; font-size: 14px; margin-top: 20px; opacity: 0.7; text-align: center; }
+
+        /* --- 头衔列表排版 --- */
+        .title-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .title-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .title-name {
+            font-size: 18px;
+            font-weight: bold;
             text-align: center;
+            margin-bottom: 5px;
+        }
+        .title-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
         }
 
-        /* ================= 炫酷流动渐变文字 ================= */
-        .gradient-text {
+        /* --- 核心：所有头衔的专属颜色特效 --- */
+
+        /* 1. 金色 Pro */
+        .text-gold {
+            background: linear-gradient(90deg, #f9ca24, #f6e58d, #f9ca24);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        /* 2. 钻石色 ++ */
+        .text-diamond {
+            background: linear-gradient(90deg, #74b9ff, #e0f7fa, #a29bfe, #74b9ff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 3s linear infinite;
+            text-shadow: 0 0 10px rgba(116, 185, 255, 0.5); /* 钻石发光感 */
+        }
+
+        /* 3. 自定义彩虹渐变 */
+        .text-rainbow {
             background: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             animation: gradient-flow 3s linear infinite;
-            font-weight: bold;
+        }
+
+        /* 4. 站长/管理员专属 (紫红尊贵色) */
+        .text-admin {
+            background: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 2.5s linear infinite;
+            text-shadow: 0 0 8px rgba(224, 64, 251, 0.4);
         }
 
         @keyframes gradient-flow {
@@ -277,27 +326,13 @@
         }
 
         /* ================= 分辨率与设备适配 ================= */
-        
-        /* 针对手机端（特别是高度较短的屏幕），允许正常滚动，防止内容被截断 */
         @media (max-height: 700px) {
-            body {
-                align-items: flex-start; /* 顶部对齐，不用强行居中 */
-                padding-top: 30px;
-                padding-bottom: 30px;
-            }
+            body { align-items: flex-start; padding-top: 30px; padding-bottom: 30px; }
         }
-
-        /* 针对电脑端/大屏平板 */
         @media (min-width: 768px) {
-            .container {
-                padding: 40px 35px; 
-            }
-            h1 {
-                font-size: 28px; 
-            }
-            .btn:hover {
-                transform: translateY(-2px);
-            }
+            .container { padding: 40px 35px; }
+            h1 { font-size: 28px; }
+            .btn:hover { transform: translateY(-2px); }
         }
     </style>
 </head>
@@ -328,29 +363,36 @@
         <span style="font-size: 12px; color: #777; margin-top: 5px; display: inline-block;">（暗号过期不候，请找站长获取）</span>
     </div>
 
-    <!-- 主按钮 -->
+    <!-- 按钮组 -->
     <div class="btn-group">
-        <a href="app.html" target="_blank" class="btn btn-submit">
+        <a href="./app.html" class="btn btn-submit">
             🚀 进入校园墙
         </a>
-        <a href="https://chenjiemiao.github.io/PineAppleStars" class="btn btn-home">
-            🍍前往站长的个人自我介绍网站
-        </a>
-    </div>
+        
+        <button class="btn btn-title-view" onclick="openModal('modal-titles')">
+            ✨ 查看专属头衔福利
+        </button>
 
-    <!-- 辅助按钮 -->
-    <div class="small-btn-group">
-        <button class="btn-small" onclick="openModal('modal-contact')">📝 (注册)申请注册账号</button>
-        <button class="btn-small" onclick="openModal('modal-sponsor')">🍍 (赞助)请站长吃个菠萝</button>
+        <button class="btn btn-home" onclick="openModal('modal-contact')">
+            📝 申请注册账号
+        </button>
+        
+        <button class="btn btn-home" onclick="openModal('modal-sponsor')">
+            🍍 赞助请站长吃个菠萝
+        </button>
+
+        <a href="https://chenjiemiao.github.io/PineAppleStars" class="btn btn-home" style="font-size: 13px; opacity: 0.7;">
+            🔗 前往站长的个人网站
+        </a>
     </div>
 
     <div class="footer">
         <p>达一中校园墙 | 所有技术内容： 2025级9班 陈xy</p>
-		<p>©copyright 陈羯喵Client&🍍Stars工作室 2026 All Rights Reserved 最终解释权归站长所有<p>
+        <p>©copyright 陈羯喵Client&🍍Stars工作室 2026 All Rights Reserved 最终解释权归站长所有<p>
     </div>
 </div>
 
-<!-- 申请注册账号弹窗 -->
+<!-- 1. 申请注册账号弹窗 -->
 <div id="modal-contact" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content">
         <h3>申请注册账号</h3>
@@ -366,37 +408,70 @@
                 <span>QQ扫码</span>
             </div>
         </div>
-
         <button class="close-btn" onclick="closeModal(event)">关闭</button>
     </div>
 </div>
 
-<!-- 赞助弹窗 -->
+<!-- 2. 赞助弹窗 -->
 <div id="modal-sponsor" class="modal-overlay" onclick="closeModal(event)">
     <div class="modal-content">
         <h3>支持校园墙</h3>
         
-        <!-- 承诺部分 -->
         <p style="text-align: center; font-size: 13px; color: #ff7675; margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
             <strong>💖 站长承诺：</strong>您的每一笔赞赏，都将全部用于服务器、域名等网站基础维护开销。
         </p>
 
-        <!-- 福利说明 -->
         <p>
-            🎁 <strong>赞赏福利：</strong><br>
-            赞赏任意金额，截图私信发给站长，即可获得<b>专属头衔</b>（发帖/评论时展示）。<br>
-            请留下你想要的<b>头衔名</b>，不备注默认发放：<br>
-            <span style="display: inline-block; margin-top: 5px;">
-                <span class="gradient-text">✨🍍StarsPro✨</span>
-            </span>
+            🎁 <strong>如何获得头衔：</strong><br>
+            长按下方赞赏码付款后，截图私信发给站长，并留下你的<b>专属昵称</b>，审核后即可在发帖/评论时展示头衔！
         </p>
         <p style="text-align: center; font-size: 12px; color: #fdcb6e; margin-top: 10px;">
-            （赞赏档位：0.1 / 0.5 / 1 / 5 / 10 / 20）
+            （基础档位：0.1 / 0.5 / 1 / 5 / 10 / 20）
         </p>
         
         <img class="single-img" src="images/sponsor.jpg" alt="赞助二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/240x240/333/fff?text=请替换赞赏码'">
         
         <button class="close-btn" onclick="closeModal(event)">关闭</button>
+    </div>
+</div>
+
+<!-- 3. 头衔福利预览弹窗 -->
+<div id="modal-titles" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <h3>✨ 专属头衔预览 ✨</h3>
+        <p style="text-align: center;">发帖、评论时，你的名字旁将展示专属流光特效！</p>
+        
+        <div class="title-list">
+            <!-- 档位1 -->
+            <div class="title-item">
+                <div class="title-name text-gold">🍍StarsPro</div>
+                <div class="title-desc">获取条件：赞赏任意金额</div>
+                <div style="font-size: 12px; color:#aaa; text-align: center;">（默认发放，支持指定改名）</div>
+            </div>
+            
+            <!-- 档位2 -->
+            <div class="title-item">
+                <div class="title-name text-diamond">🍍Stars++</div>
+                <div class="title-desc">获取条件：赞赏 5 元及以上</div>
+                <div style="font-size: 12px; color:#aaa; text-align: center;">（炫酷钻石光效）</div>
+            </div>
+
+            <!-- 档位3 -->
+            <div class="title-item">
+                <div class="title-name text-rainbow">自定义七彩称号</div>
+                <div class="title-desc">获取条件：赞赏 10 元及以上</div>
+                <div style="font-size: 12px; color:#aaa; text-align: center;">（支持自定义文字，默认套用七彩流光）</div>
+            </div>
+
+            <!-- 隐藏档位 -->
+            <div class="title-item" style="border-color: #e040fb;">
+                <div class="title-name text-admin">🍍StarsMaster / Admin</div>
+                <div class="title-desc" style="color: #e040fb;">获取条件：网站建设人员</div>
+                <div style="font-size: 12px; color:#aaa; text-align: center;">（站长陈羯喵专属 / 管理员专属）</div>
+            </div>
+        </div>
+        
+        <button class="close-btn" onclick="closeModal(event)">我知道了</button>
     </div>
 </div>
 
@@ -440,7 +515,7 @@
 
     function closeImageViewer() {
         imageViewer.classList.remove('active');
-        setTimeout(() => { viewerImg.src = ''; }, 300);
+        setTimeout(() => { viewerImg.src = ''; }, 200);
     }
 </script>
 
