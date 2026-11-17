@@ -70,6 +70,7 @@
         .like-bar { margin: 18px 0; }
         .like-btn { padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 14px; cursor: pointer; }
         .like-btn.liked { border-color: var(--accent-color); color: var(--accent-color); opacity: .75; cursor: default; }
+        .media-hint { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); z-index: 95; background: var(--accent-color); color: #121212; font-size: 13px; font-weight: bold; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
 
         /* 个人主页（内置面板） */
         #notice-overlay { position: fixed; inset: 0; z-index: 310; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
@@ -249,6 +250,7 @@
         </div>
     </div>
 
+    <div id="media-hint" class="media-hint" onclick="enableMedia()">🔊 点我开启背景音乐</div>
     <a href="./publish.html" class="fab-btn">✍️ 写树洞</a>
     <div class="music-btn" id="music-toggle" onclick="toggleMusic()">🔇</div>
     <audio id="bgm" loop preload="none">
@@ -518,6 +520,8 @@
         function setMusicUI(playing) {
             isPlaying = playing;
             if (playing) mediaStarted = true;
+            const hint = document.getElementById('media-hint');
+            if (hint && playing) hint.style.display = 'none';
             musicBtn.classList.toggle('playing', playing);
             musicBtn.innerHTML = playing ? '🎵' : '🔇';
         }
@@ -569,6 +573,19 @@
         window.addEventListener('focus', () => setTimeout(keepMediaAlive, 300));
         window.addEventListener('pageshow', () => setTimeout(keepMediaAlive, 300));
         setInterval(keepMediaAlive, 1500);
+
+        function enableMedia() {
+            userPaused = false;
+            const hint = document.getElementById('media-hint');
+            if (hint) hint.style.display = 'none';
+            if (bgVideoEl && bgVideoEl.paused) bgVideoEl.play().catch(() => {});
+            bgm.play().then(() => setMusicUI(true)).catch(() => {});
+        }
+
+        setTimeout(() => {
+            const hint = document.getElementById('media-hint');
+            if (hint && !mediaStarted) hint.style.display = 'block';
+        }, 4000);
 
         if (bgVideoEl) {
             ['pause', 'stalled', 'suspend'].forEach((evt) => {
