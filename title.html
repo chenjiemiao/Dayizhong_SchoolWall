@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>头衔申请 · 达一中校园树洞</title>
+    <style>
+        :root { --bg:#121212; --panel:#1e1e1e; --text:#e0e0e0; --muted:#aaa; --accent:#ff7675; }
+        * { box-sizing: border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding:24px 18px; }
+        .wrap { max-width:520px; margin:0 auto; }
+        .back { color:var(--muted); text-decoration:none; font-size:14px; }
+        h1 { color:var(--accent); font-size:22px; margin:16px 0 6px; }
+        .sub { color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.7; }
+        .card { background:var(--panel); border:1px solid #2a2a2a; border-radius:12px; padding:18px; margin-bottom:16px; }
+        label { display:block; font-size:13px; color:var(--muted); margin:14px 0 6px; }
+        label:first-child { margin-top:0; }
+        input, textarea, select { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; font-family:inherit; outline:none; }
+        textarea { min-height:80px; resize:vertical; line-height:1.7; }
+        input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+        .btn { width:100%; margin-top:18px; padding:13px; border:none; border-radius:8px; background:var(--accent); color:#121212; font-weight:bold; font-size:15px; cursor:pointer; }
+        .btn.ghost { background:transparent; border:1px solid #555; color:var(--text); }
+        .msg { margin-top:12px; font-size:13px; line-height:1.6; display:none; }
+        .msg.ok { display:block; color:#55efc4; }
+        .msg.err { display:block; color:#ff6b6b; }
+        .tier { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #262626; font-size:13px; }
+        .tier:last-child { border-bottom:none; }
+        .tier b { font-size:14px; }
+        .text-gold { background:linear-gradient(90deg,#f9ca24,#f6e58d,#f9ca24); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .text-diamond { background:linear-gradient(90deg,#74b9ff,#e0f7fa,#a29bfe,#74b9ff); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .text-rainbow { background:linear-gradient(90deg,#ff7675,#fdcb6e,#55efc4,#74b9ff,#a29bfe,#ff7675); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .hint { font-size:12px; color:#777; line-height:1.7; margin-top:12px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <a class="back" href="./index.html">← 返回首页</a>
+    <h1>✨ 头衔申请</h1>
+    <p class="sub">在首页赞助页付款后，在这里提交。站长确认后，你的头衔会显示在发帖和评论的昵称后面。</p>
+
+    <div class="card">
+        <div class="tier"><span>🍍 <b class="text-gold">🍍StarsPro</b> · 赞赏任意金额</span><span>0.1 起</span></div>
+        <div class="tier"><span>💎 <b class="text-diamond">🍍Stars++</b> · 赞赏 5 元及以上</span><span>5 元</span></div>
+        <div class="tier"><span>🌈 <b class="text-rainbow">自定义七彩称号</b> · 自定义文字</span><span>10 元</span></div>
+    </div>
+
+    <div class="card">
+        <label>想申请哪个头衔</label>
+        <select id="title" onchange="onTitleChange()">
+            <option value="🍍StarsPro">🍍StarsPro（任意金额）</option>
+            <option value="🍍Stars++">🍍Stars++（5 元以上）</option>
+            <option value="自定义">自定义七彩称号（10 元以上）</option>
+        </select>
+
+        <div id="custom-wrap" hidden>
+            <label>你想要的称号文字（最多 12 个字）</label>
+            <input id="custom-title" maxlength="12" placeholder="比如：达一中最懂电脑之人">
+        </div>
+
+        <label>赞赏金额</label>
+        <input id="amount" placeholder="比如 5 元，写数字就行">
+
+        <label>付款截图或转账单号</label>
+        <textarea id="proof" placeholder="贴截图链接，或者写一下付款时间和金额，方便站长核对"></textarea>
+
+        <button class="btn" onclick="submitTitle()">提交申请</button>
+        <div class="msg" id="msg"></div>
+        <p class="hint">站长在后台确认后，头衔才会生效。想加速就加首页那个微信催一下。</p>
+    </div>
+</div>
+
+<script>
+    const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
+    const token = localStorage.getItem('wall_token');
+    if (!token) location.replace('./account.html');
+
+    function api(action, data) {
+        return fetch(API + '?action=' + action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data || {})
+        }).then(r => r.json());
+    }
+
+    function onTitleChange() {
+        document.getElementById('custom-wrap').hidden = document.getElementById('title').value !== '自定义';
+    }
+
+    async function submitTitle() {
+        const pick = document.getElementById('title').value;
+        const custom = document.getElementById('custom-title').value.trim();
+        const title = pick === '自定义' ? custom : pick;
+        const msg = document.getElementById('msg');
+
+        if (!title) {
+            msg.textContent = '自定义称号不能空';
+            msg.className = 'msg err';
+            return;
+        }
+
+        const res = await api('titleRequest', {
+            token,
+            title,
+            amount: document.getElementById('amount').value.trim(),
+            proof: document.getElementById('proof').value.trim()
+        });
+
+        if (res.code === 200) {
+            msg.textContent = res.message;
+            msg.className = 'msg ok';
+        } else if (res.code === 401) {
+            location.replace('./account.html');
+        } else {
+            msg.textContent = res.message || '提交失败';
+            msg.className = 'msg err';
+        }
+    }
+</script>
+</body>
+</html>

@@ -57,6 +57,22 @@
         .post-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-muted); }
         .post-tag { background: rgba(255, 118, 117, 0.15); color: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
         body.light-theme .post-tag { background: rgba(255, 82, 82, 0.1); }
+
+        /* 头衔渐变文字 */
+        .text-gold, .text-diamond, .text-rainbow, .text-admin {
+            background-size: 200% 100%;
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent; font-weight: bold;
+            animation: title-flow 3s linear infinite;
+        }
+        .text-gold { background-image: linear-gradient(90deg, #f9ca24, #f6e58d, #f9ca24); }
+        .text-diamond { background-image: linear-gradient(90deg, #74b9ff, #e0f7fa, #a29bfe, #74b9ff); }
+        .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
+        .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
+        @keyframes title-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: -200% 50%; }
+        }
         .post-content { font-size: 15px; line-height: 1.6; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* 详情页遮罩层 */
@@ -161,6 +177,23 @@
         let currentPostId = '';
         let wallData = []; // 用来存从数据库拉下来的数据
 
+        function esc(str) {
+            return String(str == null ? '' : str).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        }
+
+        function titleClass(title) {
+            if (!title) return '';
+            if (title.indexOf('Master') >= 0 || title.indexOf('Admin') >= 0) return 'text-admin';
+            if (title.indexOf('Stars++') >= 0) return 'text-diamond';
+            if (title.indexOf('StarsPro') >= 0) return 'text-gold';
+            return 'text-rainbow';
+        }
+
+        function titleHtml(title) {
+            if (!title) return '';
+            return ' <span class="' + titleClass(title) + '">' + esc(title) + '</span>';
+        }
+
         // ==========================================
         // 从腾讯云拉取数据的函数
         // ==========================================
@@ -213,7 +246,7 @@
                 card.innerHTML = `
                     <div class="post-header">
                         <span class="post-tag">${item.category}</span>
-                        <span>${item.date} | @${item.author}</span>
+                        <span>${item.date} | @${esc(item.author)}${titleHtml(item.author_title)}</span>
                     </div>
                     <div class="post-content">${shortContent}</div>
                 `;
@@ -258,7 +291,7 @@
             body.innerHTML = `
                 <div class="post-header" style="margin-bottom: 20px;">
                     <span class="post-tag">${post.category}</span>
-                    <span>${post.date} | @${post.author}</span>
+                    <span>${post.date} | @${esc(post.author)}${titleHtml(post.author_title)}</span>
                 </div>
                 <div class="detail-content">${contentHtml}</div>
                 

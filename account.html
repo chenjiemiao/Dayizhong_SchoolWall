@@ -24,6 +24,12 @@
         .msg.ok { display:block; color:#55efc4; }
         .msg.err { display:block; color:#ff6b6b; }
         .hint { font-size:12px; color:#777; line-height:1.7; margin-top:14px; }
+        .qr-block { margin-top:18px; padding-top:16px; border-top:1px dashed #333; }
+        .qr-tip { font-size:13px; color:var(--muted); text-align:center; margin:0 0 12px; line-height:1.6; }
+        .qr-group { display:flex; gap:12px; justify-content:center; }
+        .qr-item { display:flex; flex-direction:column; align-items:center; width:46%; }
+        .qr-item img { width:100%; max-width:130px; border-radius:8px; border:1px solid #444; }
+        .qr-item span { font-size:12px; color:var(--muted); margin-top:6px; }
         .who { font-size:15px; margin:0 0 14px; }
     </style>
 </head>
@@ -54,19 +60,27 @@
         </div>
 
         <div class="card" id="pane-reg" hidden>
-            <label>用户名</label>
+            <label>用户名（用来登录，别用真名）</label>
             <input id="reg-name" placeholder="2 到 24 位，字母数字下划线或中文">
-            <label>昵称（发帖时显示）</label>
-            <input id="reg-nick" placeholder="比如：菠萝、9班某人">
+            <label>真实姓名（必填）</label>
+            <input id="reg-realname" placeholder="填真名，只有站长看得到">
+            <label>班级（必填）</label>
+            <input id="reg-class" placeholder="比如：9班">
             <label>密码</label>
             <input id="reg-pass" type="password" placeholder="至少 6 位">
             <label>联系方式（微信 / QQ，方便站长找到你）</label>
             <input id="reg-contact" placeholder="选填，但建议留">
-            <label>申请理由</label>
-            <input id="reg-reason" placeholder="选填，比如：9 班同学，想发寻物启事">
             <button class="btn" onclick="doRegister()">提交申请</button>
             <div class="msg" id="reg-msg"></div>
             <p class="hint">提交后不会立刻能用，要等站长在后台点通过。</p>
+
+            <div class="qr-block">
+                <p class="qr-tip">想加速审核？直接加站长私人联系方式催我</p>
+                <div class="qr-group">
+                    <div class="qr-item"><img src="images/wechat.jpg" alt="微信二维码"><span>微信</span></div>
+                    <div class="qr-item"><img src="images/qq.jpg" alt="QQ二维码"><span>QQ</span></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -115,10 +129,10 @@
     async function doRegister() {
         const body = {
             username: document.getElementById('reg-name').value.trim(),
-            nickname: document.getElementById('reg-nick').value.trim(),
+            realName: document.getElementById('reg-realname').value.trim(),
+            className: document.getElementById('reg-class').value.trim(),
             password: document.getElementById('reg-pass').value,
-            contact: document.getElementById('reg-contact').value.trim(),
-            reason: document.getElementById('reg-reason').value.trim()
+            contact: document.getElementById('reg-contact').value.trim()
         };
         const res = await api('register', body);
         showMsg('reg-msg', res.message || (res.code === 200 ? '已提交' : '提交失败'), res.code === 200);
