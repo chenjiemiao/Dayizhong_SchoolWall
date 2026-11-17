@@ -152,6 +152,7 @@
         .comment-head .avatar { width: 22px; height: 22px; }
         .comment-name { color: var(--text-main); font-weight: bold; font-size: 13px; }
         .comment-text { font-size: 14px; line-height: 1.6; word-break: break-word; }
+        .del-comment { border: none; background: transparent; color: #ff6b6b; font-size: 12px; cursor: pointer; margin-left: 8px; }
         .comment-form { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
         .comment-form textarea { width: 100%; min-height: 70px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: #161616; color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; }
         .comment-form .like-btn { align-self: flex-end; }
@@ -562,6 +563,8 @@
                 const d = await r.json();
                 if (d.code !== 200) { box.textContent = '加载失败'; return; }
                 if (!d.data.length) { box.textContent = '还没有评论，来抢第一'; return; }
+                const me = (function () { try { return JSON.parse(localStorage.getItem('wall_user') || 'null'); } catch (e) { return null; } })();
+                const staff = me && (me.role === 'owner' || me.role === 'admin');
                 box.innerHTML = d.data.map((c) => `
                     <div class="comment-item">
                         <div class="comment-head">
@@ -569,6 +572,7 @@
                             <span class="comment-name">${esc(c.nickname)}</span>
                             ${(c.titles || []).map((t) => `<span class="${titleClass(t)}">${esc(t)}</span>`).join('')}
                             <span style="margin-left:auto">${new Date(c.created_at).toLocaleString('zh-CN', { hour12: false })}</span>
+                            ${(staff || (me && c.username === me.username)) ? `<button class="del-comment" onclick="deleteComment('${c._id}','${postId}')">删除</button>` : ''}
                         </div>
                         <div class="comment-text">${esc(c.content)}</div>
                     </div>`).join('');
@@ -596,6 +600,22 @@
                 } else {
                     alert(d.message || '评论失败');
                 }
+            } catch (e) {
+                alert('网络请求失败');
+            }
+        }
+
+        async function deleteComment(id, postId) {
+            if (!confirm('删掉这条评论？')) return;
+            const token = localStorage.getItem('wall_token');
+            try {
+                const r = await fetch(API_ROOT + '?action=deleteComment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, id })
+                });
+                const d = await r.json();
+                if (d.code === 200) loadComments(postId); else alert(d.message || '删除失败');
             } catch (e) {
                 alert('网络请求失败');
             }
