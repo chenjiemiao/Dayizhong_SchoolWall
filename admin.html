@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>站长后台 · 达一中校园树洞</title>
+    <title>后台 · 达一中校园树洞</title>
     <style>
         :root { --bg:#121212; --panel:#1e1e1e; --text:#e0e0e0; --muted:#aaa; --accent:#ff7675; }
         * { box-sizing: border-box; }
@@ -13,52 +13,63 @@
         h1 { color:var(--accent); font-size:22px; margin:16px 0 18px; }
         h2 { font-size:16px; margin:0 0 12px; color:var(--accent); }
         .card { background:var(--panel); border:1px solid #2a2a2a; border-radius:12px; padding:18px; margin-bottom:16px; }
-        label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
-        input { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; outline:none; }
-        select { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; outline:none; }
-        input + input, select + input { margin-top:8px; }
-        textarea { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; font-family:inherit; outline:none; margin-top:8px; }
+        label { display:block; font-size:13px; color:var(--muted); margin:10px 0 6px; }
+        input, select, textarea { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; font-family:inherit; outline:none; }
+        textarea { min-height:80px; resize:vertical; }
         .btn { padding:10px 16px; border:none; border-radius:8px; background:var(--accent); color:#121212; font-weight:bold; cursor:pointer; font-size:14px; }
         .btn.ghost { background:transparent; border:1px solid #555; color:var(--text); }
         .btn.ok { background:#55efc4; }
         .btn.no { background:#636e72; color:#fff; }
-        .row { display:flex; gap:8px; flex-wrap:wrap; }
+        .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
         .item { border:1px solid #2a2a2a; border-radius:10px; padding:14px; margin-bottom:10px; background:#181818; }
-        .item .meta { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.6; }
-        .item .body { font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word; margin-bottom:12px; }
+        .item .meta { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.8; }
+        .item .body { font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word; margin-bottom:10px; }
         .empty { color:var(--muted); font-size:13px; padding:6px 0; }
         .msg { margin-top:10px; font-size:13px; display:none; }
         .msg.err { display:block; color:#ff6b6b; }
         .msg.ok { display:block; color:#55efc4; }
         .tag { display:inline-block; padding:1px 8px; border-radius:4px; background:rgba(255,118,117,.15); color:var(--accent); font-size:12px; margin-right:6px; }
+        .role { font-size:11px; padding:1px 6px; border-radius:4px; background:rgba(253,203,110,.15); color:#fdcb6e; margin-left:6px; }
     </style>
 </head>
 <body>
 <div class="wrap">
     <a class="back" href="./index.html">← 返回首页</a>
-    <h1>🔐 站长后台</h1>
+    <h1>🔐 后台</h1>
 
     <div class="card" id="login-card">
-        <label>管理密码</label>
-        <div class="row">
-            <input id="admin-pw" type="password" style="flex:1;min-width:200px" placeholder="云函数里那个 ADMIN_PASSWORD">
-            <button class="btn" id="admin-btn" onclick="enter()">进入</button>
-        </div>
+        <label>用户名</label>
+        <input id="adm-name" placeholder="你自己的账号">
+        <label>密码</label>
+        <input id="adm-pass" type="password" placeholder="账号密码">
+        <button class="btn" id="adm-btn" onclick="login()" style="margin-top:16px">登录后台</button>
         <div class="msg" id="login-msg"></div>
+        <p style="font-size:12px;color:#777;margin-top:12px">必须用管理员账号登录，光知道密码进不来。</p>
     </div>
 
     <div id="panel" hidden>
-        <div class="card">
-            <h2>待审核账号 <span id="user-count" class="tag"></span></h2>
+        <div class="card" id="sec-users">
+            <h2>用户管理</h2>
             <div id="user-list"><div class="empty">加载中…</div></div>
         </div>
-        <div class="card">
-            <h2>待审核帖子 <span id="post-count" class="tag"></span></h2>
-            <div id="post-list"><div class="empty">加载中…</div></div>
+
+        <div class="card" id="sec-notice">
+            <h2>发通知</h2>
+            <label>发给谁（用户名）</label>
+            <input id="notice-user" placeholder="比如 test_demo_001">
+            <label>内容</label>
+            <textarea id="notice-text" placeholder="比如：你发的那条帖子涉嫌违规，已被删除"></textarea>
+            <div class="row"><button class="btn" onclick="sendNotice()">发送</button></div>
+            <div class="msg" id="notice-msg"></div>
         </div>
-        <div class="card">
-            <h2>头衔发放 <span class="tag">选好头衔，点人后面的授予</span></h2>
-            <label>选头衔</label>
+
+        <div class="card" id="sec-approved">
+            <h2>已上墙的帖子</h2>
+            <div id="approved-list"><div class="empty">加载中…</div></div>
+        </div>
+
+        <div class="card" id="sec-grant" hidden>
+            <h2>头衔发放 <span class="tag">只有站长</span></h2>
             <select id="grant-type" onchange="onGrantType()">
                 <option value="🍍StarsPro">🍍StarsPro</option>
                 <option value="🍍Stars++">🍍Stars++</option>
@@ -71,37 +82,38 @@
             <div id="grant-users"><div class="empty">加载中…</div></div>
         </div>
 
-        <div class="card">
-            <h2>待审核头衔 <span id="title-count" class="tag"></span></h2>
-            <div id="title-list"><div class="empty">加载中…</div></div>
-        </div>
-        <div class="card">
-            <h2>发通知 <span class="tag">帖子违规、有人评论等</span></h2>
-            <label>发给谁（用户名）</label>
-            <input id="notice-user" placeholder="用户名，比如 test_demo_001">
-            <label>内容</label>
-            <textarea id="notice-text" style="min-height:80px" placeholder="比如：你发的那条帖子涉嫌违规，已被删除"></textarea>
-            <div class="row"><button class="btn" onclick="sendNotice()">发送</button></div>
-            <div class="msg" id="notice-msg"></div>
+        <div class="card" id="sec-requests" hidden>
+            <h2>待审核账号</h2>
+            <div id="req-list"><div class="empty">加载中…</div></div>
         </div>
 
-        <div class="card">
-            <h2>已上墙的帖子</h2>
-            <div id="approved-list"><div class="empty">加载中…</div></div>
+        <div class="card" id="sec-posts" hidden>
+            <h2>待审核帖子</h2>
+            <div id="post-list"><div class="empty">加载中…</div></div>
         </div>
-        <button class="btn ghost" onclick="reload()">刷新</button>
+
+        <div class="card" id="sec-titles" hidden>
+            <h2>待审核头衔</h2>
+            <div id="title-list"><div class="empty">加载中…</div></div>
+        </div>
+
+        <div class="row">
+            <button class="btn ghost" onclick="reload()">刷新</button>
+            <button class="btn ghost" onclick="logoutAdmin()">退出后台</button>
+        </div>
     </div>
 </div>
 
 <script>
     const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
-    let adminPassword = '';
+    let me = null;
 
     function api(action, data) {
+        const token = localStorage.getItem('admin_token') || '';
         return fetch(API + '?action=' + action, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(Object.assign({ adminPassword }, data || {}))
+            body: JSON.stringify(Object.assign({ token }, data || {}))
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }
 
@@ -113,124 +125,178 @@
         return t ? new Date(t).toLocaleString('zh-CN', { hour12: false }) : '';
     }
 
-    async function enter() {
-        const pw = document.getElementById('admin-pw').value;
-        const m = document.getElementById('login-msg');
-        if (!pw) { m.textContent = '先填密码'; m.className = 'msg err'; return; }
-        adminPassword = pw;
-        const btn = document.getElementById('admin-btn');
-        btn.disabled = true;
-        btn.textContent = '验证中…';
-        let res;
-        try {
-            res = await api('adminRequests');
-        } catch (e) {
-            res = { code: -1, message: '网络请求失败' };
-        }
-        btn.disabled = false;
-        btn.textContent = '进入';
-        if (res.code !== 200) {
-            m.textContent = res.message || '进不去';
-            m.className = 'msg err';
+    async function login() {
+        const username = document.getElementById('adm-name').value.trim();
+        const password = document.getElementById('adm-pass').value;
+        const msg = document.getElementById('login-msg');
+        const btn = document.getElementById('adm-btn');
+        if (!username || !password) { msg.textContent = '用户名和密码都要填'; msg.className = 'msg err'; return; }
+        btn.disabled = true; btn.textContent = '登录中…';
+        const res = await fetch(API + '?action=login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
+        btn.disabled = false; btn.textContent = '登录后台';
+        if (res.code !== 200) { msg.textContent = res.message || '登录失败'; msg.className = 'msg err'; return; }
+        if (res.user.role !== 'owner' && res.user.role !== 'admin') {
+            msg.textContent = '这个账号不是管理员';
+            msg.className = 'msg err';
             return;
         }
+        localStorage.setItem('admin_token', res.token);
+        localStorage.setItem('admin_user', JSON.stringify(res.user));
+        me = res.user;
+        showPanel();
+    }
+
+    function showPanel() {
         document.getElementById('login-card').hidden = true;
         document.getElementById('panel').hidden = false;
-        renderUsers(res.data || []);
-        reloadPosts();
-        reloadTitles();
-        reloadApproved();
-        reloadGrantUsers();
+        const owner = me.role === 'owner';
+        document.getElementById('sec-grant').hidden = !owner;
+        document.getElementById('sec-requests').hidden = !owner;
+        document.getElementById('sec-posts').hidden = !owner;
+        document.getElementById('sec-titles').hidden = !owner;
+        reload();
     }
 
     async function reload() {
-        const res = await api('adminRequests');
-        if (res.code === 200) renderUsers(res.data);
-        reloadPosts();
-        reloadTitles();
-        reloadApproved();
-        reloadGrantUsers();
+        loadUsers();
+        loadApproved();
+        if (me.role === 'owner') {
+            loadRequests();
+            loadPendingPosts();
+            loadTitles();
+        }
     }
 
-    async function reloadPosts() {
-        const res = await api('adminPosts');
-        if (res.code === 200) renderPosts(res.data);
+    async function loadUsers() {
+        const box = document.getElementById('user-list');
+        const res = await api('adminListUsers');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
+        const owner = me.role === 'owner';
+        box.innerHTML = res.data.map(u => {
+            const banned = u.status === 'banned';
+            const roleTag = u.role === 'owner' ? '<span class="role">站长</span>' : (u.role === 'admin' ? '<span class="role">管理员</span>' : '');
+            const grantBtn = owner && u.role !== 'owner' ? `<button class="btn" onclick="grantTo('${esc(u.username)}')">授予头衔</button>` : '';
+            const adminBtn = owner && u.role !== 'owner'
+                ? `<button class="btn ghost" onclick="setRole('${esc(u.username)}','${u.role === 'admin' ? 'user' : 'admin'}')">${u.role === 'admin' ? '取消管理员' : '设为管理员'}</button>`
+                : '';
+            const banBtn = u.role === 'owner' ? '' : `<button class="btn no" onclick="toggleBan('${esc(u.username)}', ${banned ? 'false' : 'true'})">${banned ? '解封' : '封号'}</button>`;
+            return `
+            <div class="item">
+                <div class="meta">${esc(u.nickname)}（${esc(u.username)}）${u.class_name ? ' · ' + esc(u.class_name) : ''}${roleTag}${banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : ''}</div>
+                <div class="meta">${(u.titles || []).length ? u.titles.map(t => `<span class="tag">${esc(t)}</span>`).join('') : '无头衔'}</div>
+                <div class="row">${grantBtn}${adminBtn}${banBtn}</div>
+            </div>`;
+        }).join('');
     }
 
-    async function reloadTitles() {
-        const res = await api('adminTitles');
-        if (res.code === 200) renderTitles(res.data);
-    }
-
-    async function reloadApproved() {
-        const res = await api('posts');
-        if (res.code === 200) renderApproved(res.data || []);
-    }
-
-    function renderApproved(list) {
+    async function loadApproved() {
         const box = document.getElementById('approved-list');
+        const res = await api('posts');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">加载失败</div>'; return; }
+        const list = res.data || [];
         if (!list.length) { box.innerHTML = '<div class="empty">墙上还没有帖子</div>'; return; }
         box.innerHTML = list.map(p => `
             <div class="item">
-                <div class="meta"><span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)} · ${esc(p.created_by || '')}</div>
-                <div class="body">${esc(p.content.slice(0, 160))}${(p.content || '').length > 160 ? '…' : ''}</div>
+                <div class="meta"><span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)}</div>
+                <div class="body"><b>${esc(p.title || '（无标题）')}</b><br>${esc((p.content || '').slice(0, 120))}</div>
+                <div class="row"><button class="btn no" onclick="delPost('${p._id}')">删除违规帖</button></div>
+            </div>`).join('');
+    }
+
+    async function loadRequests() {
+        const box = document.getElementById('req-list');
+        const res = await api('adminRequests');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的注册申请</div>'; return; }
+        box.innerHTML = res.data.map(u => `
+            <div class="item">
+                <div class="meta">${esc(u.username)} · 昵称 ${esc(u.nickname)} · ${esc(u.contact || '没留联系方式')}</div>
                 <div class="row">
-                    <button class="btn no" onclick="handleDeletePost('${p._id}')">删除违规帖</button>
+                    <button class="btn ok" onclick="handleUser('${u._id}','approveUser')">通过</button>
+                    <button class="btn no" onclick="handleUser('${u._id}','rejectUser')">拒绝</button>
                 </div>
             </div>`).join('');
     }
 
-    async function handleDeletePost(id) {
-        if (!confirm('删了就找不回来了，确定？')) return;
-        const res = await api('deletePost', { postId: id });
-        if (res.code === 200) reloadApproved();
-        else alert(res.message || '删除失败');
+    async function loadPendingPosts() {
+        const box = document.getElementById('post-list');
+        const res = await api('adminPosts');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的帖子</div>'; return; }
+        box.innerHTML = res.data.map(p => `
+            <div class="item">
+                <div class="meta"><span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)} · 来自 ${esc(p.created_by)}</div>
+                <div class="body"><b>${esc(p.title || '（无标题）')}</b><br>${esc(p.content)}</div>
+                <div class="row">
+                    <button class="btn ok" onclick="handlePost('${p._id}','approvePost')">通过</button>
+                    <button class="btn no" onclick="handlePost('${p._id}','rejectPost')">拒绝</button>
+                </div>
+            </div>`).join('');
     }
 
-    function renderTitles(list) {
+    async function loadTitles() {
         const box = document.getElementById('title-list');
-        document.getElementById('title-count').textContent = list.length;
-        if (!list.length) { box.innerHTML = '<div class="empty">没有待审核的头衔申请</div>'; return; }
-        box.innerHTML = list.map(t => `
+        const res = await api('adminTitles');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的头衔申请</div>'; return; }
+        box.innerHTML = res.data.map(t => `
             <div class="item">
-                <div class="meta">${esc(t.nickname)}（${esc(t.username)}）申请 <b>${esc(t.title)}</b> · 金额 ${esc(t.amount || '未填')} · ${time(t.created_at)}</div>
-                ${t.proof && t.proof.indexOf('data:image') === 0
-                    ? `<img src="${t.proof}" style="max-width:180px;border-radius:8px;margin:6px 0;border:1px solid #333">`
-                    : `<div class="body">证明：${esc(t.proof || '没填')}</div>`}
+                <div class="meta">${esc(t.nickname)}（${esc(t.username)}）申请 <b>${esc(t.title)}</b> · ${esc(t.amount || '未填')} · ${time(t.created_at)}</div>
+                ${t.proof && t.proof.indexOf('data:image') === 0 ? `<img src="${t.proof}" style="max-width:180px;border-radius:8px;margin:6px 0;border:1px solid #333">` : ''}
                 <div class="row">
-                    <button class="btn ok" onclick="handleTitle('${t._id}','approveTitle')">通过并挂上</button>
+                    <button class="btn ok" onclick="handleTitle('${t._id}','approveTitle')">通过</button>
                     <button class="btn no" onclick="handleTitle('${t._id}','rejectTitle')">拒绝</button>
                 </div>
             </div>`).join('');
     }
 
-    async function handleTitle(id, action) {
-        const res = await api(action, { requestId: id });
-        if (res.code === 200) reloadTitles(); else alert(res.message);
+    async function grantTo(username) {
+        const type = document.getElementById('grant-type').value;
+        const custom = document.getElementById('grant-custom').value.trim();
+        const title = type === '自定义' ? custom : type;
+        if (!title) return alert('先选好头衔');
+        const res = await api('adminGrantTitle', { username, title });
+        if (res.code === 200) loadUsers(); else alert(res.message || '失败');
     }
 
     function onGrantType() {
         document.getElementById('grant-custom').hidden = document.getElementById('grant-type').value !== '自定义';
     }
 
-    async function reloadGrantUsers() {
-        const box = document.getElementById('grant-users');
-        const res = await api('adminListUsers');
-        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
-        const list = res.data || [];
-        if (!list.length) { box.innerHTML = '<div class="empty">还没有注册用户</div>'; return; }
-        box.innerHTML = list.map(u => {
-            const banned = u.status === 'banned';
-            return `
-            <div class="item">
-                <div class="meta">${esc(u.nickname)}（${esc(u.username)}）${u.class_name ? ' · ' + esc(u.class_name) : ''}${u.role === 'admin' ? ' · 管理员' : ''}${banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : ''}</div>
-                <div class="meta">${u.titles.length ? u.titles.map(t => `<span class="tag">${esc(t)}<a href="javascript:void(0)" onclick="revokeTitle('${esc(u.username)}','${esc(t)}')" style="color:#ff6b6b;margin-left:4px;text-decoration:none">×</a></span>`).join('') : '无头衔'}</div>
-                <div class="row">
-                    <button class="btn" onclick="grantTo('${esc(u.username)}')">授予</button>
-                    <button class="btn no" onclick="toggleBan('${esc(u.username)}', ${banned ? 'false' : 'true'})">${banned ? '解封' : '封号'}</button>
-                </div>
-            </div>`;
-        }).join('');
+    async function setRole(username, role) {
+        const res = await api('adminSetRole', { username, role });
+        if (res.code === 200) loadUsers(); else alert(res.message || '失败');
+    }
+
+    async function toggleBan(username, banned) {
+        if (banned && !confirm('封禁后他登录不了，确定？')) return;
+        const res = await api('banUser', { username, banned });
+        if (res.code === 200) loadUsers(); else alert(res.message || '失败');
+    }
+
+    async function handleUser(id, action) {
+        const res = await api(action, { requestId: id });
+        if (res.code === 200) loadRequests(); else alert(res.message);
+    }
+
+    async function handlePost(id, action) {
+        const res = await api(action, { postId: id });
+        if (res.code === 200) loadPendingPosts(); else alert(res.message);
+    }
+
+    async function handleTitle(id, action) {
+        const res = await api(action, { requestId: id });
+        if (res.code === 200) loadTitles(); else alert(res.message);
+    }
+
+    async function delPost(id) {
+        if (!confirm('删了就找不回来了，确定？')) return;
+        const res = await api('deletePost', { postId: id });
+        if (res.code === 200) loadApproved(); else alert(res.message || '失败');
     }
 
     async function sendNotice() {
@@ -244,67 +310,23 @@
         if (res.code === 200) document.getElementById('notice-text').value = '';
     }
 
-    async function toggleBan(username, banned) {
-        if (banned && !confirm('封禁后他登录不了，确定？')) return;
-        const res = await api('banUser', { username, banned });
-        if (res.code === 200) reloadGrantUsers(); else alert(res.message || '操作失败');
+    function logoutAdmin() {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
+        location.reload();
     }
 
-    async function grantTo(username) {
-        const type = document.getElementById('grant-type').value;
-        const custom = document.getElementById('grant-custom').value.trim();
-        const title = type === '自定义' ? custom : type;
-        if (!title) return alert('先选好头衔');
-        const res = await api('adminGrantTitle', { username, title });
-        if (res.code === 200) reloadGrantUsers(); else alert(res.message || '授予失败');
-    }
-
-    async function revokeTitle(username, title) {
-        const res = await api('adminRevokeTitle', { username, title });
-        if (res.code === 200) reloadGrantUsers(); else alert(res.message);
-    }
-
-    function renderUsers(list) {
-        const box = document.getElementById('user-list');
-        document.getElementById('user-count').textContent = list.length;
-        if (!list.length) { box.innerHTML = '<div class="empty">没有待审核的注册申请</div>'; return; }
-        box.innerHTML = list.map(u => `
-            <div class="item">
-                <div class="meta">${esc(u.username)} · 昵称 ${esc(u.nickname)} · ${esc(u.contact || '没留联系方式')} · ${time(u.created_at)}</div>
-                <div class="body">${esc(u.reason || '（没写理由）')}</div>
-                <div class="row">
-                    <button class="btn ok" onclick="handleUser('${u._id}','approveUser')">通过</button>
-                    <button class="btn no" onclick="handleUser('${u._id}','rejectUser')">拒绝</button>
-                </div>
-            </div>`).join('');
-    }
-
-    function renderPosts(list) {
-        const box = document.getElementById('post-list');
-        document.getElementById('post-count').textContent = list.length;
-        if (!list.length) { box.innerHTML = '<div class="empty">没有待审核的帖子</div>'; return; }
-        box.innerHTML = list.map(p => `
-            <div class="item">
-                <div class="meta"><span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)} · 来自 ${esc(p.created_by)}</div>
-                <div class="body">${esc(p.content)}</div>
-                ${p.images && p.images.length ? `<div class="meta">图片：${p.images.map(i => esc(i)).join('，')}</div>` : ''}
-                <div class="meta">姓名：${esc(p.real_name || '未填')} · 班级：${esc(p.class_name || '未填')} · 备注：${esc(p.note || '无')}</div>
-                <div class="row">
-                    <button class="btn ok" onclick="handlePost('${p._id}','approvePost')">通过</button>
-                    <button class="btn no" onclick="handlePost('${p._id}','rejectPost')">拒绝</button>
-                </div>
-            </div>`).join('');
-    }
-
-    async function handleUser(id, action) {
-        const res = await api(action, { requestId: id });
-        if (res.code === 200) reload(); else alert(res.message);
-    }
-
-    async function handlePost(id, action) {
-        const res = await api(action, { postId: id });
-        if (res.code === 200) reloadPosts(); else alert(res.message);
-    }
+    (async function init() {
+        const token = localStorage.getItem('admin_token');
+        const raw = localStorage.getItem('admin_user');
+        if (!token || !raw) return;
+        try { me = JSON.parse(raw); } catch (e) { return; }
+        const res = await api('me');
+        if (res.code !== 200) { logoutAdmin(); return; }
+        me = res.user;
+        if (me.role !== 'owner' && me.role !== 'admin') { logoutAdmin(); return; }
+        showPanel();
+    })();
 </script>
 </body>
 </html>
