@@ -111,6 +111,16 @@
             <div class="msg" id="broadcast-msg"></div>
         </div>
 
+        <div class="card" id="sec-announce" hidden>
+            <h2>发公告 <span class="tag">直接上墙，不用审核</span></h2>
+            <label>标题</label>
+            <input id="ann-title" placeholder="比如：本周暗号已更换">
+            <label>正文</label>
+            <textarea id="ann-content" placeholder="写清楚要通知什么"></textarea>
+            <div class="row"><button class="btn" onclick="publishAnnounce()">发布公告</button></div>
+            <div class="msg" id="ann-msg"></div>
+        </div>
+
         <div class="row">
             <button class="btn ghost" onclick="reload()">刷新</button>
             <button class="btn ghost" onclick="logoutAdmin()">退出后台</button>
@@ -174,6 +184,7 @@
         document.getElementById('sec-titles').hidden = !owner;
         document.getElementById('sec-gate').hidden = !owner;
         document.getElementById('sec-broadcast').hidden = !owner;
+        document.getElementById('sec-announce').hidden = !owner;
         reload();
     }
 
@@ -323,6 +334,21 @@
         msg.textContent = res.message || '完成';
         msg.className = 'msg ' + (res.code === 200 ? 'ok' : 'err');
         if (res.code === 200) document.getElementById('gate-input').value = '';
+    }
+
+    async function publishAnnounce() {
+        const title = document.getElementById('ann-title').value.trim();
+        const content = document.getElementById('ann-content').value.trim();
+        const msg = document.getElementById('ann-msg');
+        if (!title || !content) { msg.textContent = '标题和正文都要填'; msg.className = 'msg err'; return; }
+        const res = await api('adminCreatePost', { title, content, category: '通知' });
+        msg.textContent = res.message || '完成';
+        msg.className = 'msg ' + (res.code === 200 ? 'ok' : 'err');
+        if (res.code === 200) {
+            document.getElementById('ann-title').value = '';
+            document.getElementById('ann-content').value = '';
+            loadApproved();
+        }
     }
 
     async function sendBroadcast() {
