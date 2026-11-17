@@ -41,9 +41,27 @@
         .thumb { position:relative; width:76px; height:76px; }
         .thumb img { width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #333; }
         .thumb span { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#ff6b6b; color:#fff; font-size:12px; line-height:20px; text-align:center; cursor:pointer; }
+    
+        /* 全站动态背景 */
+        .bg-media { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .bg-media video { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+        .bg-media .bg-mask { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,18,18,0.45) 0%, rgba(18,18,18,0.88) 100%); }
+        .wrap, .container, .card, .pf-card, .modal-content { position: relative; z-index: 1; }
     </style>
 </head>
 <body>
+<div class="bg-media" aria-hidden="true"><video autoplay muted loop playsinline preload="none"></video><div class="bg-mask"></div></div>
+<script>
+(function () {
+  var v = document.querySelector('.bg-media video');
+  var wide = window.matchMedia('(min-width: 1100px)').matches;
+  v.src = wide
+    ? 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-1080.mp4'
+    : 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-720.mp4';
+  v.play().catch(function () {});
+})();
+</script>
+
 <div class="wrap">
     <a class="back" href="./app.html">← 返回校园墙</a>
     <h1>达一中校园墙の投稿入口</h1>
