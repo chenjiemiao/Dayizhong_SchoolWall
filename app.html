@@ -63,6 +63,7 @@
         .detail-author { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
         .author-name-lg { font-size: 18px; }
         .post-meta { font-size: 12px; color: var(--text-muted); }
+        .post-class { font-size: 12px; color: var(--text-muted); margin-left: 6px; }
         .btn-del { padding: 10px 16px; border-radius: 8px; border: 1px solid #ff6b6b; background: transparent; color: #ff6b6b; font-size: 13px; cursor: pointer; }
         .post-title { font-size: 16px; font-weight: bold; margin: 0 0 8px; line-height: 1.4; }
         .post-footer { margin-top: 10px; font-size: 12px; color: var(--text-muted); }
@@ -443,7 +444,7 @@
                     </div>
                     <div class="post-author">
                         ${avatarHtml(item.author_avatar, false)}
-                        <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}
+                        <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}${item.class_name ? `<span class="post-class">${esc(item.class_name)}</span>` : ''}
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
                     <div class="post-content">${shortContent}</div>
@@ -503,7 +504,7 @@
                     ${avatarHtml(post.author_avatar, true)}
                     <div class="detail-author-info">
                         <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}</div>
-                        <div class="post-meta">${post.date} · ${post.category}</div>
+                        <div class="post-meta">${post.date} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
                     </div>
                 </div>
                 <div class="detail-content">${contentHtml}</div>

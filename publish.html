@@ -33,6 +33,8 @@
         .st.rejected { background:rgba(255,107,107,.15); color:#ff6b6b; }
         .empty { color:var(--muted); font-size:13px; }
         .tag { display:inline-block; padding:1px 8px; border-radius:4px; background:rgba(255,118,117,.15); color:var(--accent); font-size:12px; margin-right:6px; }
+        .anon-row { display:flex; align-items:center; gap:8px; margin:14px 0 4px; font-size:14px; color:var(--text); cursor:pointer; }
+        .anon-row input { width:auto; }
         .upload-row { margin:8px 0; }
         .up-btn { display:inline-block; padding:10px 16px; border-radius:8px; border:1px dashed #444; color:var(--text); font-size:14px; cursor:pointer; }
         .thumbs { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
@@ -48,14 +50,16 @@
     <p class="sub">内容需经过站长人工审核，通过后才会出现。</p>
 
     <div class="card">
-        <div class="q">01 请填写姓名 <small>可选</small></div>
-        <p class="tip">留空就是匿名；填了就显示你的名字。建议别填真名。</p>
-        <input id="real-name" placeholder="请输入">
+        <div class="q">01 请填写您的班级</div>
+        <p class="tip">班级会和帖子一起展示；勾选匿名就不显示。</p>
+        <input id="class-name" placeholder="比如：9班">
 
-        <div class="q">02 请填写您的班级 <small>可选</small></div>
-        <input id="class-name" placeholder="请输入">
+        <label class="anon-row">
+            <input type="checkbox" id="anonymous" onchange="onAnonChange()">
+            <span>匿名发布（不显示昵称和班级）</span>
+        </label>
 
-        <div class="q">03 请选择您想发布的主题</div>
+        <div class="q">02 请选择您想发布的主题</div>
         <select id="category">
             <option value="寻物">寻物启事</option>
             <option value="日常">日常分享</option>
@@ -114,12 +118,25 @@
         return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
 
+    function onAnonChange() {
+        const anon = document.getElementById('anonymous').checked;
+        const c = document.getElementById('class-name');
+        c.disabled = anon;
+        if (anon) c.value = '';
+    }
+
     async function submitPost() {
-        const realName = document.getElementById('real-name').value.trim();
+        const anonymous = document.getElementById('anonymous').checked;
+        const className = document.getElementById('class-name').value.trim();
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
         const msg = document.getElementById('msg');
 
+        if (!anonymous && !className) {
+            msg.textContent = '不匿名的话，班级必须填';
+            msg.className = 'msg err';
+            return;
+        }
         if (!title) {
             msg.textContent = '标题不能空';
             msg.className = 'msg err';
@@ -137,10 +154,9 @@
             category: document.getElementById('category').value,
             content,
             images: imagesData,
-            realName,
-            className: document.getElementById('class-name').value.trim(),
+            className: anonymous ? '' : className,
             note: document.getElementById('note').value.trim(),
-            anonymous: !realName
+            anonymous
         });
 
         if (res.code === 200) {
