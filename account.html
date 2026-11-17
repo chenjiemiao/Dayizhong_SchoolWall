@@ -30,6 +30,9 @@
         .qr-item { display:flex; flex-direction:column; align-items:center; width:46%; }
         .qr-item img { width:100%; max-width:130px; border-radius:8px; border:1px solid #444; }
         .qr-item span { font-size:12px; color:var(--muted); margin-top:6px; }
+        .avatar-row { display:flex; align-items:center; gap:12px; margin:4px 0 4px; }
+        .avatar-preview { width:64px; height:64px; border-radius:50%; border:1px solid #444; object-fit:cover; background:#161616; }
+        .avatar-pick { display:inline-block; padding:8px 14px; border-radius:8px; border:1px solid #444; color:var(--text); font-size:13px; cursor:pointer; margin:0; }
         .who { font-size:15px; margin:0 0 14px; }
     </style>
 </head>
@@ -68,6 +71,12 @@
             <input id="reg-class" placeholder="比如：9班">
             <label>密码</label>
             <input id="reg-pass" type="password" placeholder="至少 6 位">
+            <label>头像（选填，不传就给你一个菠萝）</label>
+            <div class="avatar-row">
+                <img id="avatar-preview" class="avatar-preview" alt="头像预览">
+                <label class="avatar-pick" for="avatar-file">选择图片</label>
+                <input type="file" id="avatar-file" accept="image/*" onchange="pickAvatar(event)" style="display:none">
+            </div>
             <label>联系方式（微信 / QQ，方便站长找到你）</label>
             <input id="reg-contact" placeholder="选填，但建议留">
             <button class="btn" id="reg-btn" onclick="doRegister()">提交申请</button>
@@ -87,6 +96,32 @@
 
 <script>
     const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
+    const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23202020'/><text x='50' y='70' font-size='54' text-anchor='middle'>🍍</text></svg>";
+    let avatarData = '';
+
+    function compressImage(file, maxSize, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = url;
+        });
+    }
+
+    async function pickAvatar(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        avatarData = await compressImage(file, 240, 0.8);
+        document.getElementById('avatar-preview').src = avatarData;
+    }
 
     function api(action, data) {
         return fetch(API + '?action=' + action, {
@@ -133,7 +168,8 @@
             realName: document.getElementById('reg-realname').value.trim(),
             className: document.getElementById('reg-class').value.trim(),
             password: document.getElementById('reg-pass').value,
-            contact: document.getElementById('reg-contact').value.trim()
+            contact: document.getElementById('reg-contact').value.trim(),
+            avatar: avatarData
         };
         btn.disabled = true;
         btn.textContent = '提交中…';
@@ -150,6 +186,7 @@
     }
 
     (function init() {
+        document.getElementById('avatar-preview').src = avatarData || DEFAULT_AVATAR;
         const token = localStorage.getItem('wall_token');
         if (!token) return;
         api('me', { token }).then(res => {

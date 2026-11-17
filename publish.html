@@ -33,6 +33,12 @@
         .st.rejected { background:rgba(255,107,107,.15); color:#ff6b6b; }
         .empty { color:var(--muted); font-size:13px; }
         .tag { display:inline-block; padding:1px 8px; border-radius:4px; background:rgba(255,118,117,.15); color:var(--accent); font-size:12px; margin-right:6px; }
+        .upload-row { margin:8px 0; }
+        .up-btn { display:inline-block; padding:10px 16px; border-radius:8px; border:1px dashed #444; color:var(--text); font-size:14px; cursor:pointer; }
+        .thumbs { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+        .thumb { position:relative; width:76px; height:76px; }
+        .thumb img { width:100%; height:100%; object-fit:cover; border-radius:8px; border:1px solid #333; }
+        .thumb span { position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#ff6b6b; color:#fff; font-size:12px; line-height:20px; text-align:center; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -62,12 +68,16 @@
         <p class="tip">需要加粗：&lt;加粗&gt;这段内容需要加粗&lt;/加粗&gt;</p>
         <textarea id="content" placeholder="请输入"></textarea>
 
-        <div class="q">05 携带图片 <small>可选</small></div>
+        <div class="q">05 携带图片 <small>可选，最多 6 张</small></div>
         <p class="tip">
-            暂时只能贴图片链接，一行一个，最多 6 张。<br>
+            点下面按钮从相册选，会自动压缩。<br>
             正文里写 &lt;p1&gt; 就会在那个位置显示图片。
         </p>
-        <textarea id="images" style="min-height:70px" placeholder="https://...jpg"></textarea>
+        <div class="upload-row">
+            <label class="up-btn" for="img-file">＋ 添加图片</label>
+            <input type="file" id="img-file" accept="image/*" multiple onchange="pickImages(event)" style="display:none">
+        </div>
+        <div id="thumbs" class="thumbs"></div>
 
         <div class="q">06 备注内容 <small>非必要情况勿填</small></div>
         <input id="note" placeholder="只有站长看得到">
@@ -111,14 +121,11 @@
             return;
         }
 
-        const images = document.getElementById('images').value
-            .split('\n').map(s => s.trim()).filter(Boolean).slice(0, 6);
-
         const res = await api('createPost', {
             token,
             category: document.getElementById('category').value,
             content,
-            images,
+            images: imagesData,
             realName,
             className: document.getElementById('class-name').value.trim(),
             note: document.getElementById('note').value.trim(),
@@ -129,7 +136,8 @@
             msg.textContent = res.message;
             msg.className = 'msg ok';
             document.getElementById('content').value = '';
-            document.getElementById('images').value = '';
+            imagesData = [];
+            renderThumbs();
             loadMine();
         } else if (res.code === 401) {
             location.replace('./account.html');
@@ -140,6 +148,45 @@
     }
 
     const STATUS = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
+    let imagesData = [];
+
+    function compressImage(file, maxSize, quality) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+                resolve(canvas.toDataURL('image/jpeg', 0.72));
+            };
+            img.src = url;
+        });
+    }
+
+    async function pickImages(e) {
+        const files = Array.from(e.target.files || []);
+        for (const file of files) {
+            if (imagesData.length >= 6) break;
+            imagesData.push(await compressImage(file, 1200, 0.72));
+        }
+        e.target.value = '';
+        renderThumbs();
+    }
+
+    function renderThumbs() {
+        document.getElementById('thumbs').innerHTML = imagesData.map((src, i) =>
+            `<div class="thumb"><img src="${src}"><span onclick="removeImage(${i})">×</span></div>`
+        ).join('');
+    }
+
+    function removeImage(i) {
+        imagesData.splice(i, 1);
+        renderThumbs();
+    }
 
     async function loadMine() {
         const box = document.getElementById('mine');

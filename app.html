@@ -56,6 +56,13 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .post-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--text-muted); }
         .post-tag { background: rgba(255, 118, 117, 0.15); color: var(--accent-color); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .post-author { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 2px 0 10px; font-size: 14px; }
+        .author-name { color: var(--text-main); font-weight: bold; }
+        .avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #222; }
+        .avatar-lg { width: 46px; height: 46px; }
+        .detail-author { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        .author-name-lg { font-size: 18px; }
+        .post-meta { font-size: 12px; color: var(--text-muted); }
         body.light-theme .post-tag { background: rgba(255, 82, 82, 0.1); }
 
         /* 头衔渐变文字 */
@@ -133,7 +140,7 @@
     <header class="header">
         <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
         <div class="controls">
-            <a class="btn-icon" href="./account.html" id="account-btn" style="margin-right:8px;">👤 登录</a>
+            <a class="btn-icon" href="./profile.html" id="account-btn" style="margin-right:8px;">👤 登录</a>
             <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()">🌙 暗黑</button>
         </div>
     </header>
@@ -194,6 +201,18 @@
             return ' <span class="' + titleClass(title) + '">' + esc(title) + '</span>';
         }
 
+        function titlesHtml(post) {
+            const list = Array.isArray(post.author_titles) && post.author_titles.length
+                ? post.author_titles
+                : (post.author_title ? [post.author_title] : []);
+            return list.map((t) => titleHtml(t)).join('');
+        }
+
+        function avatarHtml(src, big) {
+            if (!src) return '';
+            return '<img class="avatar' + (big ? ' avatar-lg' : '') + '" src="' + esc(src) + '" alt="">';
+        }
+
         // ==========================================
         // 从腾讯云拉取数据的函数
         // ==========================================
@@ -246,7 +265,11 @@
                 card.innerHTML = `
                     <div class="post-header">
                         <span class="post-tag">${item.category}</span>
-                        <span>${item.date} | @${esc(item.author)}${titleHtml(item.author_title)}</span>
+                        <span>${item.date}</span>
+                    </div>
+                    <div class="post-author">
+                        ${avatarHtml(item.author_avatar, false)}
+                        <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}
                     </div>
                     <div class="post-content">${shortContent}</div>
                 `;
@@ -289,9 +312,12 @@
             contentHtml = contentHtml.replace(/<p[2-9]>/g, '');
 
             body.innerHTML = `
-                <div class="post-header" style="margin-bottom: 20px;">
-                    <span class="post-tag">${post.category}</span>
-                    <span>${post.date} | @${esc(post.author)}${titleHtml(post.author_title)}</span>
+                <div class="detail-author">
+                    ${avatarHtml(post.author_avatar, true)}
+                    <div class="detail-author-info">
+                        <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}</div>
+                        <div class="post-meta">${post.date} · ${post.category}</div>
+                    </div>
                 </div>
                 <div class="detail-content">${contentHtml}</div>
                 
