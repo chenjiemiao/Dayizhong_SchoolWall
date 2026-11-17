@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园树洞 v1.7</title>
+    <title>达一中 · 校园墙 v1.7</title>
     
     <style>
         /* ================= 核心变量与主题 ================= */
@@ -71,6 +71,8 @@
         .like-btn { padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 14px; cursor: pointer; }
         .like-btn.liked { border-color: var(--accent-color); color: var(--accent-color); opacity: .75; cursor: default; }
         .media-hint { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); z-index: 95; background: var(--accent-color); color: #121212; font-size: 13px; font-weight: bold; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+        @keyframes bell-ring { 0%,100%{ transform: rotate(0); } 25%{ transform: rotate(-14deg); } 75%{ transform: rotate(14deg); } }
+        #notice-btn.ring { animation: bell-ring .6s ease 3; border-color: var(--accent-color); color: var(--accent-color); }
 
         /* 个人主页（内置面板） */
         #notice-overlay { position: fixed; inset: 0; z-index: 310; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
@@ -175,7 +177,7 @@
     </div>
 
     <header class="header">
-        <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
+        <div class="logo" onclick="closeDetail()">达一中 · 校园墙</div>
         <div class="controls">
             <button class="btn-icon" id="notice-btn" onclick="openNotices()" style="margin-right:8px;">🔔</button>
             <button class="btn-icon" id="account-btn" onclick="openProfile()" style="margin-right:8px;">👤 登录</button>
@@ -215,6 +217,7 @@
                         <div class="pf-name" id="pf-name">未登录</div>
                         <div class="pf-meta" id="pf-meta"></div>
                         <label class="pf-btn" for="pf-avatar-file">换头像</label>
+                        <button class="pf-btn" onclick="pfRename()">改名字</button>
                         <input type="file" id="pf-avatar-file" accept="image/*" onchange="pfPickAvatar(event)" style="display:none">
                     </div>
                 </div>
@@ -253,7 +256,7 @@
     </div>
 
     <div id="media-hint" class="media-hint" onclick="enableMedia()">🔊 点我开启背景音乐</div>
-    <a href="./publish.html" class="fab-btn">✍️ 写树洞</a>
+    <a href="./publish.html" class="fab-btn">✍️ 写校园墙</a>
     <div class="music-btn" id="music-toggle" onclick="toggleMusic()">🔇</div>
     <audio id="bgm" loop preload="none">
         <source src="https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bgm.m4a" type="audio/mp4">
@@ -301,6 +304,30 @@
             return '<img class="avatar' + (big ? ' avatar-lg' : '') + '" src="' + esc(src) + '" alt="">';
         }
 
+        async function resolveImages(list) {
+            const ids = [];
+            list.forEach((p) => {
+                (p.images || []).forEach((x) => { if (String(x).indexOf('cloud://') === 0) ids.push(x); });
+                if (p.author_avatar && String(p.author_avatar).indexOf('cloud://') === 0) ids.push(p.author_avatar);
+            });
+            if (!ids.length) return list;
+            try {
+                const r = await fetch(API_ROOT + '?action=imageUrls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileIds: ids })
+                });
+                const d = await r.json();
+                const map = d.urls || {};
+                return list.map((p) => Object.assign({}, p, {
+                    images: (p.images || []).map((x) => map[x] || x),
+                    author_avatar: map[p.author_avatar] || p.author_avatar
+                }));
+            } catch (e) {
+                return list;
+            }
+        }
+
         // ==========================================
         // 从腾讯云拉取数据的函数
         // ==========================================
@@ -317,8 +344,8 @@
                 
                 // 检查云函数返回状态
                 if (result.code === 200 && result.data) {
-                    // 把拉到的数据存到 wallData 里
-                    wallData = result.data;
+                    // 把拉到的数据存到 wallData 里（顺便把云存储图片换成临时链接）
+                    wallData = await resolveImages(result.data);
                     renderPosts(); // 重新渲染页面
                 } else {
                     container.innerHTML = `<div style="text-align: center; color: red;">加载失败: ${result.message}</div>`;
@@ -751,8 +778,7 @@
 
         const PF_STATUS = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
 
-        async function pfLoadPosts() {
-            const box = document.getElementById('pf-posts');
+        async function pfLoadPosts() {            const box = document.getElementById('pf-posts');
             const res = await pfApi('myPosts');
             if (res.code !== 200) { box.innerHTML = '<div class="pf-empty">加载失败</div>'; return; }
             if (!res.data.length) { box.innerHTML = '<div class="pf-empty">还没发过帖子</div>'; return; }
@@ -788,6 +814,18 @@
             });
         }
 
+        async function pfRename() {
+            const name = prompt('新的昵称（最多 24 个字）', pfMe.nickname);
+            if (!name || !name.trim()) return;
+            const res = await pfApi('updateNickname', { nickname: name.trim() });
+            alert(res.message || '完成');
+            if (res.code === 200) {
+                pfMe.nickname = name.trim();
+                document.getElementById('pf-name').textContent = pfMe.nickname;
+                fetchPosts();
+            }
+        }
+
         async function pfPickAvatar(e) {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
@@ -812,6 +850,40 @@
             location.reload();
         }
 
+        function noticeDing() {
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                const ctx = new Ctx();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine';
+                o.frequency.value = 880;
+                g.gain.value = 0.12;
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start();
+                o.stop(ctx.currentTime + 0.18);
+            } catch (e) {}
+        }
+
+        async function pollNotices() {
+            if (!localStorage.getItem('wall_token')) return;
+            const res = await pfApi('myNotices');
+            if (res.code !== 200) return;
+            const seen = Number(localStorage.getItem('notice_seen') || 0);
+            const unread = (res.data || []).filter((n) => n.created_at > seen).length;
+            const btn = document.getElementById('notice-btn');
+            if (unread > 0) {
+                btn.textContent = '🔔' + unread;
+                btn.classList.add('ring');
+                if (!window.__notified) { noticeDing(); window.__notified = true; }
+            } else {
+                btn.textContent = '🔔';
+                btn.classList.remove('ring');
+            }
+        }
+
         async function openNotices() {
             if (!localStorage.getItem('wall_token')) { alert('登录后就能看通知'); return; }
             document.getElementById('notice-overlay').classList.add('active');
@@ -825,6 +897,9 @@
                     <div class="m">${new Date(n.created_at).toLocaleString('zh-CN', { hour12: false })}</div>
                     <div class="t">${esc(n.text)}</div>
                 </div>`).join('');
+            localStorage.setItem('notice_seen', String(Date.now()));
+            document.getElementById('notice-btn').textContent = '🔔';
+            document.getElementById('notice-btn').classList.remove('ring');
         }
 
         function closeNotices() {
@@ -842,6 +917,8 @@
             if (btn && raw) {
                 try { btn.textContent = '👤 ' + JSON.parse(raw).nickname; } catch (e) {}
             }
+            pollNotices();
+            setInterval(pollNotices, 20000);
         })();
 
     </script>
