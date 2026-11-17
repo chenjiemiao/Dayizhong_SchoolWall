@@ -146,6 +146,15 @@
         /* 评论区容器 */
         .comment-section { margin-top: 40px; border-top: 1px solid var(--border-color); padding-top: 20px; }
         .comment-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--accent-color); }
+        .comment-list { display: flex; flex-direction: column; gap: 10px; }
+        .comment-item { background: rgba(0,0,0,.18); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; }
+        .comment-head { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        .comment-head .avatar { width: 22px; height: 22px; }
+        .comment-name { color: var(--text-main); font-weight: bold; font-size: 13px; }
+        .comment-text { font-size: 14px; line-height: 1.6; word-break: break-word; }
+        .comment-form { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .comment-form textarea { width: 100%; min-height: 70px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: #161616; color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; }
+        .comment-form .like-btn { align-self: flex-end; }
         
         .fab-btn { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 12px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4); cursor: pointer; z-index: 90; }
         .music-btn { position: fixed; bottom: 90px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--panel-bg); border: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; z-index: 90; box-shadow: var(--shadow); }
@@ -500,13 +509,17 @@
                 </div>
                 ${deleteHtml}
                 <div class="comment-section">
-                    <div class="comment-title">💬 评论区</div>
-                    <!-- 这里暂时空着，下一步我们再接评论 -->
-                    <div style="color: var(--text-muted); font-size: 14px;">评论功能开发中...</div>
+                    <div class="comment-title">💬 评论</div>
+                    <div id="comment-list" class="comment-list">加载中…</div>
+                    <div class="comment-form">
+                        <textarea id="comment-input" maxlength="500" placeholder="说点什么…"></textarea>
+                        <button class="like-btn" onclick="submitComment('${post._id}')">发表评论</button>
+                    </div>
                 </div>
             `;
 
             overlay.classList.add('active');
+            loadComments(post._id);
         }
 
         async function likePost(id) {
@@ -530,6 +543,58 @@
                     if (post) { post.liked = true; post.likes = new Array(data.count).fill('x'); }
                 } else {
                     alert(data.message || '点赞失败');
+                }
+            } catch (e) {
+                alert('网络请求失败');
+            }
+        }
+
+        async function loadComments(postId) {
+            const box = document.getElementById('comment-list');
+            if (!box) return;
+            box.textContent = '加载中…';
+            try {
+                const r = await fetch(API_ROOT + '?action=comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ postId })
+                });
+                const d = await r.json();
+                if (d.code !== 200) { box.textContent = '加载失败'; return; }
+                if (!d.data.length) { box.textContent = '还没有评论，来抢第一'; return; }
+                box.innerHTML = d.data.map((c) => `
+                    <div class="comment-item">
+                        <div class="comment-head">
+                            ${c.avatar ? `<img class="avatar" src="${esc(c.avatar)}" alt="">` : ''}
+                            <span class="comment-name">${esc(c.nickname)}</span>
+                            ${(c.titles || []).map((t) => `<span class="${titleClass(t)}">${esc(t)}</span>`).join('')}
+                            <span style="margin-left:auto">${new Date(c.created_at).toLocaleString('zh-CN', { hour12: false })}</span>
+                        </div>
+                        <div class="comment-text">${esc(c.content)}</div>
+                    </div>`).join('');
+            } catch (e) {
+                box.textContent = '网络请求失败';
+            }
+        }
+
+        async function submitComment(postId) {
+            const input = document.getElementById('comment-input');
+            const text = input.value.trim();
+            if (!text) { alert('评论不能空'); return; }
+            const token = localStorage.getItem('wall_token');
+            if (!token) { alert('登录后才能评论'); return; }
+            try {
+                const r = await fetch(API_ROOT + '?action=addComment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, postId, content: text })
+                });
+                const d = await r.json();
+                if (d.code === 200) {
+                    input.value = '';
+                    loadComments(postId);
+                } else {
+                    alert(d.message || '评论失败');
                 }
             } catch (e) {
                 alert('网络请求失败');
