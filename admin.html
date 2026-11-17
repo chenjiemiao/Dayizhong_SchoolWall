@@ -15,6 +15,8 @@
         .card { background:var(--panel); border:1px solid #2a2a2a; border-radius:12px; padding:18px; margin-bottom:16px; }
         label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
         input { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; outline:none; }
+        select { width:100%; padding:11px; border-radius:8px; border:1px solid #333; background:#161616; color:var(--text); font-size:14px; outline:none; }
+        input + input, select + input { margin-top:8px; }
         .btn { padding:10px 16px; border:none; border-radius:8px; background:var(--accent); color:#121212; font-weight:bold; cursor:pointer; font-size:14px; }
         .btn.ghost { background:transparent; border:1px solid #555; color:var(--text); }
         .btn.ok { background:#55efc4; }
@@ -53,6 +55,27 @@
             <h2>待审核帖子 <span id="post-count" class="tag"></span></h2>
             <div id="post-list"><div class="empty">加载中…</div></div>
         </div>
+        <div class="card">
+            <h2>头衔发放 <span class="tag">不用申请，你直接给</span></h2>
+            <label>账号用户名</label>
+            <input id="grant-user" placeholder="比如 test_demo_001">
+            <label>选头衔</label>
+            <select id="grant-type" onchange="onGrantType()">
+                <option value="🍍StarsPro">🍍StarsPro</option>
+                <option value="🍍Stars++">🍍Stars++</option>
+                <option value="🍍StarsMaster">🍍StarsMaster（网站建设）</option>
+                <option value="🍍StarsAdmin">🍍StarsAdmin（管理员）</option>
+                <option value="🏆名人堂">🏆名人堂</option>
+                <option value="自定义">自定义…</option>
+            </select>
+            <input id="grant-custom" placeholder="自定义头衔，最多 10 字" maxlength="10" hidden>
+            <div class="row">
+                <button class="btn" onclick="grantTitle()">授予</button>
+                <button class="btn ghost" onclick="findUser()">查看该账号</button>
+            </div>
+            <div id="grant-result" class="meta" style="margin-top:10px"></div>
+        </div>
+
         <div class="card">
             <h2>待审核头衔 <span id="title-count" class="tag"></span></h2>
             <div id="title-list"><div class="empty">加载中…</div></div>
@@ -164,7 +187,9 @@
         box.innerHTML = list.map(t => `
             <div class="item">
                 <div class="meta">${esc(t.nickname)}（${esc(t.username)}）申请 <b>${esc(t.title)}</b> · 金额 ${esc(t.amount || '未填')} · ${time(t.created_at)}</div>
-                <div class="body">证明：${esc(t.proof || '没填')}</div>
+                ${t.proof && t.proof.indexOf('data:image') === 0
+                    ? `<img src="${t.proof}" style="max-width:180px;border-radius:8px;margin:6px 0;border:1px solid #333">`
+                    : `<div class="body">证明：${esc(t.proof || '没填')}</div>`}
                 <div class="row">
                     <button class="btn ok" onclick="handleTitle('${t._id}','approveTitle')">通过并挂上</button>
                     <button class="btn no" onclick="handleTitle('${t._id}','rejectTitle')">拒绝</button>
@@ -175,6 +200,39 @@
     async function handleTitle(id, action) {
         const res = await api(action, { requestId: id });
         if (res.code === 200) reloadTitles(); else alert(res.message);
+    }
+
+    function onGrantType() {
+        document.getElementById('grant-custom').hidden = document.getElementById('grant-type').value !== '自定义';
+    }
+
+    async function grantTitle() {
+        const username = document.getElementById('grant-user').value.trim();
+        const type = document.getElementById('grant-type').value;
+        const custom = document.getElementById('grant-custom').value.trim();
+        const title = type === '自定义' ? custom : type;
+        if (!username || !title) return alert('账号和头衔都要填');
+        const res = await api('adminGrantTitle', { username, title });
+        alert(res.message || '完成');
+        findUser();
+    }
+
+    async function findUser() {
+        const username = document.getElementById('grant-user').value.trim();
+        if (!username) return;
+        const res = await api('adminFindUser', { username });
+        const box = document.getElementById('grant-result');
+        if (res.code !== 200) { box.textContent = res.message || '查询失败'; return; }
+        const titles = res.user.titles || [];
+        box.innerHTML = esc(username) + '（' + esc(res.user.nickname) + '）的头衔：' +
+            (titles.length
+                ? titles.map(t => `<span class="tag">${esc(t)}<a href="javascript:void(0)" onclick="revokeTitle('${esc(username)}','${esc(t)}')" style="color:#ff6b6b;margin-left:6px;text-decoration:none">×</a></span>`).join('')
+                : '无');
+    }
+
+    async function revokeTitle(username, title) {
+        const res = await api('adminRevokeTitle', { username, title });
+        if (res.code === 200) findUser(); else alert(res.message);
     }
 
     function renderUsers(list) {
