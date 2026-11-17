@@ -64,11 +64,14 @@
             <option value="反馈">意见反馈</option>
         </select>
 
-        <div class="q">04 请输入您要发布的主题的正文</div>
+        <div class="q">04 标题</div>
+        <input id="title" placeholder="一句话说清楚这条帖子讲什么">
+
+        <div class="q">05 请输入您要发布的主题的正文</div>
         <p class="tip">需要加粗：&lt;加粗&gt;这段内容需要加粗&lt;/加粗&gt;</p>
         <textarea id="content" placeholder="请输入"></textarea>
 
-        <div class="q">05 携带图片 <small>可选，最多 6 张</small></div>
+        <div class="q">06 携带图片 <small>可选，最多 6 张</small></div>
         <p class="tip">
             点下面按钮从相册选，会自动压缩。<br>
             正文里写 &lt;p1&gt; 就会在那个位置显示图片。
@@ -79,7 +82,7 @@
         </div>
         <div id="thumbs" class="thumbs"></div>
 
-        <div class="q">06 备注内容 <small>非必要情况勿填</small></div>
+        <div class="q">07 备注内容 <small>非必要情况勿填</small></div>
         <input id="note" placeholder="只有站长看得到">
 
         <button class="btn" onclick="submitPost()">提交，等站长审核</button>
@@ -112,9 +115,15 @@
 
     async function submitPost() {
         const realName = document.getElementById('real-name').value.trim();
+        const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
         const msg = document.getElementById('msg');
 
+        if (!title) {
+            msg.textContent = '标题不能空';
+            msg.className = 'msg err';
+            return;
+        }
         if (!content) {
             msg.textContent = '正文不能空';
             msg.className = 'msg err';
@@ -123,6 +132,7 @@
 
         const res = await api('createPost', {
             token,
+            title,
             category: document.getElementById('category').value,
             content,
             images: imagesData,
@@ -135,6 +145,7 @@
         if (res.code === 200) {
             msg.textContent = res.message;
             msg.className = 'msg ok';
+            document.getElementById('title').value = '';
             document.getElementById('content').value = '';
             imagesData = [];
             renderThumbs();
@@ -200,7 +211,7 @@
                     <span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)}
                     <span class="st ${esc(p.status)}">${STATUS[p.status] || p.status}</span>
                 </div>
-                <div class="txt">${esc(p.content.slice(0, 120))}${p.content.length > 120 ? '…' : ''}</div>
+                <div class="txt"><b>${esc(p.title || '（无标题）')}</b><br>${esc(p.content.slice(0, 120))}${p.content.length > 120 ? '…' : ''}</div>
             </div>`).join('');
     }
 

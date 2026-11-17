@@ -64,8 +64,16 @@
         .author-name-lg { font-size: 18px; }
         .post-meta { font-size: 12px; color: var(--text-muted); }
         .btn-del { padding: 10px 16px; border-radius: 8px; border: 1px solid #ff6b6b; background: transparent; color: #ff6b6b; font-size: 13px; cursor: pointer; }
+        .post-title { font-size: 16px; font-weight: bold; margin: 0 0 8px; line-height: 1.4; }
+        .post-footer { margin-top: 10px; font-size: 12px; color: var(--text-muted); }
+        .detail-title { font-size: 22px; margin: 0 0 14px; line-height: 1.4; }
+        .like-bar { margin: 18px 0; }
+        .like-btn { padding: 9px 18px; border-radius: 20px; border: 1px solid var(--border-color); background: transparent; color: var(--text-main); font-size: 14px; cursor: pointer; }
+        .like-btn.liked { border-color: var(--accent-color); color: var(--accent-color); opacity: .75; cursor: default; }
 
         /* 个人主页（内置面板） */
+        #notice-overlay { position: fixed; inset: 0; z-index: 310; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        #notice-overlay.active { display: flex; transform: translateX(0); }
         #profile-overlay { position: fixed; inset: 0; z-index: 300; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #profile-overlay.active { display: flex; transform: translateX(0); }
         .pf-body { max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
@@ -166,6 +174,7 @@
     <header class="header">
         <div class="logo" onclick="closeDetail()">达一中 · 树洞</div>
         <div class="controls">
+            <button class="btn-icon" id="notice-btn" onclick="openNotices()" style="margin-right:8px;">🔔</button>
             <button class="btn-icon" id="account-btn" onclick="openProfile()" style="margin-right:8px;">👤 登录</button>
             <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()">🌙 暗黑</button>
         </div>
@@ -216,10 +225,27 @@
                 <div class="pf-msg" id="pf-title-msg"></div>
             </div>
             <div class="pf-card">
+                <h3>我的申请记录</h3>
+                <div id="pf-records"><div class="pf-empty">加载中…</div></div>
+            </div>
+            <div class="pf-card">
                 <h3>我发过的帖子</h3>
                 <div id="pf-posts"><div class="pf-empty">加载中…</div></div>
             </div>
             <button class="pf-logout" onclick="pfLogout()">退出登录</button>
+            <div id="pf-delete-area" style="margin-top:10px"></div>
+        </div>
+    </div>
+
+    <div id="notice-overlay">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeNotices()">⬅ 返回</button>
+        </div>
+        <div class="pf-body">
+            <div class="pf-card">
+                <h3>🔔 通知</h3>
+                <div id="notice-list"><div class="pf-empty">加载中…</div></div>
+            </div>
         </div>
     </div>
 
@@ -281,7 +307,9 @@
             
             try {
                 // 向云函数发起请求
-                const response = await fetch(API_BASE_URL);
+                const token = localStorage.getItem('wall_token');
+                const url = API_BASE_URL + (token ? '&token=' + encodeURIComponent(token) : '');
+                const response = await fetch(url);
                 const result = await response.json();
                 
                 // 检查云函数返回状态
@@ -330,7 +358,11 @@
                         ${avatarHtml(item.author_avatar, false)}
                         <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}
                     </div>
+                    <div class="post-title">${esc(item.title || '（无标题）')}</div>
                     <div class="post-content">${shortContent}</div>
+                    <div class="post-footer">
+                        <span class="like-count">👍 ${(item.likes || []).length}</span>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -379,6 +411,7 @@
                 : '';
 
             body.innerHTML = `
+        <h2 class="detail-title">${esc(post.title || '')}</h2>
                 <div class="detail-author">
                     ${avatarHtml(post.author_avatar, true)}
                     <div class="detail-author-info">
@@ -387,6 +420,11 @@
                     </div>
                 </div>
                 <div class="detail-content">${contentHtml}</div>
+                <div class="like-bar">
+                    <button class="like-btn ${post.liked ? 'liked' : ''}" ${post.liked ? 'disabled' : ''} onclick="likePost('${post._id}')">
+                        👍 ${post.liked ? '已赞' : '点赞'} <span id="like-num">${(post.likes || []).length}</span>
+                    </button>
+                </div>
                 ${deleteHtml}
                 <div class="comment-section">
                     <div class="comment-title">💬 评论区</div>
@@ -398,13 +436,39 @@
             overlay.classList.add('active');
         }
 
+        async function likePost(id) {
+            const token = localStorage.getItem('wall_token');
+            if (!token) { alert('登录后才能点赞'); return; }
+            try {
+                const res = await fetch(API_ROOT + '?action=likePost', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, postId: id })
+                });
+                const data = await res.json();
+                if (data.code === 200) {
+                    const btn = document.querySelector('.like-btn');
+                    if (btn) {
+                        btn.classList.add('liked');
+                        btn.disabled = true;
+                        btn.innerHTML = '👍 已赞 <span>' + data.count + '</span>';
+                    }
+                    const post = wallData.find((p) => p._id === id);
+                    if (post) { post.liked = true; post.likes = new Array(data.count).fill('x'); }
+                } else {
+                    alert(data.message || '点赞失败');
+                }
+            } catch (e) {
+                alert('网络请求失败');
+            }
+        }
+
         function closeDetail() {
             document.getElementById('detail-overlay').classList.remove('active');
             currentPostId = '';
         }
 
-        async function deleteOwnPost(id) {
-            if (!confirm('删了就找不回来了，确定？')) return;
+        async function deleteOwnPost(id) {            if (!confirm('删了就找不回来了，确定？')) return;
             const token = localStorage.getItem('wall_token');
             try {
                 const res = await fetch(API_ROOT + '?action=deletePost', {
@@ -586,6 +650,49 @@
             document.getElementById('pf-meta').textContent = '@' + pfMe.username;
             pfRenderTitles();
             pfLoadPosts();
+            pfLoadRecords();
+            pfRenderDeleteArea();
+        }
+
+        async function pfLoadRecords() {
+            const box = document.getElementById('pf-records');
+            const res = await pfApi('checkStatus', { username: pfMe.username });
+            if (res.code !== 200) { box.innerHTML = '<div class="pf-empty">加载失败</div>'; return; }
+            const map = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
+            let html = '';
+            (res.accountRequests || []).forEach((r) => {
+                html += '<div class="pf-post"><div class="m">注册申请 · ' + (map[r.status] || r.status) + '</div></div>';
+            });
+            (res.titleRequests || []).forEach((t) => {
+                html += '<div class="pf-post"><div class="m">头衔「' + esc(t.title) + '」 · ' + (map[t.status] || t.status) + '</div></div>';
+            });
+            box.innerHTML = html || '<div class="pf-empty">还没有申请记录</div>';
+        }
+
+        function pfRenderDeleteArea() {
+            const box = document.getElementById('pf-delete-area');
+            if (pfMe.status === 'deleting' && pfMe.delete_after) {
+                const d = new Date(pfMe.delete_after).toLocaleString('zh-CN', { hour12: false });
+                box.innerHTML = '<div class="pf-empty" style="margin-bottom:8px">账号将在 ' + d + ' 注销，帖子会保留并显示为「已注销账号」</div>' +
+                    '<button class="pf-logout" onclick="pfCancelDelete()">撤销注销</button>';
+            } else {
+                box.innerHTML = '<button class="pf-logout" onclick="pfRequestDelete()">注销账号（7 天冷静期）</button>';
+            }
+        }
+
+        async function pfRequestDelete() {
+            if (!confirm('注销后有 7 天冷静期，期间可以撤销。到期后账号消失，帖子会保留并显示为「已注销账号」。确定申请？')) return;
+            const password = prompt('输入密码确认');
+            if (password === null) return;
+            const res = await pfApi('requestDelete', { password });
+            alert(res.message || '已提交');
+            if (res.code === 200) pfLoad();
+        }
+
+        async function pfCancelDelete() {
+            const res = await pfApi('cancelDelete');
+            alert(res.message || '已撤销');
+            if (res.code === 200) pfLoad();
         }
 
         function pfTitleLimit() {
@@ -685,6 +792,25 @@
             localStorage.removeItem('wall_token');
             localStorage.removeItem('wall_user');
             location.reload();
+        }
+
+        async function openNotices() {
+            if (!localStorage.getItem('wall_token')) { alert('登录后就能看通知'); return; }
+            document.getElementById('notice-overlay').classList.add('active');
+            const box = document.getElementById('notice-list');
+            box.innerHTML = '<div class="pf-empty">加载中…</div>';
+            const res = await pfApi('myNotices');
+            if (res.code !== 200) { box.innerHTML = '<div class="pf-empty">加载失败</div>'; return; }
+            if (!res.data.length) { box.innerHTML = '<div class="pf-empty">没有通知</div>'; return; }
+            box.innerHTML = res.data.map((n) => `
+                <div class="pf-post">
+                    <div class="m">${new Date(n.created_at).toLocaleString('zh-CN', { hour12: false })}</div>
+                    <div class="t">${esc(n.text)}</div>
+                </div>`).join('');
+        }
+
+        function closeNotices() {
+            document.getElementById('notice-overlay').classList.remove('active');
         }
 
 

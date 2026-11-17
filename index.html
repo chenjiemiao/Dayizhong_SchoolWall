@@ -341,6 +341,12 @@
             <div class="qr-item"><img src="images/wechat.jpg" alt="微信二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/130x130/333/fff?text=微信码'"><span>微信扫码</span></div>
             <div class="qr-item"><img src="images/qq.jpg" alt="QQ二维码" onclick="openImageViewer(this.src)" onerror="this.src='https://via.placeholder.com/130x130/333/fff?text=QQ码'"><span>QQ扫码</span></div>
         </div>
+        <div style="margin-top:16px; padding-top:14px; border-top:1px dashed #3a3a3a; text-align:left;">
+            <p style="font-size:13px; color:#aaa; margin:0 0 8px;">查一下申请通过没有（不用登录）</p>
+            <input id="status-name" placeholder="输入用户名" style="width:100%; padding:10px; border-radius:8px; border:1px solid #333; background:#161616; color:#e0e0e0; font-size:14px; box-sizing:border-box; outline:none;">
+            <button class="btn btn-home" style="margin-top:8px;" onclick="checkStatus()">查询进度</button>
+            <div id="status-result" style="font-size:13px; color:#aaa; line-height:1.8; margin-top:10px;"></div>
+        </div>
         <button class="close-btn" onclick="closeModal(event)">关闭</button>
     </div>
 </div>
@@ -453,6 +459,30 @@
     function closeImageViewer() {
         imageViewer.classList.remove('active');
         setTimeout(() => { viewerImg.src = ''; }, 200);
+    }
+
+    async function checkStatus() {
+        const name = document.getElementById('status-name').value.trim();
+        const out = document.getElementById('status-result');
+        if (!name) { out.textContent = '先把用户名填上'; return; }
+        out.textContent = '查询中…';
+        try {
+            const res = await fetch('https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api?action=checkStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: name })
+            });
+            const data = await res.json();
+            if (data.code !== 200) { out.textContent = data.message || '查询失败'; return; }
+            const map = { pending: '待审核', approved: '已通过', rejected: '已拒绝', banned: '已封禁', deleting: '注销中', active: '正常' };
+            let html = '';
+            if (data.account) html += '账号：' + (map[data.account.status] || data.account.status) + '<br>';
+            (data.accountRequests || []).forEach((r) => { html += '注册申请：' + (map[r.status] || r.status) + '<br>'; });
+            (data.titleRequests || []).forEach((t) => { html += '头衔「' + t.title + '」：' + (map[t.status] || t.status) + '<br>'; });
+            out.innerHTML = html || '没查到记录';
+        } catch (e) {
+            out.textContent = '网络请求失败';
+        }
     }
 </script>
 
