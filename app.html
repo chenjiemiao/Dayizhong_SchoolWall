@@ -153,6 +153,10 @@
         .comment-name { color: var(--text-main); font-weight: bold; font-size: 13px; }
         .comment-text { font-size: 14px; line-height: 1.6; word-break: break-word; }
         .del-comment { border: none; background: transparent; color: #ff6b6b; font-size: 12px; cursor: pointer; margin-left: 8px; }
+        .reply-btn { border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 4px 0 0; }
+        .reply-btn:hover { color: var(--accent-color); }
+        .comment-child { margin-left: 24px; border-left: 2px solid var(--border-color); }
+        .reply-hint { font-size: 12px; color: var(--accent-color); cursor: pointer; }
         .comment-form { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
         .comment-form textarea { width: 100%; min-height: 70px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: #161616; color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; }
         .comment-form .like-btn { align-self: flex-end; }
@@ -513,6 +517,7 @@
                     <div class="comment-title">💬 评论</div>
                     <div id="comment-list" class="comment-list">加载中…</div>
                     <div class="comment-form">
+                        <div id="reply-hint" class="reply-hint" hidden></div>
                         <textarea id="comment-input" maxlength="500" placeholder="说点什么…"></textarea>
                         <button class="like-btn" onclick="submitComment('${post._id}')">发表评论</button>
                     </div>
@@ -565,8 +570,8 @@
                 if (!d.data.length) { box.textContent = '还没有评论，来抢第一'; return; }
                 const me = (function () { try { return JSON.parse(localStorage.getItem('wall_user') || 'null'); } catch (e) { return null; } })();
                 const staff = me && (me.role === 'owner' || me.role === 'admin');
-                box.innerHTML = d.data.map((c) => `
-                    <div class="comment-item">
+                function commentCard(c, child) {
+                    return `<div class="comment-item ${child ? 'comment-child' : ''}">
                         <div class="comment-head">
                             ${c.avatar ? `<img class="avatar" src="${esc(c.avatar)}" alt="">` : ''}
                             <span class="comment-name">${esc(c.nickname)}</span>
@@ -575,10 +580,32 @@
                             ${(staff || (me && c.username === me.username)) ? `<button class="del-comment" onclick="deleteComment('${c._id}','${postId}')">删除</button>` : ''}
                         </div>
                         <div class="comment-text">${esc(c.content)}</div>
-                    </div>`).join('');
+                        ${child ? '' : `<button class="reply-btn" onclick="replyTo('${c._id}','${esc(c.nickname)}')">回复</button>`}
+                    </div>`;
+                }
+                const tops = d.data.filter((c) => !c.parent_id);
+                const kids = d.data.filter((c) => c.parent_id);
+                box.innerHTML = tops.map((c) =>
+                    commentCard(c, false) + kids.filter((k) => k.parent_id === c._id).map((k) => commentCard(k, true)).join('')
+                ).join('');
             } catch (e) {
                 box.textContent = '网络请求失败';
             }
+        }
+
+        let replyParent = null;
+
+        function replyTo(id, name) {
+            replyParent = id;
+            const hint = document.getElementById('reply-hint');
+            if (!hint) return;
+            hint.hidden = false;
+            hint.textContent = '正在回复 @' + name + '（点这里取消）';
+            hint.onclick = function () {
+                replyParent = null;
+                hint.hidden = true;
+            };
+            document.getElementById('comment-input').focus();
         }
 
         async function submitComment(postId) {
@@ -591,11 +618,14 @@
                 const r = await fetch(API_ROOT + '?action=addComment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, postId, content: text })
+                    body: JSON.stringify({ token, postId, content: text, parentId: replyParent || '' })
                 });
                 const d = await r.json();
                 if (d.code === 200) {
                     input.value = '';
+                    replyParent = null;
+                    const hint = document.getElementById('reply-hint');
+                    if (hint) hint.hidden = true;
                     loadComments(postId);
                 } else {
                     alert(d.message || '评论失败');
