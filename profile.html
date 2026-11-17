@@ -194,7 +194,17 @@
             <div class="post">
                 <div class="pmeta">${esc(p.category)} · ${esc(p.date)}<span class="st ${esc(p.status)}">${STATUS[p.status] || p.status}</span></div>
                 <div class="ptxt">${esc(p.content.slice(0, 160))}${p.content.length > 160 ? '…' : ''}</div>
+                <div class="row">
+                    <button class="btn ghost" onclick="delPost('${p._id}')">删除这条</button>
+                </div>
             </div>`).join('');
+    }
+
+    async function delPost(id) {
+        if (!confirm('删了就找不回来了，确定？')) return;
+        const res = await api('deletePost', { postId: id });
+        if (res.code === 200) loadPosts();
+        else alert(res.message || '删除失败');
     }
 
     function logout() {

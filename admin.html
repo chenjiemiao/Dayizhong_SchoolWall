@@ -57,6 +57,10 @@
             <h2>待审核头衔 <span id="title-count" class="tag"></span></h2>
             <div id="title-list"><div class="empty">加载中…</div></div>
         </div>
+        <div class="card">
+            <h2>已上墙的帖子</h2>
+            <div id="approved-list"><div class="empty">加载中…</div></div>
+        </div>
         <button class="btn ghost" onclick="reload()">刷新</button>
     </div>
 </div>
@@ -107,6 +111,7 @@
         renderUsers(res.data || []);
         reloadPosts();
         reloadTitles();
+        reloadApproved();
     }
 
     async function reload() {
@@ -114,6 +119,7 @@
         if (res.code === 200) renderUsers(res.data);
         reloadPosts();
         reloadTitles();
+        reloadApproved();
     }
 
     async function reloadPosts() {
@@ -124,6 +130,31 @@
     async function reloadTitles() {
         const res = await api('adminTitles');
         if (res.code === 200) renderTitles(res.data);
+    }
+
+    async function reloadApproved() {
+        const res = await api('posts');
+        if (res.code === 200) renderApproved(res.data || []);
+    }
+
+    function renderApproved(list) {
+        const box = document.getElementById('approved-list');
+        if (!list.length) { box.innerHTML = '<div class="empty">墙上还没有帖子</div>'; return; }
+        box.innerHTML = list.map(p => `
+            <div class="item">
+                <div class="meta"><span class="tag">${esc(p.category)}</span>${esc(p.author)} · ${esc(p.date)} · ${esc(p.created_by || '')}</div>
+                <div class="body">${esc(p.content.slice(0, 160))}${(p.content || '').length > 160 ? '…' : ''}</div>
+                <div class="row">
+                    <button class="btn no" onclick="handleDeletePost('${p._id}')">删除违规帖</button>
+                </div>
+            </div>`).join('');
+    }
+
+    async function handleDeletePost(id) {
+        if (!confirm('删了就找不回来了，确定？')) return;
+        const res = await api('deletePost', { postId: id });
+        if (res.code === 200) reloadApproved();
+        else alert(res.message || '删除失败');
     }
 
     function renderTitles(list) {
