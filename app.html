@@ -433,7 +433,6 @@
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
                     <div class="post-content">${shortContent}</div>
-                    ${(item.images && item.images.length) ? `<div class="card-imgs">${item.images.slice(0, 9).map((src) => `<img src="${esc(src)}" alt="">`).join('')}</div>` : ''}
                     <div class="post-footer">
                         <span class="like-count">👍 ${(item.likes || []).length}</span>
                     </div>
