@@ -102,10 +102,11 @@
     if (!token) location.replace('./account.html');
 
     function api(action, data) {
+        const tk = localStorage.getItem('wall_token') || '';
         return fetch(API + '?action=' + action, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(Object.assign({ token }, data || {}))
+            body: JSON.stringify(Object.assign({ token: tk }, data || {}))
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }
 

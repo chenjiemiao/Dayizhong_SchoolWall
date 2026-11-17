@@ -740,7 +740,7 @@
         function openPublish() {
             if (!localStorage.getItem('wall_token')) { location.href = './account.html'; return; }
             const f = document.getElementById('publish-frame');
-            if (!f.src || f.src === 'about:blank') f.src = './publish.html?embed=1';
+            f.src = './publish.html?embed=1&v=' + Date.now();
             document.getElementById('publish-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
