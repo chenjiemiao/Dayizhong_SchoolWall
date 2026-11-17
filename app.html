@@ -87,6 +87,9 @@
         #sponsor-overlay.active { display: flex; transform: translateX(0); }
         #user-overlay { position: fixed; inset: 0; z-index: 315; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #user-overlay.active { display: flex; transform: translateX(0); }
+        .help-btn { position: fixed; left: 16px; bottom: 92px; z-index: 96; background: rgba(255,118,117,.92); color: #121212; border: none; border-radius: 22px; padding: 10px 16px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+        #help-overlay { position: fixed; inset: 0; z-index: 330; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        #help-overlay.active { display: flex; transform: translateX(0); }
         #profile-overlay { position: fixed; inset: 0; z-index: 300; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #profile-overlay.active { display: flex; transform: translateX(0); }
         .pf-body { max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
@@ -316,6 +319,25 @@
             <div class="pf-card">
                 <h3>他发过的帖子</h3>
                 <div id="u-posts" class="pf-empty">加载中…</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="help-btn" onclick="openHelp()">🆘 举报 / 加速审核 / 找暗号</button>
+
+    <div id="help-overlay">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeHelp()">⬅ 返回</button>
+        </div>
+        <div class="pf-body">
+            <div class="pf-card" style="text-align:center">
+                <h3>🆘 有问题找站长</h3>
+                <p style="font-size:13px;color:#aaa;line-height:1.9">
+                    举报违规帖子、催审核、忘了暗号，都可以加微信找我。<br>
+                    不知道暗号也能进群问。
+                </p>
+                <img src="images/wechat.jpg" alt="站长微信" style="width:220px;max-width:80%;border-radius:10px;border:1px solid #333;margin:12px auto;display:block">
+                <p style="font-size:12px;color:#fdcb6e">扫码加我微信，备注「校园墙」</p>
             </div>
         </div>
     </div>
@@ -900,6 +922,16 @@
             } catch (e) {
                 box.textContent = '网络请求失败';
             }
+        }
+
+        function openHelp() {
+            document.getElementById('help-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeHelp() {
+            document.getElementById('help-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
 
         function closeUser() {

@@ -322,6 +322,7 @@
         <button class="btn btn-home" onclick="openModal('modal-contact')">📝 申请注册账号</button>
         <button class="btn btn-home" onclick="openModal('modal-sponsor')">🍍 赞助请站长吃个菠萝</button>
         <a href="https://chenjiemiao.github.io/PineAppleStars" class="btn btn-home" style="font-size: 13px; opacity: 0.7;">🔗 前往站长的个人网站</a>
+        <button class="btn btn-home" onclick="openModal('modal-help')" style="border-color:#ff7675; color:#ff7675;">🆘 举报 / 加速审核 / 忘了暗号</button>
     </div>
 
     <div class="footer">
@@ -425,6 +426,17 @@
         
         <a class="btn btn-title-view" href="./title.html" style="margin:14px 0 0;">现在去申请头衔</a>
         <button class="close-btn" onclick="closeModal(event)">我知道了</button>
+    </div>
+</div>
+
+<!-- 4. 求助弹窗 -->
+<div id="modal-help" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <h3>🆘 举报 / 加速审核 / 找暗号</h3>
+        <p style="text-align:center">举报违规帖子、催审核、忘了暗号，都可以加我微信。<br>不知道暗号也能进群问。</p>
+        <img class="single-img" src="images/wechat.jpg" alt="站长微信" onclick="openImageViewer(this.src)">
+        <p style="text-align:center;font-size:12px;color:#fdcb6e;margin-top:8px">扫码加微信，备注「校园墙」</p>
+        <button class="close-btn" onclick="closeModal(event)">关闭</button>
     </div>
 </div>
 
