@@ -85,6 +85,8 @@
         #publish-frame { flex: 1; width: 100%; border: 0; background: var(--bg-color); }
         #sponsor-overlay { position: fixed; inset: 0; z-index: 305; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #sponsor-overlay.active { display: flex; transform: translateX(0); }
+        #user-overlay { position: fixed; inset: 0; z-index: 315; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        #user-overlay.active { display: flex; transform: translateX(0); }
         #profile-overlay { position: fixed; inset: 0; z-index: 300; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #profile-overlay.active { display: flex; transform: translateX(0); }
         .pf-body { max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
@@ -290,6 +292,30 @@
                 <p style="font-size:13px;color:#aaa;line-height:1.8">每一笔赞赏都会用在服务器和域名维护上。<br>长按下面的赞赏码付款，然后在「头衔」页传截图申请头衔。</p>
                 <img src="images/sponsor.jpg" alt="赞赏码" style="width:200px;border-radius:10px;border:1px solid #333;margin:10px auto;display:block">
                 <a class="btn-icon" href="./title.html" style="display:inline-block;text-decoration:none;margin-top:6px;">去申请头衔</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="user-overlay">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeUser()">⬅ 返回</button>
+        </div>
+        <div class="pf-body">
+            <div class="pf-card">
+                <div class="pf-top">
+                    <img id="u-avatar" class="pf-avatar" alt="">
+                    <div>
+                        <div class="pf-name" id="u-name"></div>
+                        <div class="pf-meta" id="u-meta"></div>
+                    </div>
+                </div>
+                <div style="margin-top:12px">
+                    <button class="btn-del" id="u-block" onclick="blockUser()">拉黑他</button>
+                </div>
+            </div>
+            <div class="pf-card">
+                <h3>他发过的帖子</h3>
+                <div id="u-posts" class="pf-empty">加载中…</div>
             </div>
         </div>
     </div>
@@ -501,7 +527,7 @@
             body.innerHTML = `
         <h2 class="detail-title">${esc(post.title || '')}</h2>
                 <div class="detail-author">
-                    ${avatarHtml(post.author_avatar, true)}
+                    <span onclick="openUser('${post.created_by || ''}')" style="cursor:pointer">${avatarHtml(post.author_avatar, true)}</span>
                     <div class="detail-author-info">
                         <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}</div>
                         <div class="post-meta">${post.date} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
@@ -843,6 +869,50 @@
         function closeProfile() {
             document.getElementById('profile-overlay').classList.remove('active');
             document.body.style.overflow = 'auto';
+        }
+
+        let profileUser = '';
+
+        async function openUser(username) {
+            if (!username) return;
+            profileUser = username;
+            document.getElementById('user-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            const box = document.getElementById('u-posts');
+            box.textContent = '加载中…';
+            try {
+                const r = await fetch(API_ROOT + '?action=publicProfile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                const d = await r.json();
+                if (d.code !== 200) { box.textContent = d.message || '加载失败'; return; }
+                document.getElementById('u-avatar').src = d.user.avatar || PF_DEFAULT_AVATAR;
+                document.getElementById('u-name').textContent = d.user.nickname;
+                document.getElementById('u-meta').textContent = '@' + d.user.username + (d.user.class_name ? ' · ' + d.user.class_name : '');
+                let meName = '';
+                try { meName = JSON.parse(localStorage.getItem('wall_user') || '{}').username || ''; } catch (e) {}
+                document.getElementById('u-block').style.display = (d.user.username === meName) ? 'none' : 'inline-block';
+                box.innerHTML = (d.posts || []).length
+                    ? d.posts.map((p) => `<div class="pf-post"><div class="m">${esc(p.category)} · ${esc(p.date)}</div><div class="t"><b>${esc(p.title || '')}</b><br>${esc((p.content || '').slice(0, 100))}</div></div>`).join('')
+                    : '<div class="pf-empty">还没发过帖子</div>';
+            } catch (e) {
+                box.textContent = '网络请求失败';
+            }
+        }
+
+        function closeUser() {
+            document.getElementById('user-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function blockUser() {
+            if (!profileUser) return;
+            if (!confirm('拉黑后他的帖子不会再显示给你，确定？')) return;
+            const res = await pfApi('blockUser', { username: profileUser });
+            alert(res.message || '完成');
+            if (res.code === 200) { closeUser(); fetchPosts(); }
         }
 
         function openSponsor() {
