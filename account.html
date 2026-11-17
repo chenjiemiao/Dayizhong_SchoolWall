@@ -70,7 +70,7 @@
             <input id="reg-pass" type="password" placeholder="至少 6 位">
             <label>联系方式（微信 / QQ，方便站长找到你）</label>
             <input id="reg-contact" placeholder="选填，但建议留">
-            <button class="btn" onclick="doRegister()">提交申请</button>
+            <button class="btn" id="reg-btn" onclick="doRegister()">提交申请</button>
             <div class="msg" id="reg-msg"></div>
             <p class="hint">提交后不会立刻能用，要等站长在后台点通过。</p>
 
@@ -93,7 +93,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data || {})
-        }).then(r => r.json());
+        }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败，检查下网络再试' }));
     }
 
     function showMsg(id, text, ok) {
@@ -127,6 +127,7 @@
     }
 
     async function doRegister() {
+        const btn = document.getElementById('reg-btn');
         const body = {
             username: document.getElementById('reg-name').value.trim(),
             realName: document.getElementById('reg-realname').value.trim(),
@@ -134,7 +135,11 @@
             password: document.getElementById('reg-pass').value,
             contact: document.getElementById('reg-contact').value.trim()
         };
+        btn.disabled = true;
+        btn.textContent = '提交中…';
         const res = await api('register', body);
+        btn.disabled = false;
+        btn.textContent = '提交申请';
         showMsg('reg-msg', res.message || (res.code === 200 ? '已提交' : '提交失败'), res.code === 200);
     }
 

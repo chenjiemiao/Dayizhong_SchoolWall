@@ -39,7 +39,7 @@
         <label>管理密码</label>
         <div class="row">
             <input id="admin-pw" type="password" style="flex:1;min-width:200px" placeholder="云函数里那个 ADMIN_PASSWORD">
-            <button class="btn" onclick="enter()">进入</button>
+            <button class="btn" id="admin-btn" onclick="enter()">进入</button>
         </div>
         <div class="msg" id="login-msg"></div>
     </div>
@@ -70,7 +70,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({ adminPassword }, data || {}))
-        }).then(r => r.json());
+        }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }
 
     function esc(s) {
@@ -83,12 +83,22 @@
 
     async function enter() {
         const pw = document.getElementById('admin-pw').value;
-        if (!pw) return;
+        const m = document.getElementById('login-msg');
+        if (!pw) { m.textContent = '先填密码'; m.className = 'msg err'; return; }
         adminPassword = pw;
-        const res = await api('adminRequests');
-        if (res.code === 403) {
-            const m = document.getElementById('login-msg');
-            m.textContent = '密码不对';
+        const btn = document.getElementById('admin-btn');
+        btn.disabled = true;
+        btn.textContent = '验证中…';
+        let res;
+        try {
+            res = await api('adminRequests');
+        } catch (e) {
+            res = { code: -1, message: '网络请求失败' };
+        }
+        btn.disabled = false;
+        btn.textContent = '进入';
+        if (res.code !== 200) {
+            m.textContent = res.message || '进不去';
             m.className = 'msg err';
             return;
         }
