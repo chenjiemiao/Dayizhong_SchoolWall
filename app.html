@@ -98,6 +98,7 @@
         .pf-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 1px solid #444; background: #161616; }
         .pf-name { font-size: 18px; font-weight: bold; }
         .pf-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .pf-titles { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
         .pf-btn { display: inline-block; margin-top: 8px; padding: 7px 12px; border-radius: 8px; border: 1px solid #555; color: var(--text-main); font-size: 13px; cursor: pointer; }
         .pf-card h3 { margin: 0 0 12px; font-size: 15px; color: var(--accent-color); }
         .pf-title-opt { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 14px; }
@@ -324,6 +325,7 @@
                     <div>
                         <div class="pf-name" id="u-name"></div>
                         <div class="pf-meta" id="u-meta"></div>
+                        <div class="pf-titles" id="u-titles"></div>
                     </div>
                 </div>
                 <div style="margin-top:12px">
@@ -940,6 +942,10 @@
                 document.getElementById('u-avatar').src = d.user.avatar || PF_DEFAULT_AVATAR;
                 document.getElementById('u-name').textContent = d.user.nickname;
                 document.getElementById('u-meta').textContent = '@' + d.user.username + (d.user.class_name ? ' · ' + d.user.class_name : '');
+                const titles = d.user.titles || [];
+                document.getElementById('u-titles').innerHTML = titles.length
+                    ? titles.map((t) => titleSpan(t)).join(' ')
+                    : '<span style="font-size:12px;color:#777">还没有头衔</span>';
                 let meName = '';
                 try { meName = JSON.parse(localStorage.getItem('wall_user') || '{}').username || ''; } catch (e) {}
                 document.getElementById('u-block').style.display = (d.user.username === meName) ? 'none' : 'inline-block';
