@@ -127,6 +127,15 @@
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
         .badge-witness { background: linear-gradient(135deg, #ff9a3c, #ff5f6d); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 8px rgba(255,120,80,.5); }
+        .badge-xmas { position: relative; overflow: hidden; padding-left: 20px;
+            background: linear-gradient(180deg, #6f8fb8 0%, #27405f 100%);
+            border: 1px solid rgba(255,255,255,.45); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
+        .badge-xmas::before { content: "🎄"; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); font-size: 11px; z-index: 2; }
+        .badge-xmas::after { content: ""; position: absolute; inset: 0; opacity: .65; pointer-events: none;
+            background-image: radial-gradient(circle, #fff 1px, transparent 1.3px); background-size: 12px 12px;
+            animation: snow-fall 3s linear infinite; }
+        .badge-xmas .badge-txt { position: relative; z-index: 1; }
+        @keyframes snow-fall { from { background-position: 0 0; } to { background-position: 0 12px; } }
         @keyframes title-flow {
             0% { background-position: 0% 50%; }
             100% { background-position: -200% 50%; }
@@ -398,6 +407,9 @@
         function titleSpan(t) {
             if (t.indexOf('见证者') !== -1) {
                 return '<span class="badge badge-witness">' + esc(t) + '</span>';
+            }
+            if (t.indexOf('圣诞') !== -1) {
+                return '<span class="badge badge-xmas"><span class="badge-txt">' + esc(t) + '</span></span>';
             }
             return '<span class="' + titleClass(t) + '">' + esc(t) + '</span>';
         }
