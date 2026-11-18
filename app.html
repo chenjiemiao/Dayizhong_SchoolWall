@@ -60,6 +60,8 @@
         .author-name { color: var(--text-main); font-weight: bold; }
         .avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #222; }
         .avatar-lg { width: 46px; height: 46px; }
+        .frame-gold { box-shadow: 0 0 0 2px #f9ca24, 0 0 10px rgba(249,202,36,.55); }
+        .frame-diamond { box-shadow: 0 0 0 2px #74b9ff, 0 0 10px rgba(116,185,255,.6); }
         .detail-author { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
         .author-name-lg { font-size: 18px; }
         .post-meta { font-size: 12px; color: var(--text-muted); }
@@ -280,6 +282,7 @@
                 <button class="pf-save" onclick="pfSaveTitles()">保存头衔</button>
                 <button class="pf-save" style="background:transparent;border:1px solid #555;color:var(--text-main);margin-left:8px" onclick="openCodex()">头衔图鉴</button>
                 <p class="pf-hint" id="pf-title-hint"></p>
+                <div id="pf-frames" style="margin-top:12px"></div>
                 <div class="pf-msg" id="pf-title-msg"></div>
             </div>
             <div class="pf-card">
@@ -487,9 +490,10 @@
             return list.map((t) => titleHtml(t)).join('');
         }
 
-        function avatarHtml(src, big) {
+        function avatarHtml(src, big, frame) {
             if (!src) return '';
-            return '<img class="avatar' + (big ? ' avatar-lg' : '') + '" src="' + esc(src) + '" alt="">';
+            const cls = 'avatar' + (big ? ' avatar-lg' : '') + (frame ? ' frame-' + frame : '');
+            return '<img class="' + cls + '" src="' + esc(src) + '" alt="">';
         }
 
         async function resolveImages(list) {
@@ -573,7 +577,7 @@
                         <span>${item.date}</span>
                     </div>
                     <div class="post-author">
-                        ${avatarHtml(item.author_avatar, false)}
+                        ${avatarHtml(item.author_avatar, false, item.author_frame)}
                         <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}${item.class_name ? `<span class="post-class">${esc(item.class_name)}</span>` : ''}
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
@@ -631,7 +635,7 @@
             body.innerHTML = `
         <h2 class="detail-title">${esc(post.title || '')}</h2>
                 <div class="detail-author">
-                    <span onclick="openUser('${post.created_by || ''}')" style="cursor:pointer">${avatarHtml(post.author_avatar, true)}</span>
+                    <span onclick="openUser('${post.created_by || ''}')" style="cursor:pointer">${avatarHtml(post.author_avatar, true, post.author_frame)}</span>
                     <div class="detail-author-info">
                         <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}</div>
                         <div class="post-meta">${post.date} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
@@ -1075,10 +1079,12 @@
             const res = await pfApi('me');
             if (res.code !== 200) { location.href = './account.html'; return; }
             pfMe = res.user;
+            document.getElementById('pf-avatar').className = 'pf-avatar' + (pfMe.frame ? ' frame-' + pfMe.frame : '');
             document.getElementById('pf-avatar').src = pfMe.avatar || PF_DEFAULT_AVATAR;
             document.getElementById('pf-name').textContent = pfMe.nickname;
             document.getElementById('pf-meta').textContent = '@' + pfMe.username;
             pfRenderTitles();
+            pfRenderFrames();
             pfLoadPosts();
             pfLoadRecords();
             pfRenderDeleteArea();
@@ -1170,6 +1176,29 @@
         }
 
         const PF_STATUS = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
+
+        function pfRenderFrames() {
+            const box = document.getElementById('pf-frames');
+            if (!box) return;
+            const frames = pfMe.frames || [];
+            if (!frames.length) { box.innerHTML = ''; return; }
+            const opts = [{ id: '', label: '不戴' }].concat(frames.map((f) => ({ id: f, label: f === 'gold' ? '金色框' : '钻石框' })));
+            box.innerHTML = '<p class="pf-hint" style="margin:0 0 6px">头像框（购买头衔附赠）</p>' + opts.map((o) => {
+                const active = pfMe.frame === o.id;
+                return '<button class="pf-save" style="margin:0 6px 6px 0;background:' + (active ? 'var(--accent-color)' : 'transparent') +
+                    ';border:1px solid #555;color:' + (active ? '#121212' : 'var(--text-main)') + '" onclick="pfSetFrame(\'' + o.id + '\')">' + o.label + '</button>';
+            }).join('');
+        }
+
+        async function pfSetFrame(frame) {
+            const res = await pfApi('setFrame', { frame });
+            if (res.code !== 200) { alert(res.message || '设置失败'); return; }
+            pfMe.frame = frame;
+            const av = document.getElementById('pf-avatar');
+            av.className = 'pf-avatar' + (frame ? ' frame-' + frame : '');
+            pfRenderFrames();
+            fetchPosts();
+        }
 
         async function pfLoadPosts() {            const box = document.getElementById('pf-posts');
             const res = await pfApi('myPosts');
