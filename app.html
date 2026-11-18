@@ -60,8 +60,24 @@
         .author-name { color: var(--text-main); font-weight: bold; }
         .avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #222; }
         .avatar-lg { width: 46px; height: 46px; }
-        .frame-gold { box-shadow: 0 0 0 2px #f9ca24, 0 0 10px rgba(249,202,36,.55); }
-        .frame-diamond { box-shadow: 0 0 0 2px #74b9ff, 0 0 10px rgba(116,185,255,.6); }
+        @property --ring-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        .frame-gold, .frame-diamond {
+            border: 3px solid transparent;
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            animation: ring-spin 5s linear infinite;
+        }
+        .frame-gold {
+            background-image: linear-gradient(#1e1e1e, #1e1e1e),
+                conic-gradient(from var(--ring-angle), #7a4a00, #ffe08a, #fff9d6, #ffcf4d, #7a4a00);
+            box-shadow: 0 0 12px rgba(255, 205, 80, .55), inset 0 0 4px rgba(255, 240, 180, .35);
+        }
+        .frame-diamond {
+            background-image: linear-gradient(#1e1e1e, #1e1e1e),
+                conic-gradient(from var(--ring-angle), #3f6fb5, #a8e6ff, #ffffff, #b7a6ff, #3f6fb5);
+            box-shadow: 0 0 14px rgba(150, 200, 255, .6), inset 0 0 4px rgba(220, 240, 255, .35);
+        }
+        @keyframes ring-spin { to { --ring-angle: 360deg; } }
         .detail-author { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
         .author-name-lg { font-size: 18px; }
         .post-meta { font-size: 12px; color: var(--text-muted); }
