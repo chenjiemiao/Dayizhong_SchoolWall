@@ -36,6 +36,11 @@
         .bg-media video { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
         .bg-media .bg-mask { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(18,18,18,0.45) 0%, rgba(18,18,18,0.88) 100%); }
         .wrap, .container, .card, .pf-card, .modal-content { position: relative; z-index: 1; }
+    
+        .fold-h { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+        .fold-h::after { content: '▾'; margin-left: auto; color: #777; font-size: 12px; }
+        .card-body.hidden { display: none; }
+        .cnt { color: var(--accent); font-size: 13px; }
     </style>
 </head>
 <body>
@@ -49,6 +54,27 @@
     : 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-720.mp4';
   v.play().catch(function () {});
 })();
+
+    // ---- 折叠与计数 ----
+    const FOLD_DEFAULT = ['sec-users', 'sec-requests', 'sec-posts', 'sec-titles'];
+    function foldInit() {
+        document.querySelectorAll('#panel .card').forEach((card) => {
+            const h = card.querySelector('h2');
+            if (!h || card.querySelector('.card-body')) return;
+            const body = document.createElement('div');
+            body.className = 'card-body';
+            Array.from(card.childNodes).forEach((n) => { if (n !== h) body.appendChild(n); });
+            card.appendChild(body);
+            h.classList.add('fold-h');
+            h.addEventListener('click', () => body.classList.toggle('hidden'));
+            if (FOLD_DEFAULT.indexOf(card.id) !== -1) body.classList.add('hidden');
+        });
+    }
+    function setCount(id, n) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = n > 0 ? '(' + n + ')' : '';
+    }
+    foldInit();
 </script>
 
 <div class="wrap">
@@ -67,7 +93,7 @@
 
     <div id="panel" hidden>
         <div class="card" id="sec-users">
-            <h2>用户管理</h2>
+            <h2>用户管理 <span class="cnt" id="cnt-users"></span></h2>
             <div id="user-list"><div class="empty">加载中…</div></div>
         </div>
 
@@ -102,17 +128,17 @@
         </div>
 
         <div class="card" id="sec-requests" hidden>
-            <h2>待审核账号</h2>
+            <h2>待审核账号 <span class="cnt" id="cnt-req"></span></h2>
             <div id="req-list"><div class="empty">加载中…</div></div>
         </div>
 
         <div class="card" id="sec-posts" hidden>
-            <h2>待审核帖子</h2>
+            <h2>待审核帖子 <span class="cnt" id="cnt-posts"></span></h2>
             <div id="post-list"><div class="empty">加载中…</div></div>
         </div>
 
         <div class="card" id="sec-titles" hidden>
-            <h2>待审核头衔</h2>
+            <h2>待审核头衔 <span class="cnt" id="cnt-titles"></span></h2>
             <div id="title-list"><div class="empty">加载中…</div></div>
         </div>
 
@@ -221,6 +247,7 @@
         const box = document.getElementById('user-list');
         const res = await api('adminListUsers');
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
+        setCount('cnt-users', res.data.length);
         const owner = me.role === 'owner';
         box.innerHTML = res.data.map(u => {
             const banned = u.status === 'banned';
@@ -257,6 +284,7 @@
         const box = document.getElementById('req-list');
         const res = await api('adminRequests');
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        setCount('cnt-req', res.data.length);
         if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的注册申请</div>'; return; }
         box.innerHTML = res.data.map(u => `
             <div class="item">
@@ -272,6 +300,7 @@
         const box = document.getElementById('post-list');
         const res = await api('adminPosts');
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        setCount('cnt-posts', res.data.length);
         if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的帖子</div>'; return; }
         box.innerHTML = res.data.map(p => `
             <div class="item">
@@ -288,6 +317,7 @@
         const box = document.getElementById('title-list');
         const res = await api('adminTitles');
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        setCount('cnt-titles', res.data.length);
         if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的头衔申请</div>'; return; }
         box.innerHTML = res.data.map(t => `
             <div class="item">
