@@ -78,6 +78,13 @@
         #notice-btn.ring { animation: bell-ring .6s ease 3; border-color: var(--accent-color); color: var(--accent-color); }
 
         /* 个人主页（内置面板） */
+        #codex-overlay { position: fixed; inset: 0; z-index: 335; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        #codex-overlay.active { display: flex; transform: translateX(0); }
+        .codex-item { border-bottom: 1px solid var(--border-color); padding: 12px 0; }
+        .codex-item:last-of-type { border-bottom: none; }
+        .codex-name { margin-bottom: 6px; font-size: 15px; }
+        .codex-desc { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin: 0; }
+        .codex-foot { font-size: 12px; color: #777; margin-top: 14px; line-height: 1.7; }
         #notice-overlay { position: fixed; inset: 0; z-index: 310; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #notice-overlay.active { display: flex; transform: translateX(0); }
         #publish-overlay { position: fixed; inset: 0; z-index: 320; background: var(--bg-color); display: none; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; }
@@ -271,6 +278,7 @@
                 <h3>我的头衔</h3>
                 <div id="pf-titles"><div class="pf-empty">加载中…</div></div>
                 <button class="pf-save" onclick="pfSaveTitles()">保存头衔</button>
+                <button class="pf-save" style="background:transparent;border:1px solid #555;color:var(--text-main);margin-left:8px" onclick="openCodex()">头衔图鉴</button>
                 <p class="pf-hint" id="pf-title-hint"></p>
                 <div class="pf-msg" id="pf-title-msg"></div>
             </div>
@@ -335,6 +343,50 @@
             <div class="pf-card">
                 <h3>他发过的帖子</h3>
                 <div id="u-posts" class="pf-empty">加载中…</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="codex-overlay">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeCodex()">⬅ 返回</button>
+        </div>
+        <div class="pf-body">
+            <div class="pf-card">
+                <h3>📖 头衔图鉴</h3>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="badge badge-witness">🏅网站见证者</span></div>
+                    <p class="codex-desc">建站元老。2027 年 1 月 18 日之前注册的账号，登录后自动获得；之后注册的就没有了。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-gold">🍍StarsPro</span></div>
+                    <p class="codex-desc">在首页赞赏任意金额，到「头衔」页上传付款截图申请，站长审核通过后发放。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-diamond">🍍Stars++</span></div>
+                    <p class="codex-desc">赞赏 5 元及以上，同样上传付款截图申请。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-rainbow">自定义七彩称号</span></div>
+                    <p class="codex-desc">赞赏 10 元及以上，自己起名字（10 个字以内），提交时写上想要的称号。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="badge badge-xmas"><span class="badge-txt">🎄初雪之约</span></span></div>
+                    <p class="codex-desc">节日限定。圣诞活动期间开放获取，过期不补，名字里带「雪」的都是这一款。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-admin">🍍StarsMaster</span></div>
+                    <p class="codex-desc">网站建设者。参与过建站、写代码、做设计的成员，由站长直接发放，不能申请。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-admin">🍍StarsAdmin</span></div>
+                    <p class="codex-desc">管理员。负责审核和日常维护，由站长任命，同时会获得后台权限。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="text-gold">🏆名人堂</span></div>
+                    <p class="codex-desc">对校园墙有特别贡献的人，比如长期供稿、组织活动、帮忙推广，由站长授予。</p>
+                </div>
+                <p class="codex-foot">普通用户最多同时佩戴 3 个头衔，站长和管理员可以戴 4 个。</p>
             </div>
         </div>
     </div>
@@ -956,6 +1008,16 @@
             } catch (e) {
                 box.textContent = '网络请求失败';
             }
+        }
+
+        function openCodex() {
+            document.getElementById('codex-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCodex() {
+            document.getElementById('codex-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
 
         function openHelp() {
