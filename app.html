@@ -711,7 +711,7 @@
                             ${(staff || (me && c.username === me.username)) ? `<button class="del-comment" onclick="deleteComment('${c._id}','${postId}')">删除</button>` : ''}
                         </div>
                         <div class="comment-text">${esc(c.content)}</div>
-                        ${child ? '' : `<button class="reply-btn" onclick="replyTo('${c._id}','${esc(c.nickname)}')">回复</button>`}
+                        <button class="reply-btn" onclick="replyTo('${c.parent_id || c._id}','${esc(c.nickname)}')">回复</button>
                     </div>`;
                 }
                 const tops = d.data.filter((c) => !c.parent_id);
@@ -725,15 +725,18 @@
         }
 
         let replyParent = null;
+        let replyName = '';
 
         function replyTo(id, name) {
             replyParent = id;
+            replyName = name;
             const hint = document.getElementById('reply-hint');
             if (!hint) return;
             hint.hidden = false;
             hint.textContent = '正在回复 @' + name + '（点这里取消）';
             hint.onclick = function () {
                 replyParent = null;
+                replyName = '';
                 hint.hidden = true;
             };
             document.getElementById('comment-input').focus();
@@ -749,12 +752,13 @@
                 const r = await fetch(API_ROOT + '?action=addComment', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, postId, content: text, parentId: replyParent || '' })
+                    body: JSON.stringify({ token, postId, content: (replyName ? '回复 @' + replyName + '：' : '') + text, parentId: replyParent || '' })
                 });
                 const d = await r.json();
                 if (d.code === 200) {
                     input.value = '';
                     replyParent = null;
+                    replyName = '';
                     const hint = document.getElementById('reply-hint');
                     if (hint) hint.hidden = true;
                     loadComments(postId);
