@@ -133,9 +133,39 @@
         .help-btn { position: fixed; left: 16px; bottom: 92px; z-index: 96; background: rgba(255,118,117,.92); color: #121212; border: none; border-radius: 22px; padding: 10px 16px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.4); }
         #help-overlay { position: fixed; inset: 0; z-index: 330; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #help-overlay.active { display: flex; transform: translateX(0); }
+        .pf-bg { position: absolute; inset: 0; z-index: 0; display: none; overflow: hidden; pointer-events: none;
+            background: linear-gradient(180deg, #060a18 0%, #0c1733 42%, #16264d 62%, #dfeaff 100%); }
+        .pf-bg.on { display: block; }
+        .pf-bg::before { content: ''; position: absolute; inset: 0; opacity: .9;
+            background-image:
+                radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent 60%),
+                radial-gradient(1.4px 1.4px at 32% 9%, #fff, transparent 60%),
+                radial-gradient(1.8px 1.8px at 55% 15%, #fff, transparent 60%),
+                radial-gradient(1.2px 1.2px at 72% 7%, #fff, transparent 60%),
+                radial-gradient(1.6px 1.6px at 88% 22%, #fff, transparent 60%),
+                radial-gradient(1.3px 1.3px at 22% 33%, #fff, transparent 60%),
+                radial-gradient(1.4px 1.4px at 66% 30%, #fff, transparent 60%); }
+        .pf-bg::after { content: ''; position: absolute; inset: -20% 0 0; opacity: .85;
+            background-image: radial-gradient(circle, #ffffff 1.4px, transparent 2px); background-size: 34px 46px;
+            animation: bg-snow 9s linear infinite; }
+        @keyframes bg-snow { from { background-position: 0 0; } to { background-position: 24px 460px; } }
+        .pf-bg .moon { position: absolute; right: 12%; top: 8%; width: 64px; height: 64px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fffdf0, #ffe9a8 60%, #f5d27a); box-shadow: 0 0 40px rgba(255,235,170,.55); }
+        .pf-bg .ground { position: absolute; left: -10%; right: -10%; bottom: 0; height: 26%;
+            background: linear-gradient(180deg, #eef5ff 0%, #dbe7fb 60%, #c9d8f0 100%);
+            border-radius: 60% 60% 0 0 / 26% 26% 0 0; box-shadow: 0 -10px 30px rgba(220,235,255,.35); }
+        .pf-bg .tree { position: absolute; bottom: 20%; width: 0; height: 0; border-left: 34px solid transparent;
+            border-right: 34px solid transparent; border-bottom: 96px solid #0f3b28; filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
+        .pf-bg .tree::after { content: ''; position: absolute; left: -34px; top: 34px; width: 0; height: 0;
+            border-left: 44px solid transparent; border-right: 44px solid transparent; border-bottom: 80px solid #0b2f20; }
+        .pf-bg .t1 { left: 6%; transform: scale(.85); }
+        .pf-bg .t2 { left: 24%; transform: scale(1.15); bottom: 17%; }
+        .pf-bg .t3 { right: 8%; transform: scale(.95); bottom: 19%; }
+        .pf-bg .star { position: absolute; width: 10px; height: 10px; background: #ffe9a8; border-radius: 50%;
+            box-shadow: 0 0 12px #ffe9a8; }
         #profile-overlay { position: fixed; inset: 0; z-index: 300; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         #profile-overlay.active { display: flex; transform: translateX(0); }
-        .pf-body { max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
+        .pf-body { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
         .pf-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
         .pf-top { display: flex; align-items: center; gap: 14px; }
         .pf-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 1px solid #444; background: #161616; }
@@ -195,7 +225,7 @@
         #detail-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(18,18,18,0.72); backdrop-filter: blur(10px); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         body.light-theme #detail-overlay { background: rgba(244,246,249,0.85); }
         #detail-overlay.active { display: flex; transform: translateX(0); }
-        .detail-header { position: sticky; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
+        .detail-header { position: sticky; z-index: 2; top: 0; background: var(--header-bg); backdrop-filter: blur(10px); padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); z-index: 10; }
         .back-btn { background: var(--panel-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; }
         .detail-body { max-width: 800px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; }
         .detail-content { font-size: 16px; line-height: 1.8; }
@@ -298,6 +328,7 @@
     </div>
 
     <div id="profile-overlay">
+        <div class="pf-bg" id="pf-bg"><div class="moon"></div><div class="star" style="left:18%;top:22%"></div><div class="star" style="left:42%;top:12%"></div><div class="star" style="left:62%;top:26%"></div><i class="tree t1"></i><i class="tree t2"></i><i class="tree t3"></i><div class="ground"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeProfile()">⬅ 返回</button>
         </div>
@@ -322,6 +353,7 @@
                 <button class="pf-save" style="background:transparent;border:1px solid #555;color:var(--text-main);margin-left:8px" onclick="openCodex()">头衔图鉴</button>
                 <p class="pf-hint" id="pf-title-hint"></p>
                 <div id="pf-frames" style="margin-top:12px"></div>
+                <div id="pf-bgs" style="margin-top:12px"></div>
                 <div class="pf-msg" id="pf-title-msg"></div>
             </div>
             <div class="pf-card">
@@ -365,6 +397,7 @@
     </div>
 
     <div id="user-overlay">
+        <div class="pf-bg" id="u-bg"><div class="moon"></div><div class="star" style="left:18%;top:22%"></div><div class="star" style="left:42%;top:12%"></div><div class="star" style="left:62%;top:26%"></div><i class="tree t1"></i><i class="tree t2"></i><i class="tree t3"></i><div class="ground"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeUser()">⬅ 返回</button>
         </div>
@@ -1046,6 +1079,8 @@
                 document.getElementById('u-name').textContent = d.user.nickname;
                 document.getElementById('u-meta').textContent = '@' + d.user.username + (d.user.class_name ? ' · ' + d.user.class_name : '');
                 const titles = d.user.titles || [];
+                const ubg = document.getElementById('u-bg');
+                if (ubg) ubg.className = 'pf-bg' + (d.user.bg === 'xmas' ? ' on' : '');
                 document.getElementById('u-titles').innerHTML = titles.length
                     ? titles.map((t) => titleSpan(t)).join(' ')
                     : '<span style="font-size:12px;color:#777">还没有头衔</span>';
@@ -1129,6 +1164,8 @@
             document.getElementById('pf-meta').textContent = '@' + pfMe.username;
             pfRenderTitles();
             pfRenderFrames();
+            pfRenderBgs();
+            applyProfileBg(pfMe.bg);
             pfLoadPosts();
             pfLoadRecords();
             pfRenderDeleteArea();
@@ -1251,6 +1288,31 @@
             ring.className = 'ring' + (frame === 'xmas' ? ' ring-xmas ring-lg' : '');
             pfRenderFrames();
             fetchPosts();
+        }
+
+        function pfRenderBgs() {
+            const box = document.getElementById('pf-bgs');
+            if (!box) return;
+            const xmas = (pfMe.titles || []).some((t) => String(t).indexOf('初雪') !== -1 || String(t).indexOf('圣诞') !== -1);
+            const opts = [{ id: '', label: '默认' }].concat(xmas ? [{ id: 'xmas', label: '圣诞雪夜' }] : []);
+            box.innerHTML = '<p class="pf-hint" style="margin:0 0 8px">主页背景</p>' + opts.map((o) => {
+                const active = (pfMe.bg || '') === o.id;
+                return '<button class="pf-save" style="margin:0 6px 6px 0;background:' + (active ? 'var(--accent-color)' : 'transparent') +
+                    ';border:1px solid #555;color:' + (active ? '#121212' : 'var(--text-main)') + '" onclick="pfSetBg(\'' + o.id + '\')">' + o.label + '</button>';
+            }).join('');
+        }
+
+        async function pfSetBg(bg) {
+            const res = await pfApi('setBg', { bg });
+            if (res.code !== 200) { alert(res.message || '设置失败'); return; }
+            pfMe.bg = bg;
+            applyProfileBg(pfMe.bg);
+            pfRenderBgs();
+        }
+
+        function applyProfileBg(bg) {
+            const el = document.getElementById('pf-bg');
+            if (el) el.className = 'pf-bg' + (bg === 'xmas' ? ' on' : '');
         }
 
         async function pfLoadPosts() {            const box = document.getElementById('pf-posts');
