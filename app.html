@@ -61,6 +61,12 @@
         .avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); background: #222; }
         .avatar-lg { width: 46px; height: 46px; }
         @property --ring-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+                .ring { position: relative; display: inline-block; line-height: 0; }
+        .ring-sm { width: 34px; height: 34px; }
+        .ring-lg { width: 58px; height: 58px; }
+        .ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: relative; z-index: 1; }
+        .ring-xmas::before { content: ''; position: absolute; inset: -5px; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230b3d2a'/><stop offset='.5' stop-color='%231f7a4d'/><stop offset='1' stop-color='%230b3d2a'/></linearGradient></defs><circle cx='60' cy='60' r='52' fill='none' stroke='url(%23g)' stroke-width='15'/><circle cx='60' cy='60' r='59.5' fill='none' stroke='%23f4d06f' stroke-width='1.4' opacity='.85'/><circle cx='60' cy='60' r='44.5' fill='none' stroke='%23f4d06f' stroke-width='1' opacity='.5'/><g transform='rotate(0 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(45 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(90 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(135 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(180 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(225 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(270 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(315 60 60)'><g transform='translate(60 20)'><path d='M-4 0H4M-2 -3.5L2 3.5M-2 3.5L2 -3.5' stroke='%23e8fbff' stroke-width='1.5' stroke-linecap='round'/></g></g><g transform='rotate(22 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ff5f6d'/></g><g transform='rotate(67 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ffd166'/></g><g transform='rotate(112 60 60)'><circle cx='60' cy='47' r='2.6' fill='%237bdcff'/></g><g transform='rotate(157 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ff5f6d'/></g><g transform='rotate(202 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ffd166'/></g><g transform='rotate(247 60 60)'><circle cx='60' cy='47' r='2.6' fill='%237bdcff'/></g><g transform='rotate(292 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ff5f6d'/></g><g transform='rotate(337 60 60)'><circle cx='60' cy='47' r='2.6' fill='%23ffd166'/></g></svg>") center/100% 100% no-repeat; z-index: 2; pointer-events: none; filter: drop-shadow(0 0 6px rgba(120,220,160,.45)); animation: xmas-glow 3s ease-in-out infinite alternate; }
+        @keyframes xmas-glow { from { filter: drop-shadow(0 0 3px rgba(120,220,160,.3)); } to { filter: drop-shadow(0 0 9px rgba(160,255,200,.65)); } }
         .frame-gold, .frame-diamond {
             border: 3px solid transparent;
             background-origin: border-box;
@@ -286,7 +292,7 @@
         <div class="pf-body">
             <div class="pf-card">
                 <div class="pf-top">
-                    <img id="pf-avatar" class="pf-avatar" alt="">
+                    <span id="pf-avatar-ring" class="ring"><img id="pf-avatar" class="pf-avatar" alt=""></span>
                     <div>
                         <div class="pf-name" id="pf-name">未登录</div>
                         <div class="pf-meta" id="pf-meta"></div>
@@ -513,8 +519,11 @@
 
         function avatarHtml(src, big, frame) {
             if (!src) return '';
-            const cls = 'avatar' + (big ? ' avatar-lg' : '') + (frame ? ' frame-' + frame : '');
-            return '<img class="' + cls + '" src="' + esc(src) + '" alt="">';
+            const img = '<img class="avatar' + (big ? ' avatar-lg' : '') + (frame && frame !== 'xmas' ? ' frame-' + frame : '') + '" src="' + esc(src) + '" alt="">';
+            if (frame === 'xmas') {
+                return '<span class="ring ring-xmas ' + (big ? 'ring-lg' : 'ring-sm') + '">' + img + '</span>';
+            }
+            return img;
         }
 
         async function resolveImages(list) {
@@ -1100,7 +1109,9 @@
             const res = await pfApi('me');
             if (res.code !== 200) { location.href = './account.html'; return; }
             pfMe = res.user;
-            document.getElementById('pf-avatar').className = 'pf-avatar' + (pfMe.frame ? ' frame-' + pfMe.frame : '');
+            document.getElementById('pf-avatar').className = 'pf-avatar' + (pfMe.frame && pfMe.frame !== 'xmas' ? ' frame-' + pfMe.frame : '');
+            const ring = document.getElementById('pf-avatar-ring');
+            ring.className = 'ring' + (pfMe.frame === 'xmas' ? ' ring-xmas' : '') + (pfMe.frame === 'xmas' ? ' ring-lg' : '');
             document.getElementById('pf-avatar').src = pfMe.avatar || PF_DEFAULT_AVATAR;
             document.getElementById('pf-name').textContent = pfMe.nickname;
             document.getElementById('pf-meta').textContent = '@' + pfMe.username;
@@ -1204,10 +1215,13 @@
             const frames = pfMe.frames || [];
             if (!frames.length) { box.innerHTML = ''; return; }
             const src = esc(pfMe.avatar || PF_DEFAULT_AVATAR);
-            const opts = [{ id: '', label: '不戴' }].concat(frames.map((f) => ({ id: f, label: f === 'gold' ? '金色' : '钻石' })));
+            const opts = [{ id: '', label: '不戴' }].concat(frames.map((f) => ({ id: f, label: f === 'gold' ? '金色' : (f === 'diamond' ? '钻石' : '圣诞') })));
             box.innerHTML = '<p class="pf-hint" style="margin:0 0 8px">头像框（购买头衔附赠）</p>' +
                 '<div class="pf-frame-row">' + opts.map((o) => {
                     const active = pfMe.frame === o.id;
+                    if (o.id === 'xmas') {
+                        return '<div class="pf-frame-wrap" onclick="pfSetFrame(\'xmas\')"><span class="ring ring-xmas ring-lg" style="opacity:' + (active ? 1 : .55) + '"><img class="pf-frame-opt" src="' + src + '" alt=""></span><span>' + o.label + '</span></div>';
+                    }
                     const cls = 'pf-frame-opt' + (o.id ? ' frame-' + o.id : '') + (active ? ' active' : '');
                     return '<div class="pf-frame-wrap" onclick="pfSetFrame(\'' + o.id + '\')">' +
                         '<img class="' + cls + '" src="' + src + '" alt="">' +
@@ -1220,7 +1234,9 @@
             if (res.code !== 200) { alert(res.message || '设置失败'); return; }
             pfMe.frame = frame;
             const av = document.getElementById('pf-avatar');
-            av.className = 'pf-avatar' + (frame ? ' frame-' + frame : '');
+            av.className = 'pf-avatar' + (frame && frame !== 'xmas' ? ' frame-' + frame : '');
+            const ring = document.getElementById('pf-avatar-ring');
+            ring.className = 'ring' + (frame === 'xmas' ? ' ring-xmas ring-lg' : '');
             pfRenderFrames();
             fetchPosts();
         }
