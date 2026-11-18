@@ -125,6 +125,8 @@
         .text-diamond { background-image: linear-gradient(90deg, #74b9ff, #e0f7fa, #a29bfe, #74b9ff); }
         .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
+        .badge-witness { background: linear-gradient(135deg, #ff9a3c, #ff5f6d); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 8px rgba(255,120,80,.5); }
         @keyframes title-flow {
             0% { background-position: 0% 50%; }
             100% { background-position: -200% 50%; }
@@ -393,9 +395,16 @@
             return 'text-rainbow';
         }
 
+        function titleSpan(t) {
+            if (t.indexOf('见证者') !== -1) {
+                return '<span class="badge badge-witness">' + esc(t) + '</span>';
+            }
+            return '<span class="' + titleClass(t) + '">' + esc(t) + '</span>';
+        }
+
         function titleHtml(title) {
             if (!title) return '';
-            return ' <span class="' + titleClass(title) + '">' + esc(title) + '</span>';
+            return ' ' + titleSpan(title);
         }
 
         function titlesHtml(post) {
@@ -624,7 +633,7 @@
                         <div class="comment-head">
                             ${c.avatar ? `<img class="avatar" src="${esc(c.avatar)}" alt="">` : ''}
                             <span class="comment-name">${esc(c.nickname)}</span>
-                            ${(c.titles || []).map((t) => `<span class="${titleClass(t)}">${esc(t)}</span>`).join('')}
+                            ${(c.titles || []).map((t) => `${titleSpan(t)}`).join('')}
                             <span style="margin-left:auto">${new Date(c.created_at).toLocaleString('zh-CN', { hour12: false })}</span>
                             ${(staff || (me && c.username === me.username)) ? `<button class="del-comment" onclick="deleteComment('${c._id}','${postId}')">删除</button>` : ''}
                         </div>
@@ -1031,6 +1040,7 @@
         }
 
         function titleRank(t) {
+            if (t.indexOf('见证者') !== -1) return 0;
             if (t.indexOf('StarsPro') >= 0) return 1;
             if (t.indexOf('Stars++') >= 0) return 2;
             if (/Master|Admin/.test(t)) return 4;
@@ -1049,7 +1059,7 @@
             box.innerHTML = owned.map((t) => `
                 <label class="pf-title-opt">
                     <input type="checkbox" value="${esc(t)}" ${equipped.indexOf(t) >= 0 ? 'checked' : ''}>
-                    <span class="${titleClass(t)}">${esc(t)}</span>
+                    ${titleSpan(t)}
                 </label>`).join('');
             document.getElementById('pf-title-hint').textContent = '最多同时展示 ' + pfTitleLimit() + ' 个';
         }
