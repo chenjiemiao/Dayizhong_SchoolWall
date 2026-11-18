@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>达一中 · 校园墙 v1.7</title>
+    <title>达一中 · 校园墙 v1.8</title>
     
     <style>
         /* ================= 核心变量与主题 ================= */
@@ -228,12 +228,15 @@
     <div class="container" id="home-container">
         <div class="filter-bar" id="filter-bar">
             <button class="filter-btn active" data-filter="全部">🌟 全部</button>
-            <button class="filter-btn" data-filter="通知">📢 通知</button>
-            <button class="filter-btn" data-filter="日常">💬 日常</button>
-            <button class="filter-btn" data-filter="表白">❤️ 表白</button>
-            <button class="filter-btn" data-filter="交友">🤝 交友</button>
-            <button class="filter-btn" data-filter="寻物">🔍 寻物</button>
-            <button class="filter-btn" data-filter="反馈">📮 反馈</button>
+            <button class="filter-btn" data-filter="校园通知">📢 校园通知</button>
+            <button class="filter-btn" data-filter="日常分享">💬 日常分享</button>
+            <button class="filter-btn" data-filter="表白专区">❤️ 表白专区</button>
+            <button class="filter-btn" data-filter="交友广场">🤝 交友广场</button>
+            <button class="filter-btn" data-filter="寻物启事">🔍 寻物启事</button>
+            <button class="filter-btn" data-filter="意见反馈">📮 意见反馈</button>
+            <button class="filter-btn" data-filter="挂人避雷">⚠️ 挂人避雷</button>
+            <button class="filter-btn" data-filter="约稿专区">🎨 约稿专区</button>
+            <button class="filter-btn" data-filter="二手市场">🛒 二手市场</button>
         </div>
         <div id="posts-container"></div>
     </div>
@@ -388,6 +391,9 @@
                 .catch(() => {});
         })();
         
+        const CAT_MAP = { '通知': '校园通知', '日常': '日常分享', '表白': '表白专区', '交友': '交友广场', '寻物': '寻物启事', '反馈': '意见反馈' };
+        function catOf(p) { return CAT_MAP[p.category] || p.category; }
+
         let currentFilter = '全部';
         let currentPostId = '';
         let wallData = []; // 用来存从数据库拉下来的数据
@@ -496,7 +502,7 @@
             }
 
             let sortedData = [...wallData].sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-            const filteredData = currentFilter === '全部' ? sortedData : sortedData.filter(item => item.category === currentFilter);
+            const filteredData = currentFilter === '全部' ? sortedData : sortedData.filter(item => catOf(item) === currentFilter);
 
             filteredData.forEach(item => {
                 const card = document.createElement('div');
@@ -508,7 +514,7 @@
 
                 card.innerHTML = `
                     <div class="post-header">
-                        <span class="post-tag">${item.category}</span>
+                        <span class="post-tag">${catOf(item)}</span>
                         <span>${item.date}</span>
                     </div>
                     <div class="post-author">
