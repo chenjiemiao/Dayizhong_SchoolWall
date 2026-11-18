@@ -413,13 +413,14 @@
         }
 
         function titleSpan(t) {
-            if (t.indexOf('见证者') !== -1) {
-                return '<span class="badge badge-witness">' + esc(t) + '</span>';
+            const name = String(t).split('圣诞限定').join('初雪之约');
+            if (name.indexOf('见证者') !== -1) {
+                return '<span class="badge badge-witness">' + esc(name) + '</span>';
             }
-            if (t.indexOf('雪') !== -1) {
-                return '<span class="badge badge-xmas"><span class="badge-txt">' + esc(t) + '</span></span>';
+            if (name.indexOf('雪') !== -1 || String(t).indexOf('圣诞') !== -1) {
+                return '<span class="badge badge-xmas"><span class="badge-txt">' + esc(name) + '</span></span>';
             }
-            return '<span class="' + titleClass(t) + '">' + esc(t) + '</span>';
+            return '<span class="' + titleClass(name) + '">' + esc(name) + '</span>';
         }
 
         function titleHtml(title) {
