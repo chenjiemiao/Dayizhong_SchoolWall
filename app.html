@@ -136,6 +136,8 @@
         .pf-bg { position: absolute; inset: 0; z-index: 0; display: none; overflow: hidden; pointer-events: none;
             background: linear-gradient(180deg, #060a18 0%, #0c1733 42%, #16264d 62%, #dfeaff 100%); }
         .pf-bg.on { display: block; }
+        .pf-bg .bgvid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .pf-bg .bgmask { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,10,24,.55) 0%, rgba(6,10,24,.72) 55%, rgba(6,10,24,.9) 100%); }
         .pf-bg::before { content: ''; position: absolute; inset: 0; opacity: .9;
             background-image:
                 radial-gradient(1.6px 1.6px at 12% 18%, #fff, transparent 60%),
@@ -328,7 +330,7 @@
     </div>
 
     <div id="profile-overlay">
-        <div class="pf-bg" id="pf-bg"><div class="moon"></div><div class="star" style="left:18%;top:22%"></div><div class="star" style="left:42%;top:12%"></div><div class="star" style="left:62%;top:26%"></div><i class="tree t1"></i><i class="tree t2"></i><i class="tree t3"></i><div class="ground"></div></div>
+        <div class="pf-bg" id="pf-bg"><video class="bgvid" muted loop playsinline preload="none"></video><div class="bgmask"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeProfile()">⬅ 返回</button>
         </div>
@@ -397,7 +399,7 @@
     </div>
 
     <div id="user-overlay">
-        <div class="pf-bg" id="u-bg"><div class="moon"></div><div class="star" style="left:18%;top:22%"></div><div class="star" style="left:42%;top:12%"></div><div class="star" style="left:62%;top:26%"></div><i class="tree t1"></i><i class="tree t2"></i><i class="tree t3"></i><div class="ground"></div></div>
+        <div class="pf-bg" id="u-bg"><video class="bgvid" muted loop playsinline preload="none"></video><div class="bgmask"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeUser()">⬅ 返回</button>
         </div>
@@ -1080,7 +1082,16 @@
                 document.getElementById('u-meta').textContent = '@' + d.user.username + (d.user.class_name ? ' · ' + d.user.class_name : '');
                 const titles = d.user.titles || [];
                 const ubg = document.getElementById('u-bg');
-                if (ubg) ubg.className = 'pf-bg' + (d.user.bg === 'xmas' ? ' on' : '');
+                if (ubg) {
+                    const uv = ubg.querySelector('video');
+                    ubg.className = 'pf-bg' + (d.user.bg === 'xmas' ? ' on' : '');
+                    if (uv) {
+                        if (d.user.bg === 'xmas') {
+                            if (!uv.getAttribute('src')) uv.setAttribute('src', XMAS_BG_VIDEO);
+                            uv.play().catch(function () {});
+                        } else { uv.pause(); }
+                    }
+                }
                 document.getElementById('u-titles').innerHTML = titles.length
                     ? titles.map((t) => titleSpan(t)).join(' ')
                     : '<span style="font-size:12px;color:#777">还没有头衔</span>';
@@ -1310,9 +1321,22 @@
             pfRenderBgs();
         }
 
+        const XMAS_BG_VIDEO = 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/xmas-bg.mp4';
+
         function applyProfileBg(bg) {
             const el = document.getElementById('pf-bg');
-            if (el) el.className = 'pf-bg' + (bg === 'xmas' ? ' on' : '');
+            if (!el) return;
+            const v = el.querySelector('video');
+            if (bg === 'xmas') {
+                el.className = 'pf-bg on';
+                if (v) {
+                    if (!v.getAttribute('src')) v.setAttribute('src', XMAS_BG_VIDEO);
+                    v.play().catch(function () {});
+                }
+            } else {
+                el.className = 'pf-bg';
+                if (v) v.pause();
+            }
         }
 
         async function pfLoadPosts() {            const box = document.getElementById('pf-posts');
