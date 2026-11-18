@@ -372,7 +372,7 @@
                 </div>
                 <div class="codex-item">
                     <div class="codex-name"><span class="badge badge-xmas"><span class="badge-txt">🎄初雪之约</span></span></div>
-                    <p class="codex-desc">节日限定。圣诞活动期间开放获取，过期不补，名字里带「雪」的都是这一款。</p>
+                    <p class="codex-desc">圣诞节限定。只在圣诞活动期间发放，活动结束就不能再拿，平时无法申请。</p>
                 </div>
                 <div class="codex-item">
                     <div class="codex-name"><span class="text-admin">🍍StarsMaster</span></div>
@@ -469,7 +469,7 @@
             if (name.indexOf('见证者') !== -1) {
                 return '<span class="badge badge-witness">' + esc(name) + '</span>';
             }
-            if (name.indexOf('雪') !== -1 || String(t).indexOf('圣诞') !== -1) {
+            if (name.indexOf('初雪') !== -1 || String(t).indexOf('圣诞') !== -1) {
                 return '<span class="badge badge-xmas"><span class="badge-txt">' + esc(name) + '</span></span>';
             }
             return '<span class="' + titleClass(name) + '">' + esc(name) + '</span>';
