@@ -64,6 +64,7 @@
                 .ring { position: relative; display: inline-block; line-height: 0; }
         .ring-sm { width: 26px; height: 26px; }
         .ring-lg { width: 64px; height: 64px; }
+        #pf-avatar-ring.ring-lg { width: 112px; height: 112px; }
         .ring-xmas img { width: 92%; height: 92%; }
         .ring-xmas { overflow: visible; }
         .ring-xmas { display: inline-flex; align-items: center; justify-content: center; }
@@ -196,7 +197,7 @@
         .pf-body { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; padding: 20px; width: 100%; box-sizing: border-box; padding-bottom: 60px; }
         .pf-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
         .pf-top { display: flex; align-items: center; gap: 14px; }
-        .pf-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 1px solid #444; background: #161616; }
+        .pf-avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid #444; background: #161616; }
         .pf-name { font-size: 18px; font-weight: bold; }
         .pf-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
         .pf-titles { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -361,9 +362,8 @@
         <div class="controls">
             <button class="btn-icon" onclick="openPublish()" style="margin-right:8px;border-color:var(--accent-color);color:var(--accent-color)">✍️ 发帖</button>
             <button class="btn-icon" id="notice-btn" onclick="openNotices()" style="margin-right:8px;">🔔</button>
-            <button class="btn-icon" id="account-btn" onclick="openProfile()" style="margin-right:8px;">👤 登录</button>
-            <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()" style="margin-right:8px;">🌙 暗黑</button>
-            <button class="btn-icon" id="checkin-btn" onclick="openCheckin()">📅 签到</button>
+            <button class="btn-icon" id="checkin-btn" onclick="openCheckin()" style="margin-right:8px;">📅 签到</button>
+            <button class="btn-icon" id="account-btn" onclick="openProfile()">👤 登录</button>
         </div>
     </header>
 
@@ -576,6 +576,7 @@
     <div class="side-actions">
         <a class="side-btn" href="./title.html" title="头衔">✨</a>
         <button class="side-btn" onclick="openSponsor()" title="赞助">🍍</button>
+        <button class="side-btn" id="theme-toggle" onclick="toggleTheme()" title="主题">🌙</button>
         <div class="music-btn" id="music-toggle" onclick="toggleMusic()" title="音乐">🔇</div>
     </div>
     <audio id="bgm" loop preload="none">
@@ -990,11 +991,11 @@
         });
 
         const themeBtn = document.getElementById('theme-toggle');
-        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-theme'); themeBtn.innerHTML = '☀️ 明亮'; }
+        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-theme'); themeBtn.innerHTML = '☀️'; }
         function toggleTheme() {
             document.body.classList.toggle('light-theme');
-            if (document.body.classList.contains('light-theme')) { localStorage.setItem('theme', 'light'); themeBtn.innerHTML = '☀️ 明亮'; } 
-            else { localStorage.setItem('theme', 'dark'); themeBtn.innerHTML = '🌙 暗黑'; }
+            if (document.body.classList.contains('light-theme')) { localStorage.setItem('theme', 'light'); themeBtn.innerHTML = '☀️'; } 
+            else { localStorage.setItem('theme', 'dark'); themeBtn.innerHTML = '🌙'; }
         }
 
         const bgm = document.getElementById('bgm');
