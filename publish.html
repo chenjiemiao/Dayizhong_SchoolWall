@@ -68,16 +68,13 @@
     <p class="sub">内容需经过站长人工审核，通过后才会出现。</p>
 
     <div class="card">
-        <div class="q">01 请填写您的班级</div>
-        <p class="tip">班级会和帖子一起展示；勾选匿名就不显示。</p>
-        <input id="class-name" placeholder="比如：9班">
 
         <label class="anon-row">
             <input type="checkbox" id="anonymous" onchange="onAnonChange()">
-            <span>匿名发布（不显示昵称和班级）</span>
+            <span>匿名发布（不显示昵称和班级；不勾就会带上你资料里的班级）</span>
         </label>
 
-        <div class="q">02 请选择您想发布的主题</div>
+        <div class="q">01 请选择您想发布的主题</div>
         <select id="category">
             <option value="寻物启事">寻物启事</option>
             <option value="日常分享">日常分享</option>
@@ -89,14 +86,14 @@
             <option value="二手市场">🛒 二手市场</option>
         </select>
 
-        <div class="q">04 标题</div>
+        <div class="q">02 标题</div>
         <input id="title" placeholder="一句话说清楚这条帖子讲什么">
 
-        <div class="q">05 请输入您要发布的主题的正文</div>
+        <div class="q">03 请输入您要发布的主题的正文</div>
         <p class="tip">需要加粗：&lt;加粗&gt;这段内容需要加粗&lt;/加粗&gt;</p>
         <textarea id="content" placeholder="请输入"></textarea>
 
-        <div class="q">06 携带图片 <small>可选，最多 6 张</small></div>
+        <div class="q">04 携带图片 <small>可选，最多 6 张</small></div>
         <p class="tip">
             点下面按钮从相册选，会自动压缩。<br>
             正文里写 &lt;p1&gt; 就会在那个位置显示图片。
@@ -107,7 +104,7 @@
         </div>
         <div id="thumbs" class="thumbs"></div>
 
-        <div class="q">07 备注内容 <small>非必要情况勿填</small></div>
+        <div class="q">05 备注内容 <small>非必要情况勿填</small></div>
         <input id="note" placeholder="只有站长看得到">
 
         <button class="btn" onclick="submitPost()">提交，等站长审核</button>
@@ -139,25 +136,14 @@
         return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     }
 
-    function onAnonChange() {
-        const anon = document.getElementById('anonymous').checked;
-        const c = document.getElementById('class-name');
-        c.disabled = anon;
-        if (anon) c.value = '';
-    }
+    function onAnonChange() {}
 
     async function submitPost() {
         const anonymous = document.getElementById('anonymous').checked;
-        const className = document.getElementById('class-name').value.trim();
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
         const msg = document.getElementById('msg');
 
-        if (!anonymous && !className) {
-            msg.textContent = '不匿名的话，班级必须填';
-            msg.className = 'msg err';
-            return;
-        }
         if (!title) {
             msg.textContent = '标题不能空';
             msg.className = 'msg err';
@@ -175,7 +161,7 @@
             category: document.getElementById('category').value,
             content,
             images: imagesData,
-            className: anonymous ? '' : className,
+
             note: document.getElementById('note').value.trim(),
             anonymous
         });
