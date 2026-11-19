@@ -78,24 +78,27 @@
             background: url('https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/xmas-frame.png') center / 100% 100% no-repeat;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); animation: xmas-glow 3s ease-in-out infinite alternate; }
         @keyframes xmas-glow { from { filter: drop-shadow(0 0 3px rgba(120,220,160,.3)); } to { filter: drop-shadow(0 0 9px rgba(160,255,200,.65)); } }
-        .frame-gold,         .frame-hundred { border: 4px solid transparent; background-origin: border-box; background-clip: content-box, border-box;
-            background-image: linear-gradient(#1e1e1e, #1e1e1e), conic-gradient(from var(--ring-angle), #8a3b00, #ffcf4d, #fff3c4, #ff8f3a, #8a3b00);
-            box-shadow: 0 0 16px rgba(255,170,60,.75), inset 0 0 6px rgba(255,220,150,.5); animation: ring-spin 4s linear infinite; }
-        .frame-diamond {
-            border: 3px solid transparent;
+        img.frame-gold, img.frame-diamond, img.frame-hundred {
+            border: 4px solid transparent;
             background-origin: border-box;
             background-clip: content-box, border-box;
             animation: ring-spin 5s linear infinite;
         }
-        .frame-gold {
+        img.frame-gold {
             background-image: linear-gradient(#1e1e1e, #1e1e1e),
                 conic-gradient(from var(--ring-angle), #7a4a00, #ffe08a, #fff9d6, #ffcf4d, #7a4a00);
             box-shadow: 0 0 12px rgba(255, 205, 80, .55), inset 0 0 4px rgba(255, 240, 180, .35);
         }
-        .frame-diamond {
+        img.frame-diamond {
             background-image: linear-gradient(#1e1e1e, #1e1e1e),
                 conic-gradient(from var(--ring-angle), #3f6fb5, #a8e6ff, #ffffff, #b7a6ff, #3f6fb5);
             box-shadow: 0 0 14px rgba(150, 200, 255, .6), inset 0 0 4px rgba(220, 240, 255, .35);
+        }
+        img.frame-hundred {
+            background-image: linear-gradient(#1e1e1e, #1e1e1e),
+                conic-gradient(from var(--ring-angle), #8a3b00, #ffcf4d, #fff3c4, #ff8f3a, #8a3b00);
+            box-shadow: 0 0 16px rgba(255, 170, 60, .75), inset 0 0 6px rgba(255, 220, 150, .5);
+            animation-duration: 4s;
         }
         @keyframes ring-spin { to { --ring-angle: 360deg; } }
         @keyframes ring-sway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(2.2deg); } }
