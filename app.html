@@ -331,6 +331,8 @@
             .codex-item.locked { opacity: .45; }
         .codex-badge { float: right; font-size: 11px; color: #55efc4; border: 1px solid rgba(85,239,196,.4); border-radius: 6px; padding: 1px 6px; }
         .codex-badge.off { color: #777; border-color: #444; }
+            .codex-demo { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 12px; margin: 8px 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; min-height: 44px; }
+        .codex-demo .pf-avatar { width: 44px; height: 44px; }
     </style>
 </head>
 <body>
@@ -1217,7 +1219,8 @@
             box.innerHTML = TITLE_CODEX.map(function (t) {
                 var has = owned.indexOf(t.name) !== -1;
                 return '<div class="codex-item' + (has ? '' : ' locked') + '">' +
-                    '<div class="codex-name">' + titleSpan(t.name) + codexStatus(has) + '</div>' +
+                    '<div class="codex-name">' + codexStatus(has) + '</div>' +
+                    '<div class="codex-demo">chenjiemiao ' + titleSpan(t.name) + '</div>' +
                     '<p class="codex-desc">' + t.desc + '</p></div>';
             }).join('');
         }
@@ -1228,8 +1231,13 @@
             var owned = (pfMe && pfMe.frames) || [];
             box.innerHTML = FRAME_CODEX.map(function (f) {
                 var has = owned.indexOf(f.id) !== -1;
+                var src = esc((pfMe && pfMe.avatar) || PF_DEFAULT_AVATAR);
+                var demo = f.id === 'xmas'
+                    ? '<span class="ring ring-xmas ring-lg"><img class="pf-avatar" src="' + src + '" alt=""></span>'
+                    : '<img class="pf-avatar frame-' + f.id + '" src="' + src + '" alt="">';
                 return '<div class="codex-item' + (has ? '' : ' locked') + '">' +
                     '<div class="codex-name"><span class="frame-tag f-' + f.id + '">' + f.name + '</span>' + codexStatus(has) + '</div>' +
+                    '<div class="codex-demo">' + demo + '</div>' +
                     '<p class="codex-desc">' + f.desc + '</p></div>';
             }).join('');
         }
