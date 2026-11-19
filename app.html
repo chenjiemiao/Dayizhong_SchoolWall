@@ -77,7 +77,10 @@
             background: url('https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/xmas-frame.png') center / 100% 100% no-repeat;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); animation: xmas-glow 3s ease-in-out infinite alternate; }
         @keyframes xmas-glow { from { filter: drop-shadow(0 0 3px rgba(120,220,160,.3)); } to { filter: drop-shadow(0 0 9px rgba(160,255,200,.65)); } }
-        .frame-gold, .frame-diamond {
+        .frame-gold,         .frame-hundred { border: 4px solid transparent; background-origin: border-box; background-clip: content-box, border-box;
+            background-image: linear-gradient(#1e1e1e, #1e1e1e), conic-gradient(from var(--ring-angle), #8a3b00, #ffcf4d, #fff3c4, #ff8f3a, #8a3b00);
+            box-shadow: 0 0 16px rgba(255,170,60,.75), inset 0 0 6px rgba(255,220,150,.5); animation: ring-spin 4s linear infinite; }
+        .frame-diamond {
             border: 3px solid transparent;
             background-origin: border-box;
             background-clip: content-box, border-box;
@@ -318,6 +321,12 @@
             .btn-icon { padding: 5px 9px; font-size: 12px; margin-right: 0 !important; }
             .checkin-pop { right: 8px; width: min(268px, calc(100vw - 20px)); }
         }
+            .frame-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; border: 1px solid #444; color: var(--text-muted); margin-right: 4px; }
+        .frame-tag.f-gold { border-color: #f9ca24; color: #f9ca24; }
+        .frame-tag.f-diamond { border-color: #74b9ff; color: #74b9ff; }
+        .frame-tag.f-xmas { border-color: #55efc4; color: #55efc4; }
+        .frame-tag.f-hundred { border-color: #ff9a3c; color: #ff9a3c; }
+        .pf-frames-row { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
     </style>
 </head>
 <body>
@@ -471,11 +480,12 @@
         <div class="pf-body">
             <div class="pf-card">
                 <div class="pf-top">
-                    <img id="u-avatar" class="pf-avatar" alt="">
+                    <span id="u-avatar-wrap" class="ring"><img id="u-avatar" class="pf-avatar" alt=""></span>
                     <div>
                         <div class="pf-name" id="u-name"></div>
                         <div class="pf-meta" id="u-meta"></div>
                         <div class="pf-titles" id="u-titles"></div>
+                        <div class="pf-frames-row" id="u-frames"></div>
                     </div>
                 </div>
                 <div style="margin-top:12px">
@@ -1152,7 +1162,20 @@
                 });
                 const d = await r.json();
                 if (d.code !== 200) { box.textContent = d.message || '加载失败'; return; }
-                document.getElementById('u-avatar').src = d.user.avatar || PF_DEFAULT_AVATAR;
+                var uav = document.getElementById('u-avatar');
+                var wrap = document.getElementById('u-avatar-wrap');
+                if (wrap) {
+                    wrap.className = 'ring' + (d.user.frame === 'xmas' ? ' ring-xmas ring-lg' : '');
+                    wrap.style.display = 'inline-flex';
+                }
+                uav.className = 'pf-avatar' + (d.user.frame && d.user.frame !== 'xmas' ? ' frame-' + d.user.frame : '');
+                uav.src = d.user.avatar || PF_DEFAULT_AVATAR;
+                var fl = document.getElementById('u-frames');
+                if (fl) {
+                    var names = { gold: '金色框', diamond: '钻石框', xmas: '圣诞框', hundred: '百日框' };
+                    var owned = d.user.frames || [];
+                    fl.innerHTML = owned.length ? owned.map(function (f) { return '<span class="frame-tag f-' + f + '">' + (names[f] || f) + '</span>'; }).join('') : '<span style="font-size:12px;color:#777">没有头像框</span>';
+                }
                 document.getElementById('u-name').textContent = d.user.nickname;
                 document.getElementById('u-meta').textContent = '@' + d.user.username + (d.user.class_name ? ' · ' + d.user.class_name : '');
                 const titles = d.user.titles || [];
@@ -1399,7 +1422,7 @@
             const frames = pfMe.frames || [];
             if (!frames.length) { box.innerHTML = ''; return; }
             const src = esc(pfMe.avatar || PF_DEFAULT_AVATAR);
-            const opts = [{ id: '', label: '不戴' }].concat(frames.map((f) => ({ id: f, label: f === 'gold' ? '金色' : (f === 'diamond' ? '钻石' : '圣诞') })));
+            const opts = [{ id: '', label: '不戴' }].concat(frames.map((f) => ({ id: f, label: f === 'gold' ? '金色' : (f === 'diamond' ? '钻石' : (f === 'hundred' ? '百日' : '圣诞')) })));
             box.innerHTML = '<p class="pf-hint" style="margin:0 0 8px">头像框（购买头衔附赠）</p>' +
                 '<div class="pf-frame-row">' + opts.map((o) => {
                     const active = pfMe.frame === o.id;
