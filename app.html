@@ -336,6 +336,7 @@
         .codex-badge.off { color: #777; border-color: #444; }
             .codex-demo { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 12px; margin: 8px 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; min-height: 44px; }
         .codex-demo .pf-avatar { width: 44px; height: 44px; }
+            .notice-img { width: 100%; max-width: 260px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -1676,6 +1677,7 @@
                 <div class="pf-post">
                     <div class="m">${new Date(n.created_at).toLocaleString('zh-CN', { hour12: false })}</div>
                     <div class="t">${esc(n.text)}</div>
+                    ${n.image ? `<img class="notice-img" src="${esc(n.image)}" alt="">` : ''}
                 </div>`).join('');
             localStorage.setItem('notice_seen', String(Date.now()));
             document.getElementById('notice-btn').textContent = '🔔';
