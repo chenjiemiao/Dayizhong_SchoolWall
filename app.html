@@ -381,6 +381,12 @@
                 <div id="pf-bgs" style="margin-top:12px"></div>
                 <div class="pf-msg" id="pf-title-msg"></div>
             </div>
+            <div class="pf-card" id="pf-checkin-card">
+                <h3>每日签到</h3>
+                <div class="pf-meta" id="pf-checkin-info">—</div>
+                <div style="margin-top:10px"><button class="pf-save" id="pf-checkin-btn" onclick="pfCheckin()">签到</button></div>
+                <p class="pf-hint" id="pf-checkin-hint">连续签到别断，累计满 100 天可得「🏅百日守候」</p>
+            </div>
             <div class="pf-card">
                 <h3>我的申请记录</h3>
                 <div id="pf-records"><div class="pf-empty">加载中…</div></div>
@@ -1190,6 +1196,7 @@
             pfRenderTitles();
             pfRenderFrames();
             pfRenderBgs();
+            pfRenderCheckin();
             applyProfileBg(pfMe.bg);
             pfLoadPosts();
             pfLoadRecords();
@@ -1313,6 +1320,31 @@
             ring.className = 'ring' + (frame === 'xmas' ? ' ring-xmas ring-lg' : '');
             pfRenderFrames();
             fetchPosts();
+        }
+
+        function beijingToday() {
+            var d = new Date(Date.now() + 8 * 3600 * 1000);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function pfRenderCheckin() {
+            var info = document.getElementById('pf-checkin-info');
+            var btn = document.getElementById('pf-checkin-btn');
+            if (!info) return;
+            info.textContent = '连续 ' + (pfMe.checkin_streak || 0) + ' 天 · 累计 ' + (pfMe.checkin_total || 0) + ' 天';
+            var done = pfMe.checkin_last === beijingToday();
+            if (btn) { btn.disabled = done; btn.textContent = done ? '今天已签到' : '签到'; }
+        }
+
+        async function pfCheckin() {
+            var res = await pfApi('checkin');
+            if (res.code !== 200) { alert(res.message || '签到失败'); return; }
+            pfMe.checkin_streak = res.streak;
+            pfMe.checkin_total = res.total;
+            pfMe.checkin_last = beijingToday();
+            pfRenderCheckin();
+            alert(res.message);
+            if (res.gotTitle) fetchPosts();
         }
 
         function pfRenderBgs() {
