@@ -118,8 +118,8 @@
         #notice-btn.ring { animation: bell-ring .6s ease 3; border-color: var(--accent-color); color: var(--accent-color); }
 
         /* 个人主页（内置面板） */
-        #codex-overlay { position: fixed; inset: 0; z-index: 335; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
-        #codex-overlay.active { display: flex; transform: translateX(0); }
+        #framecodex-overlay, #codex-overlay { position: fixed; inset: 0; z-index: 335; background: var(--bg-color); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        #framecodex-overlay.active, #codex-overlay.active { display: flex; transform: translateX(0); }
         .codex-item { border-bottom: 1px solid var(--border-color); padding: 12px 0; }
         .codex-item:last-of-type { border-bottom: none; }
         .codex-name { margin-bottom: 6px; font-size: 15px; }
@@ -421,6 +421,7 @@
                 <div id="pf-titles"><div class="pf-empty">加载中…</div></div>
                 <button class="pf-save" onclick="pfSaveTitles()">保存头衔</button>
                 <button class="pf-save" style="background:transparent;border:1px solid #555;color:var(--text-main);margin-left:8px" onclick="openCodex()">头衔图鉴</button>
+                <button class="pf-save" style="background:transparent;border:1px solid #555;color:var(--text-main);margin-left:8px" onclick="openFrameCodex()">头像框图鉴</button>
                 <p class="pf-hint" id="pf-title-hint"></p>
                 <div id="pf-frames" style="margin-top:12px"></div>
                 <div id="pf-bgs" style="margin-top:12px"></div>
@@ -495,6 +496,34 @@
             <div class="pf-card">
                 <h3>他发过的帖子</h3>
                 <div id="u-posts" class="pf-empty">加载中…</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="framecodex-overlay">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeFrameCodex()">⬅ 返回</button>
+        </div>
+        <div class="pf-body">
+            <div class="pf-card">
+                <h3>🖼 头像框图鉴</h3>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="frame-tag f-gold">金色框</span></div>
+                    <p class="codex-desc">买「🍍StarsPro」附赠（赞赏任意金额），购买后自动到账。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="frame-tag f-diamond">钻石框</span></div>
+                    <p class="codex-desc">买「🍍Stars++」或自定义称号（10 元及以上）附赠。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="frame-tag f-xmas">圣诞框</span></div>
+                    <p class="codex-desc">拿到「🎄初雪之约」自动获得，松枝花环加落雪，圣诞节限定。</p>
+                </div>
+                <div class="codex-item">
+                    <div class="codex-name"><span class="frame-tag f-hundred">百日框</span></div>
+                    <p class="codex-desc">每日签到累计满 100 天，和「🏅百日守候」一起发放。暗金橙红环，光晕最亮。</p>
+                </div>
+                <p class="codex-foot">头像框不单卖，都是头衔或成就的附赠。买到头衔后，在个人中心「头像框」里选择佩戴。</p>
             </div>
         </div>
     </div>
@@ -1199,6 +1228,16 @@
         function openCodex() {
             document.getElementById('codex-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        function openFrameCodex() {
+            document.getElementById('framecodex-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFrameCodex() {
+            document.getElementById('framecodex-overlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
 
         function closeCodex() {
