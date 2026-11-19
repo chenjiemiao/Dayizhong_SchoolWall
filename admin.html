@@ -41,7 +41,10 @@
         .fold-h::after { content: '▾'; margin-left: auto; color: #777; font-size: 12px; }
         .card-body.hidden { display: none; }
         .cnt { color: var(--accent); font-size: 13px; }
-            .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #333; }
+            .edit-form { display: flex; flex-direction: column; gap: 6px; }
+        .edit-form label { margin: 4px 0 0; font-size: 12px; }
+        .edit-form input { padding: 8px 10px; font-size: 13px; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #333; }
     </style>
 </head>
 <body>
@@ -175,6 +178,7 @@
 </div>
 
 <script>
+    var USERS = {};
     const API = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
     let me = null;
 
@@ -250,6 +254,8 @@
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
         setCount('cnt-users', res.data.length);
         const owner = me.role === 'owner';
+        USERS = {};
+        res.data.forEach(function (u) { USERS[u.username] = u; });
         box.innerHTML = res.data.map(function (u) {
             var banned = u.status === "banned";
             var roleTag = u.role === 'owner' ? '<span class="role">站长</span>' : (u.role === 'admin' ? '<span class="role">管理员</span>' : '');
@@ -260,7 +266,7 @@
                 extra += '<button class="btn no" onclick="toggleBan(\'' + esc(u.username) + '\',' + (banned ? 'false' : 'true') + ')">' + (banned ? '解封' : '封号') + '</button>';
             }
             return '<div class="item">' +
-                '<div class="meta">' + esc(u.nickname) + '（' + esc(u.username) + '）' + (u.class_name ? ' · ' + esc(u.class_name) : '') + roleTag + (banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : '') + '</div>' +
+                '<div class="meta">' + esc(u.nickname) + '（' + esc(u.username) + '）' + (u.real_name ? ' · 真名 ' + esc(u.real_name) : ' · 真名 未填') + (u.class_name ? ' · ' + esc(u.class_name) : '') + roleTag + (banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : '') + '</div>' +
                 '<div class="meta">' + titles + '</div>' +
                 '<div class="row"><button class="btn ghost" onclick="toggleActions(\'' + esc(u.username) + '\')">⚙ 管理</button></div>' +
                 '<div class="actions" id="act-' + esc(u.username) + '" hidden>' +
@@ -277,13 +283,27 @@
         if (el) el.hidden = !el.hidden;
     }
 
-    async function editUser(username) {
-        var nickname = prompt('昵称（留空不改）');
-        var realName = prompt('真实姓名（留空不改）');
-        var className = prompt('班级（留空不改）');
+    function editUser(username) {
+        var u = USERS[username] || {};
+        var box = document.getElementById('act-' + username);
+        if (!box) return;
+        box.hidden = false;
+        box.innerHTML =
+            '<div class="edit-form">' +
+            '<label>昵称</label><input id="e-nick-' + username + '" value="' + esc(u.nickname || '') + '">' +
+            '<label>真实姓名</label><input id="e-real-' + username + '" value="' + esc(u.real_name || '') + '">' +
+            '<label>班级</label><input id="e-class-' + username + '" value="' + esc(u.class_name || '') + '">' +
+            '<div class="row"><button class="btn" onclick="saveEdit(\'' + username + '\')">保存</button>' +
+            '<button class="btn ghost" onclick="toggleActions(\'' + username + '\')">取消</button></div>' +
+            '</div>';
+    }
+
+    async function saveEdit(username) {
+        var nickname = document.getElementById('e-nick-' + username).value.trim();
+        var realName = document.getElementById('e-real-' + username).value.trim();
+        var className = document.getElementById('e-class-' + username).value.trim();
         var res = await api('adminEditUser', { username: username, nickname: nickname, realName: realName, className: className });
-        alert(res.message || '完成');
-        if (res.code === 200) loadUsers();
+        if (res.code === 200) loadUsers(); else alert(res.message || '保存失败');
     }
 
     async function loadApproved() {
