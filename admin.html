@@ -272,6 +272,7 @@
                 '<div class="actions" id="act-' + esc(u.username) + '" hidden>' +
                     '<button class="btn" onclick="grantTo(\'' + esc(u.username) + '\')">授予头衔</button>' +
                     '<button class="btn ghost" onclick="editUser(\'' + esc(u.username) + '\')">改资料</button>' +
+                    (u.role !== 'owner' ? '<button class="btn no" onclick="delUser(\'' + esc(u.username) + '\')">删除账号</button>' : '') +
                     extra +
                 '</div>' +
             '</div>';
@@ -304,6 +305,13 @@
         var className = document.getElementById('e-class-' + username).value.trim();
         var res = await api('adminEditUser', { username: username, nickname: nickname, realName: realName, className: className });
         if (res.code === 200) loadUsers(); else alert(res.message || '保存失败');
+    }
+
+    async function delUser(username) {
+        if (!confirm('删除 ' + username + '？账号、评论、通知都会删掉，帖子会保留为“已注销账号”。')) return;
+        var res = await api('adminDeleteUser', { username: username });
+        alert(res.message || '完成');
+        if (res.code === 200) loadUsers();
     }
 
     async function loadApproved() {
