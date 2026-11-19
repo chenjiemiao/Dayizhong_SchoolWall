@@ -250,6 +250,19 @@
         .post-content { font-size: 15px; line-height: 1.6; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* 详情页遮罩层 */
+        .checkin-pop { position: fixed; top: 62px; right: 14px; width: 268px; z-index: 240; background: var(--panel-bg);
+            border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); backdrop-filter: blur(10px); }
+        .ck-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-size: 13px; }
+        .ck-head b { color: var(--accent-color); font-size: 15px; }
+        .ck-head span { color: var(--text-muted); font-size: 11px; }
+        .ck-week { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; color: #777; margin-bottom: 4px; }
+        .ck-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .ck-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 8px; color: var(--text-muted); }
+        .ck-cell.blank { visibility: hidden; }
+        .ck-cell.done { background: rgba(85,239,196,.16); color: #55efc4; font-weight: bold; }
+        .ck-cell.today { box-shadow: inset 0 0 0 1.5px var(--accent-color); color: var(--accent-color); font-weight: bold; }
+        .ck-btn { width: 100%; margin-top: 12px; padding: 10px; border: none; border-radius: 10px; background: var(--accent-color); color: #121212; font-weight: bold; cursor: pointer; }
+        .ck-btn:disabled { background: #444; color: #999; cursor: default; }
         #detail-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(18,18,18,0.72); backdrop-filter: blur(10px); display: none; flex-direction: column; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
         body.light-theme #detail-overlay { background: rgba(244,246,249,0.85); }
         #detail-overlay.active { display: flex; transform: translateX(0); }
@@ -292,6 +305,13 @@
 
         #lightbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 95vw; max-height: 95vh; object-fit: contain; }
+    
+        @media (max-width: 700px) {
+            .header { padding: 10px 12px; }
+            .controls { flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 68%; }
+            .btn-icon { padding: 5px 9px; font-size: 12px; margin-right: 0 !important; }
+            .checkin-pop { right: 8px; width: min(268px, calc(100vw - 20px)); }
+        }
     </style>
 </head>
 <body>
@@ -324,13 +344,22 @@
     <header class="header">
         <div class="logo" onclick="closeDetail()">达一中 · 校园墙</div>
         <div class="controls">
+            <button class="btn-icon" onclick="openPublish()" style="margin-right:8px;border-color:var(--accent-color);color:var(--accent-color)">✍️ 发帖</button>
             <a href="./title.html" class="btn-icon" style="margin-right:8px;">✨ 头衔</a>
             <button class="btn-icon" onclick="openSponsor()" style="margin-right:8px;">🍍 赞助</button>
             <button class="btn-icon" id="notice-btn" onclick="openNotices()" style="margin-right:8px;">🔔</button>
             <button class="btn-icon" id="account-btn" onclick="openProfile()" style="margin-right:8px;">👤 登录</button>
-            <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()">🌙 暗黑</button>
+            <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()" style="margin-right:8px;">🌙 暗黑</button>
+            <button class="btn-icon" id="checkin-btn" onclick="openCheckin()">📅 签到</button>
         </div>
     </header>
+
+    <div id="checkin-pop" class="checkin-pop" hidden>
+        <div class="ck-head"><b id="ck-month">—</b><span id="ck-stat"></span></div>
+        <div class="ck-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div class="ck-grid" id="ck-grid"></div>
+        <button class="ck-btn" id="ck-btn" onclick="doCheckin()">今天签到</button>
+    </div>
 
     <div class="container" id="home-container">
         <div class="filter-bar" id="filter-bar">
@@ -523,7 +552,6 @@
         </div>
     </div>
 
-    <button class="fab-btn" onclick="openPublish()">✍️ 写校园墙</button>
 
     <div id="publish-overlay">
         <div class="detail-header">
@@ -1167,6 +1195,63 @@
             const res = await pfApi('blockUser', { username: profileUser });
             alert(res.message || '完成');
             if (res.code === 200) { closeUser(); fetchPosts(); }
+        }
+
+        function beijingNow() {
+            var d = new Date(Date.now() + 8 * 3600 * 1000);
+            return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), iso: d.toISOString().slice(0, 10) };
+        }
+
+        async function openCheckin() {
+            var pop = document.getElementById('checkin-pop');
+            if (!pop) return;
+            if (!pop.hidden) { pop.hidden = true; return; }
+            if (!localStorage.getItem('wall_token')) { location.href = './account.html'; return; }
+            var res = await pfApi('me');
+            if (res.code === 200) pfMe = res.user;
+            renderCalendar();
+            pop.hidden = false;
+        }
+
+        function renderCalendar() {
+            var t = beijingNow();
+            var first = new Date(Date.UTC(t.y, t.m, 1));
+            var start = first.getUTCDay();
+            var daysInMonth = new Date(Date.UTC(t.y, t.m + 1, 0)).getUTCDate();
+            var checked = (pfMe && pfMe.checkin_days) || [];
+            var monthLabel = document.getElementById('ck-month');
+            monthLabel.textContent = t.y + ' 年 ' + (t.m + 1) + ' 月';
+            var stat = document.getElementById('ck-stat');
+            stat.textContent = '连续 ' + ((pfMe && pfMe.checkin_streak) || 0) + ' · 累计 ' + ((pfMe && pfMe.checkin_total) || 0);
+            var grid = document.getElementById('ck-grid');
+            var html = '';
+            for (var i = 0; i < start; i++) html += '<div class="ck-cell blank"></div>';
+            for (var d = 1; d <= daysInMonth; d++) {
+                var iso = t.y + '-' + String(t.m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                var cls = 'ck-cell';
+                if (checked.indexOf(iso) !== -1) cls += ' done';
+                if (d === t.d) cls += ' today';
+                html += '<div class="' + cls + '">' + d + '</div>';
+            }
+            grid.innerHTML = html;
+            var btn = document.getElementById('ck-btn');
+            var signed = checked.indexOf(t.iso) !== -1;
+            btn.disabled = signed;
+            btn.textContent = signed ? '今天已签到' : '今天签到';
+        }
+
+        async function doCheckin() {
+            var res = await pfApi('checkin');
+            if (res.code !== 200) { alert(res.message || '签到失败'); return; }
+            if (pfMe) {
+                pfMe.checkin_streak = res.streak;
+                pfMe.checkin_total = res.total;
+                pfMe.checkin_last = beijingNow().iso;
+                pfMe.checkin_days = res.days || pfMe.checkin_days || [];
+            }
+            renderCalendar();
+            alert(res.message);
+            if (res.gotTitle) fetchPosts();
         }
 
         function openSponsor() {
