@@ -230,6 +230,9 @@
         .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
+                .badge-hundred { background: linear-gradient(135deg, #7a4a00, #ffd75e 35%, #fff6c9 50%, #ffd75e 65%, #7a4a00); color: #3a2200;
+            border: 1px solid rgba(255,255,255,.55); text-shadow: 0 1px 0 rgba(255,255,255,.45); animation: hundred-glow 3s ease-in-out infinite alternate; }
+        @keyframes hundred-glow { from { box-shadow: 0 0 6px rgba(255,200,80,.45); } to { box-shadow: 0 0 16px rgba(255,225,130,.9); } }
         .badge-witness { background: linear-gradient(135deg, #ff9a3c, #ff5f6d); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 8px rgba(255,120,80,.5); }
         .badge-xmas { position: relative; overflow: hidden; padding-left: 20px;
             background: linear-gradient(180deg, #6f8fb8 0%, #27405f 100%);
@@ -477,6 +480,10 @@
                     <p class="codex-desc">赞赏 10 元及以上，自己起名字（10 个字以内），提交时写上想要的称号。</p>
                 </div>
                 <div class="codex-item">
+                    <div class="codex-name"><span class="badge badge-hundred">🏅百日守候</span></div>
+                    <p class="codex-desc">每日签到累计满 100 天自动获得，断签不清零。</p>
+                </div>
+                <div class="codex-item">
                     <div class="codex-name"><span class="badge badge-xmas"><span class="badge-txt">🎄初雪之约</span></span></div>
                     <p class="codex-desc">圣诞节限定。只在圣诞活动期间发放，活动结束就不能再拿，平时无法申请。</p>
                 </div>
@@ -572,6 +579,9 @@
 
         function titleSpan(t) {
             const name = String(t).split('圣诞限定').join('初雪之约');
+            if (name.indexOf('百日') !== -1) {
+                return '<span class="badge badge-hundred">' + esc(name) + '</span>';
+            }
             if (name.indexOf('见证者') !== -1) {
                 return '<span class="badge badge-witness">' + esc(name) + '</span>';
             }
