@@ -87,8 +87,8 @@
             <input id="reg-nick" maxlength="24" placeholder="别人看到的名字，比如：菠萝">
             <label>真实姓名（必填，只有站长看得到）</label>
             <input id="reg-realname" placeholder="填真名，只有站长看得到">
-            <label>班级（必填）</label>
-            <input id="reg-class" placeholder="比如：9班">
+            <label>班级（必填，要带届）</label>
+            <input id="reg-class" placeholder="比如：2025级9班">
             <label>密码</label>
             <input id="reg-pass" type="password" placeholder="至少 6 位">
             <label>头像（选填，不传就给你一个菠萝）</label>
@@ -194,6 +194,10 @@
         };
         btn.disabled = true;
         btn.textContent = '提交中…';
+        if (!/^[0-9]{4}级.{1,10}班$/.test(body.className)) {
+            showMsg('reg-msg', '班级要写清届，比如 2025级9班', false);
+            return;
+        }
         const res = await api('register', body);
         btn.disabled = false;
         btn.textContent = '提交申请';
