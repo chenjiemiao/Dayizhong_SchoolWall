@@ -148,10 +148,32 @@
                 radial-gradient(1.6px 1.6px at 88% 22%, #fff, transparent 60%),
                 radial-gradient(1.3px 1.3px at 22% 33%, #fff, transparent 60%),
                 radial-gradient(1.4px 1.4px at 66% 30%, #fff, transparent 60%); }
-        .pf-bg::after { content: ''; position: absolute; inset: -20% 0 0; opacity: .85;
-            background-image: radial-gradient(circle, #ffffff 1.4px, transparent 2px); background-size: 34px 46px;
-            animation: bg-snow 9s linear infinite; }
-        @keyframes bg-snow { from { background-position: 0 0; } to { background-position: 24px 460px; } }
+
+ to { background-position: 24px 460px; } }
+        .pf-bg .snow { position: absolute; inset: -25% 0 0 0; z-index: 1; pointer-events: none; }
+        .pf-bg .snow::before, .pf-bg .snow::after { content: ''; position: absolute; inset: 0; }
+        .pf-bg .snow::before {
+            background-image:
+                radial-gradient(2.2px 2.2px at 18% 24%, #fff, transparent 60%),
+                radial-gradient(1.6px 1.6px at 62% 12%, #fff, transparent 60%),
+                radial-gradient(2.6px 2.6px at 84% 46%, #fff, transparent 60%),
+                radial-gradient(1.4px 1.4px at 34% 68%, #fff, transparent 60%),
+                radial-gradient(2px 2px at 8% 82%, #fff, transparent 60%);
+            background-size: 160px 210px, 120px 170px, 190px 240px, 140px 200px, 170px 220px;
+            opacity: .75; filter: blur(.4px);
+            animation: snow-near 11s linear infinite;
+        }
+        .pf-bg .snow::after {
+            background-image:
+                radial-gradient(1.2px 1.2px at 30% 20%, #fff, transparent 60%),
+                radial-gradient(1px 1px at 72% 55%, #fff, transparent 60%),
+                radial-gradient(1.4px 1.4px at 50% 85%, #fff, transparent 60%);
+            background-size: 90px 130px, 110px 150px, 100px 140px;
+            opacity: .5;
+            animation: snow-far 17s linear infinite;
+        }
+        @keyframes snow-near { from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; } to { background-position: 26px 630px, -14px 510px, 18px 720px, -20px 600px, 10px 660px; } }
+        @keyframes snow-far { from { background-position: 0 0, 0 0, 0 0; } to { background-position: -12px 390px, 8px 450px, -6px 420px; } }
         .pf-bg .moon { position: absolute; right: 12%; top: 8%; width: 64px; height: 64px; border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #fffdf0, #ffe9a8 60%, #f5d27a); box-shadow: 0 0 40px rgba(255,235,170,.55); }
         .pf-bg .ground { position: absolute; left: -10%; right: -10%; bottom: 0; height: 26%;
@@ -331,7 +353,7 @@
     </div>
 
     <div id="profile-overlay">
-        <div class="pf-bg" id="pf-bg"></div>
+        <div class="pf-bg" id="pf-bg"><div class="snow"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeProfile()">⬅ 返回</button>
         </div>
@@ -400,7 +422,7 @@
     </div>
 
     <div id="user-overlay">
-        <div class="pf-bg" id="u-bg"></div>
+        <div class="pf-bg" id="u-bg"><div class="snow"></div></div>
         <div class="detail-header">
             <button class="back-btn" onclick="closeUser()">⬅ 返回</button>
         </div>
