@@ -41,6 +41,7 @@
         .fold-h::after { content: '▾'; margin-left: auto; color: #777; font-size: 12px; }
         .card-body.hidden { display: none; }
         .cnt { color: var(--accent); font-size: 13px; }
+            .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #333; }
     </style>
 </head>
 <body>
@@ -56,7 +57,7 @@
 })();
 
     // ---- 折叠与计数 ----
-    const FOLD_DEFAULT = ['sec-users', 'sec-requests', 'sec-posts', 'sec-titles'];
+    const FOLD_DEFAULT = ['sec-users', 'sec-requests', 'sec-posts', 'sec-titles', 'sec-grant', 'sec-notice', 'sec-approved', 'sec-gate', 'sec-broadcast', 'sec-announce'];
     function foldInit() {
         document.querySelectorAll('#panel .card').forEach((card) => {
             const h = card.querySelector('h2');
@@ -249,21 +250,40 @@
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
         setCount('cnt-users', res.data.length);
         const owner = me.role === 'owner';
-        box.innerHTML = res.data.map(u => {
-            const banned = u.status === 'banned';
-            const roleTag = u.role === 'owner' ? '<span class="role">站长</span>' : (u.role === 'admin' ? '<span class="role">管理员</span>' : '');
-            const grantBtn = owner && u.role !== 'owner' ? `<button class="btn" onclick="grantTo('${esc(u.username)}')">授予头衔</button>` : '';
-            const adminBtn = owner && u.role !== 'owner'
-                ? `<button class="btn ghost" onclick="setRole('${esc(u.username)}','${u.role === 'admin' ? 'user' : 'admin'}')">${u.role === 'admin' ? '取消管理员' : '设为管理员'}</button>`
-                : '';
-            const banBtn = u.role === 'owner' ? '' : `<button class="btn no" onclick="toggleBan('${esc(u.username)}', ${banned ? 'false' : 'true'})">${banned ? '解封' : '封号'}</button>`;
-            return `
-            <div class="item">
-                <div class="meta">${esc(u.nickname)}（${esc(u.username)}）${u.class_name ? ' · ' + esc(u.class_name) : ''}${roleTag}${banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : ''}</div>
-                <div class="meta">${(u.titles || []).length ? u.titles.map(t => `<span class="tag">${esc(t)}</span>`).join('') : '无头衔'}</div>
-                <div class="row">${grantBtn}${adminBtn}${banBtn}</div>
-            </div>`;
+        box.innerHTML = res.data.map(function (u) {
+            var banned = u.status === "banned";
+            var roleTag = u.role === 'owner' ? '<span class="role">站长</span>' : (u.role === 'admin' ? '<span class="role">管理员</span>' : '');
+            var titles = (u.titles || []).length ? u.titles.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') : '无头衔';
+            var extra = '';
+            if (u.role !== 'owner') {
+                extra += '<button class="btn ghost" onclick="setRole(\'' + esc(u.username) + '\',\'' + (u.role === 'admin' ? 'user' : 'admin') + '\')">' + (u.role === 'admin' ? '取消管理员' : '设为管理员') + '</button>';
+                extra += '<button class="btn no" onclick="toggleBan(\'' + esc(u.username) + '\',' + (banned ? 'false' : 'true') + ')">' + (banned ? '解封' : '封号') + '</button>';
+            }
+            return '<div class="item">' +
+                '<div class="meta">' + esc(u.nickname) + '（' + esc(u.username) + '）' + (u.class_name ? ' · ' + esc(u.class_name) : '') + roleTag + (banned ? ' · <span style="color:#ff6b6b">已封禁</span>' : '') + '</div>' +
+                '<div class="meta">' + titles + '</div>' +
+                '<div class="row"><button class="btn ghost" onclick="toggleActions(\'' + esc(u.username) + '\')">⚙ 管理</button></div>' +
+                '<div class="actions" id="act-' + esc(u.username) + '" hidden>' +
+                    '<button class="btn" onclick="grantTo(\'' + esc(u.username) + '\')">授予头衔</button>' +
+                    '<button class="btn ghost" onclick="editUser(\'' + esc(u.username) + '\')">改资料</button>' +
+                    extra +
+                '</div>' +
+            '</div>';
         }).join('');
+    }
+
+    function toggleActions(username) {
+        var el = document.getElementById('act-' + username);
+        if (el) el.hidden = !el.hidden;
+    }
+
+    async function editUser(username) {
+        var nickname = prompt('昵称（留空不改）');
+        var realName = prompt('真实姓名（留空不改）');
+        var className = prompt('班级（留空不改）');
+        var res = await api('adminEditUser', { username: username, nickname: nickname, realName: realName, className: className });
+        alert(res.message || '完成');
+        if (res.code === 200) loadUsers();
     }
 
     async function loadApproved() {

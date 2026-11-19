@@ -83,7 +83,9 @@
         <div class="card" id="pane-reg" hidden>
             <label>用户名（用来登录，别用真名）</label>
             <input id="reg-name" placeholder="2 到 24 位，字母数字下划线或中文">
-            <label>真实姓名（必填）</label>
+            <label>昵称（展示用，必填）</label>
+            <input id="reg-nick" maxlength="24" placeholder="别人看到的名字，比如：菠萝">
+            <label>真实姓名（必填，只有站长看得到）</label>
             <input id="reg-realname" placeholder="填真名，只有站长看得到">
             <label>班级（必填）</label>
             <input id="reg-class" placeholder="比如：9班">
@@ -183,6 +185,7 @@
         const btn = document.getElementById('reg-btn');
         const body = {
             username: document.getElementById('reg-name').value.trim(),
+            nickname: document.getElementById('reg-nick').value.trim(),
             realName: document.getElementById('reg-realname').value.trim(),
             className: document.getElementById('reg-class').value.trim(),
             password: document.getElementById('reg-pass').value,
