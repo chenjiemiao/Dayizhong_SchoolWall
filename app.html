@@ -328,6 +328,9 @@
         .frame-tag.f-xmas { border-color: #55efc4; color: #55efc4; }
         .frame-tag.f-hundred { border-color: #ff9a3c; color: #ff9a3c; }
         .pf-frames-row { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+            .codex-item.locked { opacity: .45; }
+        .codex-badge { float: right; font-size: 11px; color: #55efc4; border: 1px solid rgba(85,239,196,.4); border-radius: 6px; padding: 1px 6px; }
+        .codex-badge.off { color: #777; border-color: #444; }
     </style>
 </head>
 <body>
@@ -507,23 +510,8 @@
         <div class="pf-body">
             <div class="pf-card">
                 <h3>🖼 头像框图鉴</h3>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="frame-tag f-gold">金色框</span></div>
-                    <p class="codex-desc">买「🍍StarsPro」附赠（赞赏任意金额），购买后自动到账。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="frame-tag f-diamond">钻石框</span></div>
-                    <p class="codex-desc">买「🍍Stars++」或自定义称号（10 元及以上）附赠。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="frame-tag f-xmas">圣诞框</span></div>
-                    <p class="codex-desc">拿到「🎄初雪之约」自动获得，松枝花环加落雪，圣诞节限定。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="frame-tag f-hundred">百日框</span></div>
-                    <p class="codex-desc">每日签到累计满 100 天，和「🏅百日守候」一起发放。暗金橙红环，光晕最亮。</p>
-                </div>
-                <p class="codex-foot">头像框不单卖，都是头衔或成就的附赠。买到头衔后，在个人中心「头像框」里选择佩戴。</p>
+                <div id="frame-codex-list" class="codex-list"></div>
+                <p class="codex-foot">头像框不单卖，都是头衔或成就的附赠。拿到后在个人中心「头像框」里佩戴。</p>
             </div>
         </div>
     </div>
@@ -535,43 +523,8 @@
         <div class="pf-body">
             <div class="pf-card">
                 <h3>📖 头衔图鉴</h3>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="badge badge-witness">🏅网站见证者</span></div>
-                    <p class="codex-desc">建站元老。2027 年 1 月 18 日之前注册的账号，登录后自动获得；之后注册的就没有了。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-gold">🍍StarsPro</span></div>
-                    <p class="codex-desc">在首页赞赏任意金额，到「头衔」页上传付款截图申请，站长审核通过后发放。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-diamond">🍍Stars++</span></div>
-                    <p class="codex-desc">赞赏 5 元及以上，同样上传付款截图申请。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-rainbow">自定义七彩称号</span></div>
-                    <p class="codex-desc">赞赏 10 元及以上，自己起名字（10 个字以内），提交时写上想要的称号。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="badge badge-hundred">🏅百日守候</span></div>
-                    <p class="codex-desc">每日签到累计满 100 天自动获得，断签不清零。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="badge badge-xmas"><span class="badge-txt">🎄初雪之约</span></span></div>
-                    <p class="codex-desc">圣诞节限定。只在圣诞活动期间发放，活动结束就不能再拿，平时无法申请。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-admin">🍍StarsMaster</span></div>
-                    <p class="codex-desc">网站建设者。参与过建站、写代码、做设计的成员，由站长直接发放，不能申请。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-admin">🍍StarsAdmin</span></div>
-                    <p class="codex-desc">管理员。负责审核和日常维护，由站长任命，同时会获得后台权限。</p>
-                </div>
-                <div class="codex-item">
-                    <div class="codex-name"><span class="text-gold">🏆名人堂</span></div>
-                    <p class="codex-desc">对校园墙有特别贡献的人，比如长期供稿、组织活动、帮忙推广，由站长授予。</p>
-                </div>
-                <p class="codex-foot">普通用户最多同时佩戴 3 个头衔，站长和管理员可以戴 4 个。</p>
+                <div id="title-codex-list" class="codex-list"></div>
+                <p class="codex-foot">普通用户最多同时佩戴 3 个头衔，站长和管理员 4 个。</p>
             </div>
         </div>
     </div>
@@ -1225,12 +1178,68 @@
             }
         }
 
-        function openCodex() {
+        async function openCodex() {
+            if (!pfMe && localStorage.getItem('wall_token')) {
+                var r2 = await pfApi('me');
+                if (r2.code === 200) pfMe = r2.user;
+            }
+            renderTitleCodex();
             document.getElementById('codex-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        function openFrameCodex() {
+
+        var TITLE_CODEX = [
+            { name: '🏅网站见证者', desc: '在网站诞生之初就注册。2027 年 1 月 18 日之前的人，都有一份。' },
+            { name: '🍍StarsPro', desc: '第一份支持。赞赏任意金额，名字旁便亮起第一抹金色。' },
+            { name: '🍍Stars++', desc: '并肩同行。赞赏五元及以上，光泽进阶为钻石。' },
+            { name: '自定义七彩称号', desc: '亲手写下自己的名字。十元及以上，可指定专属文字。' },
+            { name: '🎄初雪之约', desc: '冬夜的约定。圣诞活动限定，落雪时节发放，过时不候。' },
+            { name: '🍍StarsMaster', desc: '建造者。参与建站与设计的人，由站长授予。' },
+            { name: '🍍StarsAdmin', desc: '守夜人。负责审核与维护，由站长任命。' },
+            { name: '🏆名人堂', desc: '被记住的人。为校园墙做出特别贡献者，由站长授予。' }
+        ];
+        var FRAME_CODEX = [
+            { id: 'gold', name: '金色框', desc: '第一抹金。与 StarsPro 一同到来。' },
+            { id: 'diamond', name: '钻石框', desc: '冷光。随 Stars++ 或自定义称号附赠。' },
+            { id: 'xmas', name: '圣诞框', desc: '花环与雪。初雪之约的伴手礼，松枝、彩球、落雪。' },
+            { id: 'hundred', name: '百日框', desc: '一百天。累计签到满一百天，与百日守候一起点亮。' }
+        ];
+
+        function codexStatus(owned) {
+            return owned ? '<span class="codex-badge">已获得</span>' : '<span class="codex-badge off">未获取</span>';
+        }
+
+        function renderTitleCodex() {
+            var box = document.getElementById('title-codex-list');
+            if (!box) return;
+            var owned = (pfMe && pfMe.titles) || [];
+            box.innerHTML = TITLE_CODEX.map(function (t) {
+                var has = owned.indexOf(t.name) !== -1;
+                return '<div class="codex-item' + (has ? '' : ' locked') + '">' +
+                    '<div class="codex-name">' + titleSpan(t.name) + codexStatus(has) + '</div>' +
+                    '<p class="codex-desc">' + t.desc + '</p></div>';
+            }).join('');
+        }
+
+        function renderFrameCodex() {
+            var box = document.getElementById('frame-codex-list');
+            if (!box) return;
+            var owned = (pfMe && pfMe.frames) || [];
+            box.innerHTML = FRAME_CODEX.map(function (f) {
+                var has = owned.indexOf(f.id) !== -1;
+                return '<div class="codex-item' + (has ? '' : ' locked') + '">' +
+                    '<div class="codex-name"><span class="frame-tag f-' + f.id + '">' + f.name + '</span>' + codexStatus(has) + '</div>' +
+                    '<p class="codex-desc">' + f.desc + '</p></div>';
+            }).join('');
+        }
+
+        async function openFrameCodex() {
+            if (!pfMe && localStorage.getItem('wall_token')) {
+                var r = await pfApi('me');
+                if (r.code === 200) pfMe = r.user;
+            }
+            renderFrameCodex();
             document.getElementById('framecodex-overlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
