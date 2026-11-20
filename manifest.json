@@ -2,7 +2,7 @@
   "name": "达一中校园墙",
   "short_name": "校园墙",
   "description": "达一中校园墙，发帖、表白、失物招领",
-  "start_url": "./app.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

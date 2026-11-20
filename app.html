@@ -578,6 +578,7 @@
     <div class="side-actions">
         <a class="side-btn" href="./title.html" title="头衔">✨</a>
         <button class="side-btn" onclick="openSponsor()" title="赞助">🍍</button>
+        <button class="side-btn" id="install-btn" onclick="installApp()" title="装到桌面">📲</button>
         <button class="side-btn" id="theme-toggle" onclick="toggleTheme()" title="主题">🌙</button>
         <div class="music-btn" id="music-toggle" onclick="toggleMusic()" title="音乐">🔇</div>
     </div>
@@ -1680,6 +1681,29 @@
             } else {
                 btn.textContent = '🔔';
                 btn.classList.remove('ring');
+            }
+        }
+
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+        window.addEventListener('appinstalled', function () { deferredPrompt = null; });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                return;
+            }
+            const ua = navigator.userAgent;
+            if (/iPhone|iPad|iPod/i.test(ua)) {
+                alert('iPhone 安装方法：\n\n点 Safari 底部中间的「分享」按钮 → 往下找「添加到主屏幕」→ 点「添加」。\n\n必须是 Safari，微信和 Chrome 里都没有这个选项。');
+            } else if (/MicroMessenger|QQ\//i.test(ua)) {
+                alert('微信/QQ 里装不了。\n\n点右上角「…」→「在浏览器打开」，然后在浏览器菜单里找「添加到主屏幕」或「安装应用」。');
+            } else {
+                alert('在浏览器菜单里找：\n\n安卓 Chrome：右上角三个点 →「安装应用」或「添加到主屏幕」\n电脑 Edge：地址栏右边的安装图标');
             }
         }
 
