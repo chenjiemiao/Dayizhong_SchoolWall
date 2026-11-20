@@ -1189,8 +1189,11 @@
                 var uav = document.getElementById('u-avatar');
                 var wrap = document.getElementById('u-avatar-wrap');
                 if (wrap) {
-                    wrap.className = 'ring' + (d.user.frame === 'xmas' ? ' ring-xmas ring-lg' : '');
-                    wrap.style.display = 'inline-flex';
+                    var isX = d.user.frame === 'xmas';
+                    wrap.className = isX ? 'ring ring-xmas ring-lg' : '';
+                    wrap.style.display = isX ? 'inline-flex' : 'inline';
+                    wrap.style.width = isX ? '112px' : '96px';
+                    wrap.style.height = isX ? '112px' : '96px';
                 }
                 uav.className = 'pf-avatar' + (d.user.frame && d.user.frame !== 'xmas' ? ' frame-' + d.user.frame : '');
                 uav.src = d.user.avatar || PF_DEFAULT_AVATAR;
@@ -1412,7 +1415,10 @@
             pfMe = res.user;
             document.getElementById('pf-avatar').className = 'pf-avatar' + (pfMe.frame && pfMe.frame !== 'xmas' ? ' frame-' + pfMe.frame : '');
             const ring = document.getElementById('pf-avatar-ring');
-            ring.className = 'ring' + (pfMe.frame === 'xmas' ? ' ring-xmas' : '') + (pfMe.frame === 'xmas' ? ' ring-lg' : '');
+            ring.className = pfMe.frame === 'xmas' ? 'ring ring-xmas ring-lg' : '';
+            ring.style.display = pfMe.frame === 'xmas' ? 'inline-flex' : 'inline';
+            ring.style.width = pfMe.frame === 'xmas' ? '112px' : '96px';
+            ring.style.height = pfMe.frame === 'xmas' ? '112px' : '96px';
             document.getElementById('pf-avatar').src = pfMe.avatar || PF_DEFAULT_AVATAR;
             document.getElementById('pf-name').textContent = pfMe.nickname;
             document.getElementById('pf-meta').textContent = '@' + pfMe.username;
@@ -1540,7 +1546,10 @@
             const av = document.getElementById('pf-avatar');
             av.className = 'pf-avatar' + (frame && frame !== 'xmas' ? ' frame-' + frame : '');
             const ring = document.getElementById('pf-avatar-ring');
-            ring.className = 'ring' + (frame === 'xmas' ? ' ring-xmas ring-lg' : '');
+            ring.className = frame === 'xmas' ? 'ring ring-xmas ring-lg' : '';
+            ring.style.display = frame === 'xmas' ? 'inline-flex' : 'inline';
+            ring.style.width = frame === 'xmas' ? '112px' : '96px';
+            ring.style.height = frame === 'xmas' ? '112px' : '96px';
             pfRenderFrames();
             fetchPosts();
         }
