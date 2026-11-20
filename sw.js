@@ -1,4 +1,4 @@
-const CACHE = 'dayizhong-wall-v1';
+const CACHE = 'dayizhong-wall-v2';
 const SHELL = [
   './',
   './index.html',
