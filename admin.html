@@ -282,6 +282,7 @@
                 '<div class="actions" id="act-' + esc(u.username) + '" hidden>' +
                     '<button class="btn" onclick="grantTo(\'' + esc(u.username) + '\')">授予头衔</button>' +
                     '<button class="btn ghost" onclick="editUser(\'' + esc(u.username) + '\')">改资料</button>' +
+                    '<button class="btn ghost" onclick="resetPwd(\'' + esc(u.username) + '\')">重置密码</button>' +
                     (u.role !== 'owner' ? '<button class="btn no" onclick="delUser(\'' + esc(u.username) + '\')">删除账号</button>' : '') +
                     extra +
                 '</div>' +
@@ -315,6 +316,13 @@
         var className = document.getElementById('e-class-' + username).value.trim();
         var res = await api('adminEditUser', { username: username, nickname: nickname, realName: realName, className: className });
         if (res.code === 200) loadUsers(); else alert(res.message || '保存失败');
+    }
+
+    async function resetPwd(username) {
+        var pw = prompt('给 ' + username + ' 设置新密码（至少 6 位）');
+        if (!pw) return;
+        var res = await api('adminResetPassword', { username: username, password: pw });
+        alert(res.message || '完成');
     }
 
     async function delUser(username) {
