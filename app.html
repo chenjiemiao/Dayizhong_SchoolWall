@@ -694,7 +694,7 @@
         }
 
         function daysBadge(days) {
-            if (!days || days < 7) return '';
+            if (days === undefined || days === null || days < 0) return '';
             return '<span class="days-badge" title="在本站的签到天数">在场 ' + days + ' 天</span>';
         }
 
