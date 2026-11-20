@@ -126,6 +126,11 @@
             <div id="approved-list"><div class="empty">加载中…</div></div>
         </div>
 
+        <div class="card" id="sec-profreq" hidden>
+            <h2>资料修改申请 <span class="cnt" id="cnt-profreq"></span></h2>
+            <div id="profreq-list"><div class="empty">加载中…</div></div>
+        </div>
+
         <div class="card" id="sec-grant" hidden>
             <h2>头衔发放 <span class="tag">只有站长</span></h2>
             <select id="grant-type" onchange="onGrantType()">
@@ -245,6 +250,8 @@
         document.getElementById('sec-gate').hidden = !owner;
         document.getElementById('sec-broadcast').hidden = !owner;
         document.getElementById('sec-announce').hidden = !owner;
+        var pr = document.getElementById('sec-profreq');
+        if (pr) pr.hidden = !owner;
         reload();
     }
 
@@ -253,6 +260,7 @@
         loadApproved();
         if (me.role === 'owner') {
             loadRequests();
+            loadProfileRequests();
             loadPendingPosts();
             loadTitles();
         }
@@ -330,6 +338,34 @@
         var res = await api('adminDeleteUser', { username: username });
         alert(res.message || '完成');
         if (res.code === 200) loadUsers();
+    }
+
+    async function loadProfileRequests() {
+        var box = document.getElementById('profreq-list');
+        var res = await api('adminProfileRequests');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        setCount('cnt-profreq', res.data.length);
+        if (!res.data.length) { box.innerHTML = '<div class="empty">没有待审核的资料修改</div>'; return; }
+        var label = { nickname: '昵称', real_name: '真实姓名', class_name: '班级', contact: '联系方式' };
+        box.innerHTML = res.data.map(function (r) {
+            var rows = Object.keys(r.changes || {}).map(function (k) {
+                return '<div class="meta">' + (label[k] || k) + ' → ' + esc(r.changes[k]) + '</div>';
+            }).join('');
+            return '<div class="item">' +
+                '<div class="meta">' + esc(r.username) + '（现在的昵称：' + esc(r.nickname) + '）</div>' +
+                rows +
+                '<div class="row">' +
+                '<button class="btn ok" onclick="profileDecide(\'' + r._id + '\', true)">通过</button>' +
+                '<button class="btn no" onclick="profileDecide(\'' + r._id + '\', false)">拒绝</button>' +
+                '</div></div>';
+        }).join('');
+    }
+
+    async function profileDecide(id, approve) {
+        var res = await api('adminProfileDecision', { id: id, approve: approve });
+        alert(res.message || '完成');
+        loadProfileRequests();
+        loadUsers();
     }
 
     async function loadApproved() {

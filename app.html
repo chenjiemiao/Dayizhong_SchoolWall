@@ -361,6 +361,9 @@
             #notice-btn { position: relative; }
         .notice-dot { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
             background: #ff4757; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: bold; }
+            .edit-form { display: flex; flex-direction: column; gap: 8px; }
+        .edit-form label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .edit-form input { padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 13px; }
     </style>
 <link rel="icon" href="./images/icon-192.png">
     <link rel="manifest" href="./manifest.json">
@@ -481,6 +484,16 @@
             <div class="pf-card">
                 <h3>我发过的帖子</h3>
                 <div id="pf-posts"><div class="pf-empty">加载中…</div></div>
+            </div>
+            <div class="pf-card" id="pf-edit-card">
+                <h3>修改资料 <span class="pf-hint" style="font-weight:normal">提交后等站长审核</span></h3>
+                <div class="edit-form">
+                    <label>昵称</label><input id="pf-edit-nick" maxlength="24">
+                    <label>真实姓名</label><input id="pf-edit-real" maxlength="24">
+                    <label>班级</label><input id="pf-edit-class" maxlength="24" placeholder="比如：2025级9班">
+                    <label>联系方式</label><input id="pf-edit-contact" maxlength="60" placeholder="微信 / QQ">
+                    <div><button class="pf-save" onclick="pfSubmitProfile()">提交审核</button></div>
+                </div>
             </div>
             <button class="pf-logout" onclick="pfLogout()">退出登录</button>
             <div id="pf-delete-area" style="margin-top:10px"></div>
@@ -1443,6 +1456,7 @@
             pfRenderFrames();
             pfRenderBgs();
             pfRenderCheckin();
+            pfFillEditForm();
             applyProfileBg(pfMe.bg);
             pfLoadPosts();
             pfLoadRecords();
@@ -1574,6 +1588,25 @@
         function beijingToday() {
             var d = new Date(Date.now() + 8 * 3600 * 1000);
             return d.toISOString().slice(0, 10);
+        }
+
+        function pfFillEditForm() {
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+            set('pf-edit-nick', pfMe.nickname);
+            set('pf-edit-real', pfMe.real_name);
+            set('pf-edit-class', pfMe.class_name);
+            set('pf-edit-contact', pfMe.contact);
+        }
+
+        async function pfSubmitProfile() {
+            const body = {
+                nickname: document.getElementById('pf-edit-nick').value.trim(),
+                realName: document.getElementById('pf-edit-real').value.trim(),
+                className: document.getElementById('pf-edit-class').value.trim(),
+                contact: document.getElementById('pf-edit-contact').value.trim()
+            };
+            const res = await pfApi('requestProfile', body);
+            alert(res.message || '完成');
         }
 
         function pfRenderCheckin() {
