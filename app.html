@@ -1750,15 +1750,8 @@
             if (res.code !== 200) return;
             const seen = Number(localStorage.getItem('notice_seen') || 0);
             const unread = (res.data || []).filter((n) => n.created_at > seen).length;
-            const btn = document.getElementById('notice-btn');
-            if (unread > 0) {
-                btn.textContent = '🔔' + unread;
-                btn.classList.add('ring');
-                if (!window.__notified) { noticeDing(); window.__notified = true; }
-            } else {
-                btn.textContent = '🔔';
-                btn.classList.remove('ring');
-            }
+            if (unread > 0 && !window.__notified) { noticeDing(); window.__notified = true; }
+            updateNoticeBadge();
         }
 
         let deferredPrompt = null;
@@ -1815,8 +1808,11 @@
                     ${n.image ? `<img class="notice-img" src="${esc(n.image)}" alt="">` : ''}
                 </div>`).join('');
             localStorage.setItem('notice_seen', String(Date.now()));
-            document.getElementById('notice-btn').textContent = '🔔';
-            document.getElementById('notice-btn').classList.remove('ring');
+            const btn = document.getElementById('notice-btn');
+            btn.textContent = '🔔';
+            btn.classList.remove('ring');
+            await pfApi('markNoticesRead');
+            updateNoticeBadge();
         }
 
         function closeNotices() {
@@ -1835,11 +1831,11 @@
                 try { btn.textContent = '👤 ' + JSON.parse(raw).nickname; } catch (e) {}
             }
             pollNotices();
-            setInterval(pollNotices, 20000);
+            setInterval(pollNotices, 30000);
         })();
 
     
-        window.addEventListener('load', function () { updateNoticeBadge(); setInterval(updateNoticeBadge, 60000); });
+        window.addEventListener('load', function () { updateNoticeBadge(); });
     </script>
 </body>
 </html>
