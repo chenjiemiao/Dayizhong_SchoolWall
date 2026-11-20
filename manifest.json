@@ -1,0 +1,18 @@
+{
+  "name": "达一中校园墙",
+  "short_name": "校园墙",
+  "description": "达一中校园墙，发帖、表白、失物招领",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0f0f",
+  "theme_color": "#0f0f0f",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "./images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "./images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

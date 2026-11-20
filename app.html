@@ -341,7 +341,17 @@
             .codex-demo { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; padding: 8px 12px; margin: 8px 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; min-height: 44px; }
         .codex-demo .pf-avatar { width: 44px; height: 44px; }
             .notice-img { width: 100%; max-width: 260px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); }
+            #notice-btn { position: relative; }
+        .notice-dot { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+            background: #ff4757; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: bold; }
     </style>
+<link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="校园墙">
+    <script>if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js').catch(function () {}); });</script>
 </head>
 <body>
 
@@ -1673,6 +1683,22 @@
             }
         }
 
+        async function updateNoticeBadge() {
+            if (!localStorage.getItem('wall_token')) return;
+            const res = await api('myNotices');
+            if (res.code !== 200) return;
+            const unread = (res.data || []).filter(function (n) { return !n.read; }).length;
+            const btn = document.getElementById('notice-btn');
+            if (!btn) return;
+            let dot = btn.querySelector('.notice-dot');
+            if (unread > 0) {
+                if (!dot) { dot = document.createElement('span'); dot.className = 'notice-dot'; btn.appendChild(dot); }
+                dot.textContent = unread > 9 ? '9+' : String(unread);
+            } else if (dot) {
+                dot.remove();
+            }
+        }
+
         async function openNotices() {
             if (!localStorage.getItem('wall_token')) { alert('登录后就能看通知'); return; }
             document.getElementById('notice-overlay').classList.add('active');
@@ -1711,6 +1737,8 @@
             setInterval(pollNotices, 20000);
         })();
 
+    
+        window.addEventListener('load', function () { updateNoticeBadge(); setInterval(updateNoticeBadge, 60000); });
     </script>
 </body>
 </html>
