@@ -237,7 +237,11 @@
         .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
-                .badge-hundred { background: linear-gradient(135deg, #7a4a00, #ffd75e 35%, #fff6c9 50%, #ffd75e 65%, #7a4a00); color: #3a2200;
+                .badge-hall { background: linear-gradient(120deg, #1b0b35, #5b21b6 30%, #f7d774 50%, #5b21b6 70%, #1b0b35);
+            color: #ffe9b0; border: 1px solid rgba(247,215,116,.65); letter-spacing: .5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,.6); box-shadow: 0 0 10px rgba(124,58,237,.55); animation: hall-shine 4s ease-in-out infinite alternate; }
+        @keyframes hall-shine { from { box-shadow: 0 0 8px rgba(124,58,237,.45); } to { box-shadow: 0 0 18px rgba(247,215,116,.7); } }
+        .badge-hundred { background: linear-gradient(135deg, #7a4a00, #ffd75e 35%, #fff6c9 50%, #ffd75e 65%, #7a4a00); color: #3a2200;
             border: 1px solid rgba(255,255,255,.55); text-shadow: 0 1px 0 rgba(255,255,255,.45); animation: hundred-glow 3s ease-in-out infinite alternate; }
         @keyframes hundred-glow { from { box-shadow: 0 0 6px rgba(255,200,80,.45); } to { box-shadow: 0 0 16px rgba(255,225,130,.9); } }
         .badge-witness { background: linear-gradient(135deg, #ff9a3c, #ff5f6d); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 8px rgba(255,120,80,.5); }
@@ -616,6 +620,9 @@
             const name = String(t).split('圣诞限定').join('初雪之约');
             if (name.indexOf('百日') !== -1) {
                 return '<span class="badge badge-hundred">' + esc(name) + '</span>';
+            }
+            if (name.indexOf('名人堂') !== -1) {
+                return '<span class="badge badge-hall">' + esc(name) + '</span>';
             }
             if (name.indexOf('见证者') !== -1) {
                 return '<span class="badge badge-witness">' + esc(name) + '</span>';
