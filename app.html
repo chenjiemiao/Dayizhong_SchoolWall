@@ -760,7 +760,7 @@
                 card.innerHTML = `
                     <div class="post-header">
                         <span class="post-tag">${catOf(item)}</span>
-                        <span>${item.date}</span>
+                        <span>${fmtTime(item.created_at, item.date)}</span>
                     </div>
                     <div class="post-author">
                         ${avatarHtml(item.author_avatar, false, item.author_frame)}
@@ -824,7 +824,7 @@
                     <span onclick="openUser('${post.created_by || ''}')" style="cursor:pointer">${avatarHtml(post.author_avatar, true, post.author_frame)}</span>
                     <div class="detail-author-info">
                         <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}</div>
-                        <div class="post-meta">${post.date} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
+                        <div class="post-meta">${fmtTime(post.created_at, post.date)} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
                     </div>
                 </div>
                 <div class="detail-content">${contentHtml}</div>
@@ -1215,7 +1215,7 @@
                 try { meName = JSON.parse(localStorage.getItem('wall_user') || '{}').username || ''; } catch (e) {}
                 document.getElementById('u-block').style.display = (d.user.username === meName) ? 'none' : 'inline-block';
                 box.innerHTML = (d.posts || []).length
-                    ? d.posts.map((p) => `<div class="pf-post"><div class="m">${esc(p.category)} · ${esc(p.date)}</div><div class="t"><b>${esc(p.title || '')}</b><br>${esc((p.content || '').slice(0, 100))}</div></div>`).join('')
+                    ? d.posts.map((p) => `<div class="pf-post"><div class="m">${esc(p.category)} · ${esc(fmtTime(p.created_at, p.date))}</div><div class="t"><b>${esc(p.title || '')}</b><br>${esc((p.content || '').slice(0, 100))}</div></div>`).join('')
                     : '<div class="pf-empty">还没发过帖子</div>';
             } catch (e) {
                 box.textContent = '网络请求失败';
@@ -1610,7 +1610,7 @@
             if (!res.data.length) { box.innerHTML = '<div class="pf-empty">还没发过帖子</div>'; return; }
             box.innerHTML = res.data.map((p) => `
                 <div class="pf-post">
-                    <div class="m">${esc(p.category)} · ${esc(p.date)} · ${PF_STATUS[p.status] || p.status}</div>
+                    <div class="m">${esc(p.category)} · ${esc(fmtTime(p.created_at, p.date))} · ${PF_STATUS[p.status] || p.status}</div>
                     <div class="t">${esc(p.content.slice(0, 140))}${p.content.length > 140 ? '…' : ''}</div>
                     <button class="btn-del" onclick="pfDeletePost('${p._id}')">删除这条</button>
                 </div>`).join('');
