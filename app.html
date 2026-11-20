@@ -237,10 +237,18 @@
         .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
-                .badge-hall { background: linear-gradient(120deg, #1b0b35, #5b21b6 30%, #f7d774 50%, #5b21b6 70%, #1b0b35);
-            color: #ffe9b0; border: 1px solid rgba(247,215,116,.65); letter-spacing: .5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,.6); box-shadow: 0 0 10px rgba(124,58,237,.55); animation: hall-shine 4s ease-in-out infinite alternate; }
-        @keyframes hall-shine { from { box-shadow: 0 0 8px rgba(124,58,237,.45); } to { box-shadow: 0 0 18px rgba(247,215,116,.7); } }
+                .badge-hall { position: relative; overflow: hidden; color: #fff6d8; letter-spacing: .5px;
+            background: linear-gradient(110deg, #1b0b35, #5b21b6 22%, #a855f7 36%, #f7d774 47%, #fffbe8 50%, #f7d774 53%, #a855f7 64%, #5b21b6 78%, #1b0b35);
+            background-size: 240% 100%;
+            border: 1px solid rgba(247,215,116,.7);
+            text-shadow: 0 1px 2px rgba(0,0,0,.65);
+            animation: hall-flow 7s linear infinite, hall-glow 3s ease-in-out infinite alternate; }
+        .badge-hall::after { content: ''; position: absolute; top: 0; bottom: 0; width: 45%; pointer-events: none;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent);
+            transform: translateX(-160%) skewX(-18deg); animation: hall-sweep 3.6s ease-in-out infinite; }
+        @keyframes hall-flow { from { background-position: 0% 50%; } to { background-position: 240% 50%; } }
+        @keyframes hall-glow { from { box-shadow: 0 0 7px rgba(124,58,237,.5); } to { box-shadow: 0 0 20px rgba(247,215,116,.85); } }
+        @keyframes hall-sweep { 0% { transform: translateX(-160%) skewX(-18deg); } 55%, 100% { transform: translateX(320%) skewX(-18deg); } }
         .badge-hundred { background: linear-gradient(135deg, #7a4a00, #ffd75e 35%, #fff6c9 50%, #ffd75e 65%, #7a4a00); color: #3a2200;
             border: 1px solid rgba(255,255,255,.55); text-shadow: 0 1px 0 rgba(255,255,255,.45); animation: hundred-glow 3s ease-in-out infinite alternate; }
         @keyframes hundred-glow { from { box-shadow: 0 0 6px rgba(255,200,80,.45); } to { box-shadow: 0 0 16px rgba(255,225,130,.9); } }
