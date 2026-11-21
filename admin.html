@@ -147,7 +147,7 @@
         </div>
 
         <div class="card" id="sec-requests" hidden>
-            <h2>待审核账号 <span class="cnt" id="cnt-req"></span></h2>
+            <h2>待审核账号 <span class="cnt" id="cnt-req"></span> <button class="btn ghost" style="float:right;padding:3px 10px;font-size:12px" onclick="loadRequests()">刷新</button></h2>
             <div id="req-list"><div class="empty">加载中…</div></div>
         </div>
 
@@ -253,6 +253,8 @@
         var pr = document.getElementById('sec-profreq');
         if (pr) pr.hidden = !owner;
         reload();
+        if (window.__autoRefresh) clearInterval(window.__autoRefresh);
+        window.__autoRefresh = setInterval(function () { loadRequests(); if (me && me.role === "owner") loadProfileRequests(); }, 30000);
     }
 
     async function reload() {
