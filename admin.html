@@ -273,6 +273,8 @@
         document.getElementById('sec-gate').hidden = !owner;
         document.getElementById('sec-broadcast').hidden = !owner;
         document.getElementById('sec-announce').hidden = !owner;
+        var sec = document.getElementById('sec-security');
+        if (sec) sec.hidden = !owner;
         var pr = document.getElementById('sec-profreq');
         if (pr) pr.hidden = !owner;
         reload();
