@@ -237,30 +237,34 @@
         .text-rainbow { background-image: linear-gradient(90deg, #ff7675, #fdcb6e, #55efc4, #74b9ff, #a29bfe, #ff7675); }
         .text-admin { background-image: linear-gradient(90deg, #ff5252, #ff4081, #e040fb, #ff5252); }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #fff; vertical-align: middle; }
-                .badge-hall { position: relative; overflow: hidden; color: #fff6d8; letter-spacing: .5px;
-            background: linear-gradient(110deg, #1b0b35, #5b21b6 22%, #a855f7 36%, #f7d774 47%, #fffbe8 50%, #f7d774 53%, #a855f7 64%, #5b21b6 78%, #1b0b35);
-            background-size: 240% 100%;
+        .badge-hall { position: relative; overflow: hidden; color: #fff6d8; letter-spacing: .5px;
+            background-image: repeating-linear-gradient(90deg,
+                #1b0b35 0px, #5b21b6 34px, #a855f7 58px, #f7d774 74px, #fffbe8 80px,
+                #f7d774 86px, #a855f7 102px, #5b21b6 126px, #1b0b35 160px);
+            background-size: 160px 100%;
             border: 1px solid rgba(247,215,116,.7);
             text-shadow: 0 1px 2px rgba(0,0,0,.65);
-            animation: hall-flow 7s linear infinite, hall-glow 3s ease-in-out infinite alternate; }
+            animation: hall-flow 6s linear infinite, hall-glow 3s ease-in-out infinite alternate; }
         .badge-hall::after { content: ''; position: absolute; top: 0; bottom: 0; width: 45%; pointer-events: none;
             background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent);
-            transform: translateX(-160%) skewX(-18deg); animation: hall-sweep 3.6s ease-in-out infinite; }
-        @keyframes hall-flow { from { background-position: 0% 50%; } to { background-position: 240% 50%; } }
+            transform: translateX(-180%) skewX(-18deg); animation: hall-sweep 3.6s linear infinite; }
+        @keyframes hall-flow { from { background-position: 0 0; } to { background-position: 160px 0; } }
         @keyframes hall-glow { from { box-shadow: 0 0 7px rgba(124,58,237,.5); } to { box-shadow: 0 0 20px rgba(247,215,116,.85); } }
-        @keyframes hall-sweep { 0% { transform: translateX(-160%) skewX(-18deg); } 55%, 100% { transform: translateX(320%) skewX(-18deg); } }
+        @keyframes hall-sweep { from { transform: translateX(-180%) skewX(-18deg); } to { transform: translateX(340%) skewX(-18deg); } }
         .badge-hundred { position: relative; overflow: hidden; color: #3a2200; font-weight: bold; letter-spacing: .5px;
-            background: linear-gradient(110deg, #3a1c00, #b85c00 18%, #ffb347 34%, #ffe9a8 46%, #fffbe8 50%, #ffe9a8 54%, #ffb347 66%, #b85c00 82%, #3a1c00);
-            background-size: 240% 100%;
+            background-image: repeating-linear-gradient(90deg,
+                #3a1c00 0px, #b85c00 30px, #ffb347 52px, #ffe9a8 66px, #fffbe8 70px,
+                #ffe9a8 74px, #ffb347 88px, #b85c00 110px, #3a1c00 140px);
+            background-size: 140px 100%;
             border: 1px solid rgba(255,255,255,.7);
             text-shadow: 0 1px 0 rgba(255,255,255,.5);
-            animation: hundred-flow 6s linear infinite, hundred-glow 2.2s ease-in-out infinite alternate; }
+            animation: hundred-flow 5s linear infinite, hundred-glow 2.2s ease-in-out infinite alternate; }
         .badge-hundred::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; pointer-events: none;
             background: linear-gradient(100deg, transparent, rgba(255,255,255,.8), transparent);
-            transform: translateX(-160%) skewX(-20deg); animation: hundred-sweep 3s ease-in-out infinite; }
-        @keyframes hundred-flow { from { background-position: 0% 50%; } to { background-position: 240% 50%; } }
+            transform: translateX(-180%) skewX(-20deg); animation: hundred-sweep 3s linear infinite; }
+        @keyframes hundred-flow { from { background-position: 0 0; } to { background-position: 140px 0; } }
         @keyframes hundred-glow { from { box-shadow: 0 0 6px rgba(255,180,70,.5); } to { box-shadow: 0 0 18px rgba(255,225,130,1); } }
-        @keyframes hundred-sweep { 0% { transform: translateX(-160%) skewX(-20deg); } 50%, 100% { transform: translateX(320%) skewX(-20deg); } }
+        @keyframes hundred-sweep { from { transform: translateX(-180%) skewX(-20deg); } to { transform: translateX(340%) skewX(-20deg); } }
         .badge-witness { background: linear-gradient(135deg, #ff9a3c, #ff5f6d); border: 1px solid rgba(255,255,255,.35); box-shadow: 0 0 8px rgba(255,120,80,.5); }
         .badge-xmas { position: relative; overflow: hidden; padding-left: 20px;
             background: linear-gradient(180deg, #6f8fb8 0%, #27405f 100%);
