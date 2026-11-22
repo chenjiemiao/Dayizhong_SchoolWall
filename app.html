@@ -367,6 +367,7 @@
         .edit-form input { padding: 9px 11px; border-radius: 9px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 13px; }
             .days-badge { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; font-size: 11px;
             color: #7bd88f; border: 1px solid rgba(123,216,143,.45); background: rgba(123,216,143,.08); }
+            .img-tag { color: var(--accent-color); font-size: 12px; opacity: .9; }
     </style>
 <link rel="icon" href="./images/icon-192.png">
     <link rel="manifest" href="./manifest.json">
@@ -805,7 +806,7 @@
                         <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}${item.class_name ? `<span class="post-class">${esc(item.class_name)}</span>` : ''}${daysBadge(item.author_days)}
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
-                    <div class="post-content">${shortContent}</div>
+                    <div class="post-content">${shortContent}${item.images && item.images.length ? ' <span class="img-tag">[图片' + (item.images.length > 1 ? ' ×' + item.images.length : '') + ']</span>' : ''}</div>
                     <div class="post-footer">
                         <span class="like-count">👍 ${(item.likes || []).length}</span>
                     </div>
