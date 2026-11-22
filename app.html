@@ -1302,11 +1302,24 @@
             var box = document.getElementById('title-codex-list');
             if (!box) return;
             var owned = (pfMe && pfMe.titles) || [];
+            var fixedNames = TITLE_CODEX.map(function (t) { return t.name; }).filter(function (n) { return n !== '自定义七彩称号'; });
+            var custom = owned.filter(function (x) {
+                if (fixedNames.indexOf(x) !== -1) return false;
+                if (/见证|初雪|圣诞|百日|名人堂|Stars/.test(x)) return false;
+                return true;
+            });
             box.innerHTML = TITLE_CODEX.map(function (t) {
-                var has = owned.indexOf(t.name) !== -1;
+                var has;
+                var preview = t.name;
+                if (t.name === '自定义七彩称号') {
+                    has = custom.length > 0;
+                    if (has) preview = custom[0];
+                } else {
+                    has = owned.indexOf(t.name) !== -1;
+                }
                 return '<div class="codex-item' + (has ? '' : ' locked') + '">' +
                     '<div class="codex-name">' + codexStatus(has) + '</div>' +
-                    '<div class="codex-demo">chenjiemiao ' + titleSpan(t.name) + '</div>' +
+                    '<div class="codex-demo">chenjiemiao ' + titleSpan(preview) + '</div>' +
                     '<p class="codex-desc">' + t.desc + '</p></div>';
             }).join('');
         }
