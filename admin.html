@@ -129,6 +129,12 @@
             <div id="approved-list"><div class="empty">加载中…</div></div>
         </div>
 
+        <div class="card" id="sec-security" hidden>
+            <h2>安全日志 <span class="cnt" id="cnt-sec"></span></h2>
+            <p style="font-size:12px;color:#777;margin:0 0 10px">只记录登录、注册、发帖、评论、头衔申请这几类动作</p>
+            <div id="sec-list"><div class="empty">加载中…</div></div>
+        </div>
+
         <div class="card" id="sec-profreq" hidden>
             <h2>资料修改申请 <span class="cnt" id="cnt-profreq"></span></h2>
             <div id="profreq-list"><div class="empty">加载中…</div></div>
@@ -280,6 +286,7 @@
         if (me.role === 'owner') {
             loadRequests();
             loadProfileRequests();
+            loadSecurity();
             loadPendingPosts();
             loadTitles();
         }
@@ -376,6 +383,33 @@
         var res = await api('adminDeleteUser', { username: username });
         alert(res.message || '完成');
         if (res.code === 200) loadUsers();
+    }
+
+    async function loadSecurity() {
+        var box = document.getElementById('sec-list');
+        var res = await api('securityLogs');
+        if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '') + '</div>'; return; }
+        setCount('cnt-sec', res.data.length);
+        var blocked = res.blocked || [];
+        var html = '';
+        if (blocked.length) {
+            html += '<div class="meta">已拉黑：' + blocked.map(function (b) { return '<span class="tag">' + esc(b) + '</span>'; }).join('') + '</div>';
+        }
+        html += (res.data || []).map(function (r) {
+            return '<div class="item">' +
+                '<div class="meta">' + esc(r.ip) + ' · ' + esc(r.action) + ' · ' + (r.code === 200 ? '成功' : '失败(' + r.code + ')') + '</div>' +
+                '<div class="meta">' + new Date(r.created_at).toLocaleString('zh-CN', { hour12: false }) + '</div>' +
+                '<div class="row"><button class="btn no" onclick="blockIp(\'' + esc(r.ip) + '\')">拉黑这个 IP</button></div>' +
+                '</div>';
+        }).join('');
+        box.innerHTML = html || '<div class="empty">还没有记录</div>';
+    }
+
+    async function blockIp(ip) {
+        if (!confirm('拉黑 ' + ip + '？这个 IP 之后无法访问网站。')) return;
+        var res = await api('blockIp', { ip: ip });
+        alert(res.message || '完成');
+        loadSecurity();
     }
 
     async function loadProfileRequests() {
