@@ -862,7 +862,7 @@
                 card.className = 'post-card';
                 card.setAttribute('onclick', `openDetail('${item.id}')`);
                 // 安全地截取纯文本内容
-                let shortContent = (item.content || '').replace(/<[^>]+>/g, '');
+                let shortContent = esc(String(item.content || '').replace(/<[^>]+>/g, ''));
                 if(shortContent.length > 50) shortContent = shortContent.substring(0, 50) + '...';
 
                 card.innerHTML = `
@@ -895,8 +895,13 @@
             const overlay = document.getElementById('detail-overlay');
             const body = document.getElementById('detail-body');
 
-            let contentHtml = post.content || '';
-            contentHtml = contentHtml.replace(/<加粗>(.*?)<\/加粗>/g, '<strong>$1</strong>');
+            let contentHtml = String(post.content || '');
+            const hadNewline = contentHtml.indexOf('<p1>') !== -1;
+            // 允许的唯一标签：<加粗>。其余全部按纯文本转义，防止 XSS
+            contentHtml = contentHtml.replace(/<加粗>/g, '\u0001B\u0001').replace(/<\/加粗>/g, '\u0001/B\u0001');
+            contentHtml = esc(contentHtml);
+            contentHtml = contentHtml.replace(/\u0001B\u0001/g, '<strong>').replace(/\u0001\/B\u0001/g, '</strong>');
+            contentHtml = contentHtml.replace(/\n/g, '<br>');
             
             // 处理图片九宫格
             if (post.images && post.images.length > 0) {
