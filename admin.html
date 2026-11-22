@@ -105,6 +105,7 @@
     <div id="panel" hidden>
         <div class="card" id="sec-users">
             <h2>用户管理 <span class="cnt" id="cnt-users"></span></h2>
+            <input id="user-search" placeholder="搜索昵称 / 用户名 / 真名 / 班级" oninput="filterUsers()" style="margin-bottom:12px">
             <div id="user-list"><div class="empty">加载中…</div></div>
         </div>
 
@@ -268,15 +269,34 @@
         }
     }
 
+    var ALL_USERS = [];
+
     async function loadUsers() {
-        const box = document.getElementById('user-list');
-        const res = await api('adminListUsers');
+        var box = document.getElementById('user-list');
+        var res = await api('adminListUsers');
         if (res.code !== 200) { box.innerHTML = '<div class="empty">' + esc(res.message || '加载失败') + '</div>'; return; }
         setCount('cnt-users', res.data.length);
-        const owner = me.role === 'owner';
+        ALL_USERS = res.data || [];
         USERS = {};
-        res.data.forEach(function (u) { USERS[u.username] = u; });
-        box.innerHTML = res.data.map(function (u) {
+        ALL_USERS.forEach(function (u) { USERS[u.username] = u; });
+        renderUserList(ALL_USERS);
+    }
+
+    function filterUsers() {
+        var q = (document.getElementById('user-search').value || '').trim().toLowerCase();
+        if (!q) { renderUserList(ALL_USERS); return; }
+        var hit = ALL_USERS.filter(function (u) {
+            return [u.nickname, u.username, u.real_name, u.class_name].some(function (v) {
+                return v && String(v).toLowerCase().indexOf(q) !== -1;
+            });
+        });
+        renderUserList(hit, q);
+    }
+
+    function renderUserList(list, q) {
+        var box = document.getElementById('user-list');
+        if (!list.length) { box.innerHTML = '<div class="empty">' + (q ? '没有匹配的账号' : '还没有账号') + '</div>'; return; }
+        box.innerHTML = list.map(function (u) {
             var banned = u.status === "banned";
             var roleTag = u.role === 'owner' ? '<span class="role">站长</span>' : (u.role === 'admin' ? '<span class="role">管理员</span>' : '');
             var titles = (u.titles || []).length ? u.titles.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') : '无头衔';
