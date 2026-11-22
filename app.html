@@ -1856,11 +1856,11 @@
                 try { btn.textContent = '👤 ' + JSON.parse(raw).nickname; } catch (e) {}
             }
             pollNotices();
-            setInterval(pollNotices, 30000);
+            setInterval(function () { if (!document.hidden) pollNotices(); }, 120000);
         })();
 
     
-        window.addEventListener('load', function () { updateNoticeBadge(); });
+        window.addEventListener('load', function () { updateNoticeBadge(); setTimeout(updateNoticeBadge, 10000); });
     </script>
 </body>
 </html>
