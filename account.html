@@ -48,7 +48,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="校园墙">
-    <script>if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js?v=2').then(function (r) { r.update(); }).catch(function () {}); });</script>
+    <script>if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js?v=2').then(function (r) { r.update(); }).catch(function () {}); });    loadCaptcha();
+</script>
 </head>
 <body>
 <div class="bg-media" aria-hidden="true"><video autoplay muted loop playsinline preload="none"></video><div class="bg-mask"></div></div>
@@ -107,6 +108,12 @@
             </div>
             <label>联系方式（微信 / QQ，方便站长找到你）</label>
             <input id="reg-contact" placeholder="选填，但建议留">
+            <label>人机验证</label>
+            <div style="display:flex;gap:10px;align-items:center">
+                <span id="cap-question" style="font-size:16px;color:#ff9a9e;min-width:110px">加载中…</span>
+                <input id="cap-answer" inputmode="numeric" placeholder="答案" style="max-width:110px">
+                <button class="btn ghost" type="button" onclick="loadCaptcha()" style="padding:8px 12px">换一题</button>
+            </div>
             <button class="btn" id="reg-btn" onclick="doRegister()">提交申请</button>
             <div class="msg" id="reg-msg"></div>
             <p class="hint">提交后不会立刻能用，要等站长在后台点通过。</p>
@@ -189,6 +196,27 @@
         }
     }
 
+    let captchaToken = '';
+
+    async function loadCaptcha() {
+        const q = document.getElementById('cap-question');
+        const a = document.getElementById('cap-answer');
+        if (q) q.textContent = '加载中…';
+        if (a) a.value = '';
+        try {
+            const r = await fetch(API + '?action=issueCaptcha');
+            const d = await r.json();
+            if (d.code === 200) {
+                captchaToken = d.token;
+                if (q) q.textContent = d.question;
+            } else {
+                if (q) q.textContent = '加载失败，点换一题';
+            }
+        } catch (e) {
+            if (q) q.textContent = '网络异常，点换一题';
+        }
+    }
+
     async function doRegister() {
         const btn = document.getElementById('reg-btn');
         const body = {
@@ -198,6 +226,8 @@
             className: document.getElementById('reg-class').value.trim(),
             password: document.getElementById('reg-pass').value,
             contact: document.getElementById('reg-contact').value.trim(),
+            captchaToken: captchaToken,
+            captchaAnswer: (document.getElementById('cap-answer') || {}).value || '',
             avatar: avatarData
         };
         btn.disabled = true;
