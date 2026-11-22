@@ -790,9 +790,12 @@
             }
 
             try {
-                const token = localStorage.getItem('wall_token');
-                const url = API_BASE_URL + (token ? '&token=' + encodeURIComponent(token) : '');
-                const response = await fetch(url);
+                const token = localStorage.getItem('wall_token') || '';
+                const response = await fetch(API_ROOT + '?action=wall', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token, fresh: !!force })
+                });
                 const result = await response.json();
 
                 if (result.code === 200 && result.data) {
@@ -800,6 +803,7 @@
                     wallData = await resolveImages(result.data);
                     saveCachedWall(wallData);
                     renderPosts();
+                    if (typeof result.notices_unread === 'number') setNoticeBadgeCount(result.notices_unread);
                 } else if (result.code === 429 || String(result.message || '').indexOf('rate limit') !== -1 || String(result.message || '').indexOf('RATELIMIT') !== -1) {
                     rateLimitedUntil = Date.now() + 30000;
                     showWallHint('现在人有点多，先看看缓存的内容，稍后自动刷新');
@@ -1861,6 +1865,10 @@
             } else {
                 alert('在浏览器菜单里找：\n\n安卓 Chrome：右上角三个点 →「安装应用」或「添加到主屏幕」\n电脑 Edge：地址栏右边的安装图标');
             }
+        }
+
+        function setNoticeBadgeCount(unread) {
+            setNoticeBadgeCount(unread);
         }
 
         async function updateNoticeBadge() {
