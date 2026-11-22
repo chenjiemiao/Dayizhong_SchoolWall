@@ -97,9 +97,11 @@
         <input id="adm-name" placeholder="你自己的账号">
         <label>密码</label>
         <input id="adm-pass" type="password" placeholder="账号密码">
+        <label>站长密码</label>
+        <input id="adm-master" type="password" placeholder="站长设置的网站密码">
         <button class="btn" id="adm-btn" onclick="login()" style="margin-top:16px">登录后台</button>
         <div class="msg" id="login-msg"></div>
-        <p style="font-size:12px;color:#777;margin-top:12px">必须用管理员账号登录，光知道密码进不来。</p>
+        <p style="font-size:12px;color:#777;margin-top:12px">必须先登录自己的管理员账号，再输站长密码。站长密码只有站长知道，其他管理员也进不来。</p>
     </div>
 
     <div id="panel" hidden>
@@ -218,21 +220,35 @@
     async function login() {
         const username = document.getElementById('adm-name').value.trim();
         const password = document.getElementById('adm-pass').value;
+        const masterPassword = (document.getElementById('adm-master') || {}).value || '';
         const msg = document.getElementById('login-msg');
         const btn = document.getElementById('adm-btn');
         if (!username || !password) { msg.textContent = '用户名和密码都要填'; msg.className = 'msg err'; return; }
         btn.disabled = true; btn.textContent = '登录中…';
-        const res = await fetch(API + '?action=login', {
+        const res = await fetch(API + '?action=adminLogin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username: username, password: password, masterPassword: masterPassword })
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
-        btn.disabled = false; btn.textContent = '登录后台';
         if (res.code !== 200) { msg.textContent = res.message || '登录失败'; msg.className = 'msg err'; return; }
-        if (res.user.role !== 'owner' && res.user.role !== 'admin') {
-            msg.textContent = '这个账号不是管理员';
-            msg.className = 'msg err';
+        if (res.needSetup) {
+            const np = prompt('还没有站长密码，现在设置一个（至少 6 位，只有你知道）');
+            if (!np) { msg.textContent = '取消设置，无法进入后台'; msg.className = 'msg err'; return; }
+            const sr = await fetch(API + '?action=setMasterPassword', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: res.token, password: np })
+            }).then(r => r.json()).catch(() => ({ code: -1 }));
+            if (sr.code !== 200) { msg.textContent = sr.message || '设置失败'; msg.className = 'msg err'; return; }
+            msg.textContent = '站长密码已设置，请重新登录'; msg.className = 'msg ok';
             return;
+        }
+        if (!res.user) {
+            const ur = await fetch(API + '?action=me', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: res.token })
+            }).then(r => r.json()).catch(() => ({}));
+            res.user = (ur && ur.user) || {};
         }
         localStorage.setItem('admin_token', res.token);
         localStorage.setItem('admin_user', JSON.stringify(res.user));
