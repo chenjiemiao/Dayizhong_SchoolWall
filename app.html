@@ -393,9 +393,13 @@
         .utag-已封禁 { border-color: #636e72; color: #636e72; }
             .online-inline { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11px; color: var(--text-muted); vertical-align: middle; }
         .online-inline b { color: #55efc4; font-weight: normal; }
-            .save-banner { max-width: 900px; margin: 10px auto 0; padding: 10px 16px; border-radius: 10px; font-size: 12px; line-height: 1.7;
-            background: rgba(255,159,67,.14); border: 1px solid rgba(255,159,67,.5); color: #ffbe76; text-align: center; }
-        .save-banner b { color: #ff9f43; margin-right: 6px; }
+            .save-banner { position: relative; z-index: 8; max-width: 860px; margin: 12px auto 0; padding: 14px 18px; border-radius: 12px;
+            font-size: 13px; line-height: 1.9; text-align: left;
+            background: rgba(28,20,12,.96); border: 1px solid #ff9f43; color: #ffe0b2;
+            box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+        .save-banner .save-title { font-size: 15px; font-weight: bold; color: #ffb347; margin-bottom: 6px; }
+        .save-banner .save-line b { color: #ffd166; }
+        .save-banner b { color: #ffd166; }
     </style>
 <link rel="icon" href="./images/icon-192.png">
     <link rel="manifest" href="./manifest.json">
