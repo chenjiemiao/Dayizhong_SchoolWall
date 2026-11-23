@@ -107,6 +107,14 @@
     <div id="panel" hidden>
         <div class="card" id="sec-users">
             <h2>用户管理 <span class="cnt" id="cnt-users"></span></h2>
+            <div id="user-cats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <button class="btn ghost" data-cat="" onclick="setUserCat('')">全部</button>
+                <button class="btn ghost" data-cat="普通" onclick="setUserCat('普通')">普通</button>
+                <button class="btn ghost" data-cat="名人堂" onclick="setUserCat('名人堂')">名人堂</button>
+                <button class="btn ghost" data-cat="管理员" onclick="setUserCat('管理员')">管理员</button>
+                <button class="btn ghost" data-cat="站长" onclick="setUserCat('站长')">站长</button>
+                <button class="btn ghost" data-cat="已封禁" onclick="setUserCat('已封禁')">已封禁</button>
+            </div>
             <input id="user-search" placeholder="搜索昵称 / 用户名 / 真名 / 班级" oninput="filterUsers()" style="margin-bottom:12px">
             <div id="user-list"><div class="empty">加载中…</div></div>
         </div>
@@ -307,10 +315,30 @@
         renderUserList(ALL_USERS);
     }
 
+    var USER_CAT = '';
+
+    function userCat(u) {
+        if (u.status === 'banned') return '已封禁';
+        if (u.role === 'owner') return '站长';
+        if (u.role === 'admin') return '管理员';
+        if ((u.titles || []).some(function (t) { return String(t).indexOf('名人堂') !== -1; })) return '名人堂';
+        return '普通';
+    }
+
+    function setUserCat(cat) {
+        USER_CAT = cat;
+        Array.from(document.querySelectorAll('#user-cats button')).forEach(function (b) {
+            b.style.background = (b.getAttribute('data-cat') || '') === cat ? 'var(--accent)' : 'transparent';
+            b.style.color = (b.getAttribute('data-cat') || '') === cat ? '#121212' : 'var(--text)';
+        });
+        filterUsers();
+    }
+
     function filterUsers() {
         var q = (document.getElementById('user-search').value || '').trim().toLowerCase();
-        if (!q) { renderUserList(ALL_USERS); return; }
         var hit = ALL_USERS.filter(function (u) {
+            if (USER_CAT && userCat(u) !== USER_CAT) return false;
+            if (!q) return true;
             return [u.nickname, u.username, u.real_name, u.class_name].some(function (v) {
                 return v && String(v).toLowerCase().indexOf(q) !== -1;
             });

@@ -376,6 +376,21 @@
             max-width: 86vw; padding: 9px 16px; border-radius: 20px; font-size: 12px; color: #fff; background: rgba(30,30,30,.94);
             border: 1px solid var(--border-color); opacity: 0; pointer-events: none; transition: .25s; }
         .wall-hint.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+            .online-pill { display: inline-flex; align-items: center; gap: 6px; margin: 14px auto 0; padding: 6px 14px; border-radius: 20px;
+            background: rgba(30,30,30,.72); border: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; cursor: pointer; width: fit-content; }
+        .online-pill b { color: #55efc4; }
+        .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #55efc4; box-shadow: 0 0 6px #55efc4; animation: online-pulse 2s ease-in-out infinite; }
+        @keyframes online-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+        .online-panel { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 300; width: min(320px, 86vw);
+            max-height: 70vh; overflow: auto; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+        .online-head { font-size: 13px; color: var(--accent-color); margin-bottom: 12px; }
+        .online-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px dashed #2a2a2a; font-size: 13px; }
+        .online-row:last-child { border-bottom: none; }
+        .utag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 6px; font-size: 10px; border: 1px solid #555; color: var(--text-muted); vertical-align: middle; }
+        .utag-站长 { border-color: #ffd166; color: #ffd166; }
+        .utag-管理员 { border-color: #ff7675; color: #ff7675; }
+        .utag-名人堂 { border-color: #a29bfe; color: #a29bfe; }
+        .utag-已封禁 { border-color: #636e72; color: #636e72; }
     </style>
 <link rel="icon" href="./images/icon-192.png">
     <link rel="manifest" href="./manifest.json">
@@ -522,6 +537,11 @@
                 <div id="notice-list"><div class="pf-empty">加载中…</div></div>
             </div>
         </div>
+    </div>
+
+    <div id="online-panel" class="online-panel" hidden>
+        <div class="online-head">当前在线 <span id="online-total">0</span> 人</div>
+        <div id="online-list" class="online-list"></div>
     </div>
 
     <div id="media-hint" class="media-hint" onclick="enableMedia()">🔊 点我开启背景音乐</div>
@@ -804,6 +824,8 @@
                     saveCachedWall(wallData);
                     renderPosts();
                     if (typeof result.notices_unread === 'number') setNoticeBadgeCount(result.notices_unread);
+                    ONLINE_USERS = result.online || [];
+                    renderOnline();
                 } else if (result.code === 429 || String(result.message || '').indexOf('rate limit') !== -1 || String(result.message || '').indexOf('RATELIMIT') !== -1) {
                     rateLimitedUntil = Date.now() + 30000;
                     showWallHint('现在人有点多，先看看缓存的内容，稍后自动刷新');
@@ -845,6 +867,33 @@
         // ==========================================
         // 渲染列表
         // ==========================================
+        let ONLINE_USERS = [];
+
+        function utag(tag) {
+            if (!tag) return '';
+            return '<span class="utag utag-' + tag + '">' + tag + '</span>';
+        }
+
+        function renderOnline() {
+            const cnt = document.getElementById('online-count');
+            const total = document.getElementById('online-total');
+            const list = document.getElementById('online-list');
+            if (cnt) cnt.textContent = ONLINE_USERS.length;
+            if (total) total.textContent = ONLINE_USERS.length;
+            if (list) {
+                list.innerHTML = ONLINE_USERS.length
+                    ? ONLINE_USERS.map(function (u) {
+                        return '<div class="online-row">' + esc(u.nickname) + utag(u.tag) + '</div>';
+                    }).join('')
+                    : '<div class="online-row" style="color:#777">暂时没人</div>';
+            }
+        }
+
+        function toggleOnline() {
+            const p = document.getElementById('online-panel');
+            if (p) p.hidden = !p.hidden;
+        }
+
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -872,7 +921,7 @@
                     </div>
                     <div class="post-author">
                         ${avatarHtml(item.author_avatar, false, item.author_frame)}
-                        <span class="author-name">@${esc(item.author)}</span>${titlesHtml(item)}${item.class_name ? `<span class="post-class">${esc(item.class_name)}</span>` : ''}${daysBadge(item.author_days)}
+                        <span class="author-name">@${esc(item.author)}</span>${utag(item.author_tag)}${titlesHtml(item)}${item.class_name ? `<span class="post-class">${esc(item.class_name)}</span>` : ''}${daysBadge(item.author_days)}
                     </div>
                     <div class="post-title">${esc(item.title || '（无标题）')}</div>
                     <div class="post-content">${shortContent}${item.images && item.images.length ? ' <span class="img-tag">[图片' + (item.images.length > 1 ? ' ×' + item.images.length : '') + ']</span>' : ''}</div>
@@ -936,7 +985,7 @@
                 <div class="detail-author">
                     <span onclick="openUser('${post.created_by || ''}')" style="cursor:pointer">${avatarHtml(post.author_avatar, true, post.author_frame)}</span>
                     <div class="detail-author-info">
-                        <div class="author-name author-name-lg">@${esc(post.author)}${titlesHtml(post)}${daysBadge(post.author_days)}</div>
+                        <div class="author-name author-name-lg">@${esc(post.author)}${utag(post.author_tag)}${titlesHtml(post)}${daysBadge(post.author_days)}</div>
                         <div class="post-meta">${fmtTime(post.created_at, post.date)} · ${post.category}${post.class_name ? ' · ' + esc(post.class_name) : ''}</div>
                     </div>
                 </div>
