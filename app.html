@@ -391,6 +391,8 @@
         .utag-管理员 { border-color: #ff7675; color: #ff7675; }
         .utag-名人堂 { border-color: #a29bfe; color: #a29bfe; }
         .utag-已封禁 { border-color: #636e72; color: #636e72; }
+            .online-inline { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11px; color: var(--text-muted); vertical-align: middle; }
+        .online-inline b { color: #55efc4; font-weight: normal; }
     </style>
 <link rel="icon" href="./images/icon-192.png">
     <link rel="manifest" href="./manifest.json">
@@ -879,6 +881,8 @@
             const total = document.getElementById('online-total');
             const list = document.getElementById('online-list');
             if (cnt) cnt.textContent = ONLINE_USERS.length;
+            const cntH = document.getElementById('online-count-header');
+            if (cntH) cntH.textContent = ONLINE_USERS.length;
             if (total) total.textContent = ONLINE_USERS.length;
             if (list) {
                 list.innerHTML = ONLINE_USERS.length
@@ -1950,10 +1954,11 @@
             if (res.code !== 200) { box.innerHTML = '<div class="pf-empty">加载失败</div>'; return; }
             if (!res.data.length) { box.innerHTML = '<div class="pf-empty">没有通知</div>'; return; }
             box.innerHTML = res.data.map((n) => `
-                <div class="pf-post">
+                <div class="pf-post" ${n.post_id ? 'style="cursor:pointer" onclick="jumpToPost(\'' + n.post_id + '\')"' : ''}>
                     <div class="m">${new Date(n.created_at).toLocaleString('zh-CN', { hour12: false })}</div>
                     <div class="t">${esc(n.text)}</div>
                     ${n.image ? `<img class="notice-img" src="${esc(n.image)}" alt="">` : ''}
+                    ${n.post_id ? '<div class="m" style="color:#7bd88f;margin-top:6px">查看这条帖子 →</div>' : ''}
                 </div>`).join('');
             localStorage.setItem('notice_seen', String(Date.now()));
             const btn = document.getElementById('notice-btn');
@@ -1961,6 +1966,18 @@
             btn.classList.remove('ring');
             await pfApi('markNoticesRead');
             updateNoticeBadge();
+        }
+
+        async function jumpToPost(postId) {
+            closeNotices();
+            document.getElementById('notice-overlay').classList.remove('active');
+            if (!wallData.length) await fetchPosts(false, true);
+            const target = wallData.find(function (p) { return p.id === postId || p._id === postId; });
+            if (target) {
+                openDetail(target.id);
+            } else {
+                alert('这条帖子可能已经被删除了');
+            }
         }
 
         function closeNotices() {
