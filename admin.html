@@ -138,7 +138,7 @@
         </div>
 
         <div class="card" id="sec-security" hidden>
-            <h2>安全日志 <span class="cnt" id="cnt-sec"></span></h2>
+            <h2>安全日志 <span class="cnt" id="cnt-sec"></span> <button class="btn ghost" style="float:right;padding:3px 10px;font-size:12px" onclick="clearSecurityLogs()">清空</button></h2>
             <p style="font-size:12px;color:#777;margin:0 0 10px">只记录登录、注册、发帖、评论、头衔申请这几类动作</p>
             <div id="sec-list"><div class="empty">加载中…</div></div>
         </div>
@@ -433,6 +433,13 @@
                 '</div>';
         }).join('');
         box.innerHTML = html || '<div class="empty">还没有记录</div>';
+    }
+
+    async function clearSecurityLogs() {
+        if (!confirm('清空全部安全日志？清空后无法恢复。')) return;
+        var res = await api('clearSecurityLogs');
+        alert(res.message || '完成');
+        loadSecurity();
     }
 
     async function blockIp(ip) {
