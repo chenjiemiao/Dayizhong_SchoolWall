@@ -452,6 +452,7 @@
         <div class="save-line">本站服务器本月流量额度已用尽。为了让网站继续可用，暂时降低刷新频率：</div>
         <div class="save-line">· 帖子列表、点赞数、评论数 <b>最多延迟 5 分钟</b>更新，下拉刷新可立即获取</div>
         <div class="save-line">· 发帖、评论、点赞 <b>仍然实时生效</b>，不受影响</div>
+        <div class="save-line">· <b>工作日 8:00–20:00 服务器关闭</b>以节约资源，晚上和周末正常开放</div>
         <div class="save-line" id="save-until">· 额度预计 <b>12 月 1 日</b>重置，届时恢复正常</div>
     </div>
 
@@ -849,6 +850,9 @@
                     if (typeof result.notices_unread === 'number') setNoticeBadgeCount(result.notices_unread);
                     ONLINE_USERS = result.online || [];
                     renderOnline();
+                } else if (result.code === 503) {
+                    if (!wallData.length) container.innerHTML = '<div style="text-align:center;padding:28px;color:#ffb347;line-height:2;">🌙 现在不是开放时间<br><span style="font-size:12px;color:#999">工作日 8:00–20:00 服务器关闭，晚上和周末再来吧</span></div>';
+                    return;
                 } else if (result.code === 429 || String(result.message || '').indexOf('rate limit') !== -1 || String(result.message || '').indexOf('RATELIMIT') !== -1) {
                     rateLimitedUntil = Date.now() + 30000;
                     showWallHint('现在人有点多，先看看缓存的内容，稍后自动刷新');
