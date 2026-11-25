@@ -109,10 +109,12 @@
             <label>联系方式（微信 / QQ，方便站长找到你）</label>
             <input id="reg-contact" placeholder="选填，但建议留">
             <label>人机验证</label>
-            <div style="display:flex;gap:10px;align-items:center">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <img id="cap-img" alt="验证码" onclick="loadCaptcha()"
+                     style="display:none;height:52px;border-radius:6px;cursor:pointer;border:1px solid #333">
                 <span id="cap-question" style="font-size:16px;color:#ff9a9e;min-width:110px">加载中…</span>
-                <input id="cap-answer" inputmode="numeric" placeholder="答案" style="max-width:110px">
-                <button class="btn ghost" type="button" onclick="loadCaptcha()" style="padding:8px 12px">换一题</button>
+                <input id="cap-answer" maxlength="6" placeholder="验证码" style="max-width:120px">
+                <button class="btn ghost" type="button" onclick="loadCaptcha()" style="padding:8px 12px">换一张</button>
             </div>
             <button class="btn" id="reg-btn" onclick="doRegister()">提交申请</button>
             <div class="msg" id="reg-msg"></div>
@@ -200,20 +202,28 @@
 
     async function loadCaptcha() {
         const q = document.getElementById('cap-question');
+        const img = document.getElementById('cap-img');
         const a = document.getElementById('cap-answer');
-        if (q) q.textContent = '加载中…';
-        if (a) a.value = '';
+        if (q) { q.textContent = '加载中…'; }
+        if (img) { img.style.display = 'none'; }
+        if (a) { a.value = ''; }
         try {
             const r = await fetch(API + '?action=issueCaptcha');
             const d = await r.json();
-            if (d.code === 200) {
-                captchaToken = d.token;
-                if (q) q.textContent = d.question;
-            } else {
-                if (q) q.textContent = '加载失败，点换一题';
+            if (d.code !== 200) {
+                if (q) q.textContent = '验证码加载失败，点「换一张」';
+                return;
+            }
+            captchaToken = d.token;
+            if (d.image && img) {
+                img.src = d.image;
+                img.style.display = 'block';
+                if (q) q.textContent = d.question || '请输入图片里的字符';
+            } else if (d.question && q) {
+                q.textContent = d.question;
             }
         } catch (e) {
-            if (q) q.textContent = '网络异常，点换一题';
+            if (q) q.textContent = '网络异常，点「换一张」';
         }
     }
 
