@@ -310,8 +310,8 @@
   var v = document.querySelector('.bg-media video');
   var wide = window.matchMedia('(min-width: 1100px)').matches;
   v.src = wide
-    ? 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-1080.mp4'
-    : 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-720.mp4';
+    ? './images/bg-1080.mp4'
+    : './images/bg-720.mp4';
   v.play().catch(function () {});
 })();
 </script>

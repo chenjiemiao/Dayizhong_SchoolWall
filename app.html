@@ -422,8 +422,8 @@
             var v = document.getElementById('bg-video');
             var wide = window.matchMedia('(min-width: 1100px)').matches;
             v.src = wide
-                ? 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-1080.mp4'
-                : 'https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bg-720.mp4';
+                ? './images/bg-1080.mp4'
+                : './images/bg-720.mp4';
             v.play().catch(function () {});
         })();
     </script>
@@ -663,7 +663,7 @@
         <div class="music-btn" id="music-toggle" onclick="toggleMusic()" title="音乐">🔇</div>
     </div>
     <audio id="bgm" loop preload="none">
-        <source src="https://media-allied-chameleon-d0ehvgsf3098b23.webapps.tcloudbase.com/bgm.m4a" type="audio/mp4">
+        <source src="./images/bgm.m4a" type="audio/mp4">
     </audio>
     <div id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
 
