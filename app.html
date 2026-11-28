@@ -1945,7 +1945,16 @@
         }
 
         function setNoticeBadgeCount(unread) {
-            setNoticeBadgeCount(unread);
+            const btn = document.getElementById('notice-btn');
+            if (!btn) return;
+            let dot = btn.querySelector('.notice-dot');
+            const n = Number(unread) || 0;
+            if (n > 0) {
+                if (!dot) { dot = document.createElement('span'); dot.className = 'notice-dot'; btn.appendChild(dot); }
+                dot.textContent = n > 9 ? '9+' : String(n);
+            } else if (dot) {
+                dot.remove();
+            }
         }
 
         async function updateNoticeBadge() {
