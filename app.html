@@ -422,8 +422,8 @@
             var v = document.getElementById('bg-video');
             var wide = window.matchMedia('(min-width: 1100px)').matches;
             v.src = wide
-                ? './images/bg-1080.mp4'
-                : './images/bg-720.mp4';
+                ? 'https://syxpvkhmkvpenogatwkd.supabase.co/storage/v1/object/public/media/bg-1080.mp4'
+                : 'https://syxpvkhmkvpenogatwkd.supabase.co/storage/v1/object/public/media/bg-720.mp4';
             v.play().catch(function () {});
         })();
     </script>
@@ -664,7 +664,7 @@
         <div class="music-btn" id="music-toggle" onclick="toggleMusic()" title="音乐">🔇</div>
     </div>
     <audio id="bgm" loop preload="none">
-        <source src="./images/bgm.m4a" type="audio/mp4">
+        <source src="https://syxpvkhmkvpenogatwkd.supabase.co/storage/v1/object/public/media/bgm.m4a" type="audio/mp4">
     </audio>
     <div id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
 

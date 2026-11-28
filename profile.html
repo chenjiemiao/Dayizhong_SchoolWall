@@ -53,8 +53,8 @@
   var v = document.querySelector('.bg-media video');
   var wide = window.matchMedia('(min-width: 1100px)').matches;
   v.src = wide
-    ? './images/bg-1080.mp4'
-    : './images/bg-720.mp4';
+    ? 'https://syxpvkhmkvpenogatwkd.supabase.co/storage/v1/object/public/media/bg-1080.mp4'
+    : 'https://syxpvkhmkvpenogatwkd.supabase.co/storage/v1/object/public/media/bg-720.mp4';
   v.play().catch(function () {});
 })();
 </script>
