@@ -673,13 +673,13 @@
         // 核心配置与变量
         // ==========================================
         // 这里是你刚刚在腾讯云建好的云函数地址
-        const API_BASE_URL = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api?action=posts';
+        const API_BASE_URL = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api?action=posts';
         // ==== 省流模式：下个月要恢复时，把 true 改成 false，并把 SAVE_UNTIL 清空 ====
         // 恢复：SAVE_MODE = false 并删掉 save-banner 那段 HTML
         const SAVE_MODE = true;
         const SAVE_UNTIL = '12 月 1 日';
 
-        const API_ROOT = 'https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api';
+        const API_ROOT = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
 
         // 没登录就别进主站
         if (!localStorage.getItem('wall_token')) {

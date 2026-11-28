@@ -506,7 +506,7 @@
         if (!name) { out.textContent = '先把用户名填上'; return; }
         out.textContent = '查询中…';
         try {
-            const res = await fetch('https://allied-chameleon-d0ehvgsf3098b23-1533927425.ap-shanghai.app.tcloudbase.com/api?action=checkStatus', {
+            const res = await fetch('https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api?action=checkStatus', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: name })
