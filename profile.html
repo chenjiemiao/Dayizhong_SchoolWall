@@ -97,6 +97,7 @@
 
 <script>
     const API = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23202020'/><text x='50' y='70' font-size='54' text-anchor='middle'>🍍</text></svg>";
     const STATUS = { pending: '待审核', approved: '已通过', rejected: '已拒绝' };
     const token = localStorage.getItem('wall_token');
@@ -107,7 +108,7 @@
     function api(action, data) {
         return fetch(API + '?action=' + action, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({ token }, data || {}))
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }

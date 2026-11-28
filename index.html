@@ -301,7 +301,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="校园墙">
-    <script>if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js?v=2').then(function (r) { r.update(); }).catch(function () {}); });</script>
+    <script>
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
+if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('./sw.js?v=2').then(function (r) { r.update(); }).catch(function () {}); });</script>
 </head>
 <body>
 <div class="bg-media" aria-hidden="true"><video autoplay muted loop playsinline preload="none"></video><div class="bg-mask"></div></div>
@@ -508,7 +510,7 @@
         try {
             const res = await fetch('https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api?action=checkStatus', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: name })
             });
             const data = await res.json();

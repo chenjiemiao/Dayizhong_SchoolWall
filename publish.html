@@ -127,6 +127,7 @@
 
 <script>
     const API = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
     const token = localStorage.getItem('wall_token');
 
     if (!token) location.replace('./account.html');
@@ -135,7 +136,7 @@
         const tk = localStorage.getItem('wall_token') || '';
         return fetch(API + '?action=' + action, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({ token: tk }, data || {}))
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }

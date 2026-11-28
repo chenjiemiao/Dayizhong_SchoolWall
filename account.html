@@ -133,6 +133,7 @@
 
 <script>
     const API = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
     const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23202020'/><text x='50' y='70' font-size='54' text-anchor='middle'>🍍</text></svg>";
     let avatarData = '';
 
@@ -163,7 +164,7 @@
     function api(action, data) {
         return fetch(API + '?action=' + action, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify(data || {})
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败，检查下网络再试' }));
     }
@@ -208,7 +209,7 @@
         if (img) { img.style.display = 'none'; }
         if (a) { a.value = ''; }
         try {
-            const r = await fetch(API + '?action=issueCaptcha');
+            const r = await fetch(API + '?action=issueCaptcha', { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } });
             const d = await r.json();
             if (d.code !== 200) {
                 if (q) q.textContent = '验证码加载失败，点「换一张」';

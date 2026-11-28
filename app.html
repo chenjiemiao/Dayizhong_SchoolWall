@@ -673,6 +673,7 @@
         const SAVE_UNTIL = '';
 
         const API_ROOT = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
 
         // 没登录就别进主站
         if (!localStorage.getItem('wall_token')) {
@@ -681,7 +682,7 @@
 
         // 暗号由后台控制，取不到就用默认的
         (function loadGate() {
-            fetch(API_ROOT + '?action=getGate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+            fetch(API_ROOT + '?action=getGate', { method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: '{}' })
                 .then((r) => r.json())
                 .then((d) => { if (d && d.gate) window.__GATE_CODE = d.gate; })
                 .catch(() => {});
@@ -769,7 +770,7 @@
             try {
                 const r = await fetch(API_ROOT + '?action=imageUrls', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fileIds: ids })
                 });
                 const d = await r.json();
@@ -830,7 +831,7 @@
                 const token = localStorage.getItem('wall_token') || '';
                 const response = await fetch(API_ROOT + '?action=wall', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token: token, fresh: !!force })
                 });
                 const result = await response.json();
@@ -1039,7 +1040,7 @@
             try {
                 const res = await fetch(API_ROOT + '?action=likePost', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, postId: id })
                 });
                 const data = await res.json();
@@ -1067,7 +1068,7 @@
             try {
                 const r = await fetch(API_ROOT + '?action=comments', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ postId })
                 });
                 const d = await r.json();
@@ -1125,7 +1126,7 @@
             try {
                 const r = await fetch(API_ROOT + '?action=addComment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, postId, content: (replyName ? '回复 @' + replyName + '：' : '') + text, parentId: replyParent || '' })
                 });
                 const d = await r.json();
@@ -1150,7 +1151,7 @@
             try {
                 const r = await fetch(API_ROOT + '?action=deleteComment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, id })
                 });
                 const d = await r.json();
@@ -1170,7 +1171,7 @@
             try {
                 const res = await fetch(API_ROOT + '?action=deletePost', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token, postId: id })
                 });
                 const data = await res.json();
@@ -1336,7 +1337,7 @@
             const token = localStorage.getItem('wall_token');
             return fetch(API_ROOT + '?action=' + action, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify(Object.assign({ token }, data || {}))
             }).then((r) => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
         }
@@ -1365,7 +1366,7 @@
             try {
                 const r = await fetch(API_ROOT + '?action=publicProfile', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username })
                 });
                 const d = await r.json();

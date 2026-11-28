@@ -212,13 +212,14 @@
 <script>
     var USERS = {};
     const API = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
+        const SB_KEY = 'sb_publishable_loNoSfQ63RzVjHHRieKjpg_6HP0m5jk';
     let me = null;
 
     function api(action, data) {
         const token = localStorage.getItem('admin_token') || '';
         return fetch(API + '?action=' + action, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify(Object.assign({ token }, data || {}))
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
     }
@@ -241,7 +242,7 @@
         btn.disabled = true; btn.textContent = '登录中…';
         const res = await fetch(API + '?action=adminLogin', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: username, password: password, masterPassword: masterPassword })
         }).then(r => r.json()).catch(() => ({ code: -1, message: '网络请求失败' }));
         if (res.code !== 200) { msg.textContent = res.message || '登录失败'; msg.className = 'msg err'; return; }
@@ -250,7 +251,7 @@
             if (!np) { msg.textContent = '取消设置，无法进入后台'; msg.className = 'msg err'; return; }
             const sr = await fetch(API + '?action=setMasterPassword', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: res.token, password: np })
             }).then(r => r.json()).catch(() => ({ code: -1 }));
             if (sr.code !== 200) { msg.textContent = sr.message || '设置失败'; msg.className = 'msg err'; return; }
@@ -259,7 +260,7 @@
         }
         if (!res.user) {
             const ur = await fetch(API + '?action=me', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: res.token })
             }).then(r => r.json()).catch(() => ({}));
             res.user = (ur && ur.user) || {};
