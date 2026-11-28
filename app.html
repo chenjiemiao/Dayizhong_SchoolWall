@@ -983,7 +983,7 @@
 
                 let imgsHtml = `<div class="img-container ${imgGridClass}">`;
                 post.images.forEach((imgPath) => {
-                    imgsHtml += `<img src="${imgPath}" onclick="event.stopPropagation(); openLightbox('${imgPath}')">`;
+                    imgsHtml += `<img src="${imgPath}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onclick="event.stopPropagation(); openLightbox('${imgPath}')">`;
                 });
                 imgsHtml += `</div>`;
 
