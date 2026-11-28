@@ -1,4 +1,4 @@
-const CACHE = 'dayizhong-wall-v2';
+const CACHE = 'dayizhong-wall-v3';
 const SHELL = [
   './',
   './index.html',
@@ -32,6 +32,10 @@ self.addEventListener('fetch', (e) => {
 
   // 接口一律走网络，永不缓存
   if (url.hostname.indexOf('tcloudbase') !== -1) return;
+  if (url.hostname.indexOf('supabase') !== -1) return;
+  if (url.pathname.indexOf('/functions/v1/') !== -1) return;
+  if (url.pathname.indexOf('/rest/v1/') !== -1) return;
+  if (url.pathname.indexOf('/storage/v1/') !== -1) return;
 
   // 页面：网络优先，断网时用缓存
   if (req.mode === 'navigate' || req.destination === 'document') {
