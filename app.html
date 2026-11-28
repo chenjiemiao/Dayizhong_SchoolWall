@@ -393,7 +393,14 @@
         .utag-已封禁 { border-color: #636e72; color: #636e72; }
             .online-inline { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; font-size: 11px; color: var(--text-muted); vertical-align: middle; }
         .online-inline b { color: #55efc4; font-weight: normal; }
-            .save-banner { position: relative; z-index: 8; max-width: 860px; margin: 12px auto 0; padding: 14px 18px; border-radius: 12px;
+            .hall-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: flex; gap: 14px; align-items: flex-start; }
+        .hall-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #ffd166; }
+        .hall-body { flex: 1; min-width: 0; }
+        .hall-name { font-size: 16px; font-weight: bold; color: var(--text-main); margin-bottom: 4px; }
+        .hall-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+        .hall-reason { font-size: 13px; line-height: 1.7; color: var(--text-muted); white-space: pre-wrap; word-break: break-word; }
+        .hall-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .save-banner { position: relative; z-index: 8; max-width: 860px; margin: 12px auto 0; padding: 14px 18px; border-radius: 12px;
             font-size: 13px; line-height: 1.9; text-align: left;
             background: rgba(28,20,12,.96); border: 1px solid #ff9f43; color: #ffe0b2;
             box-shadow: 0 6px 24px rgba(0,0,0,.5); }
@@ -468,6 +475,7 @@
             <button class="filter-btn" data-filter="挂人避雷">⚠️ 挂人避雷</button>
             <button class="filter-btn" data-filter="约稿专区">🎨 约稿专区</button>
             <button class="filter-btn" data-filter="二手市场">🛒 二手市场</button>
+            <button class="filter-btn" data-filter="名人堂">🏆 名人堂</button>
         </div>
         <div id="posts-container"></div>
     </div>
@@ -1186,6 +1194,38 @@
             }
         }
 
+        async function renderHall() {
+            const box = document.getElementById('posts-container');
+            box.innerHTML = '<div class="hall-empty">加载中…</div>';
+            try {
+                const r = await fetch(API_ROOT + '?action=hallOfFame', {
+                    method: 'POST',
+                    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const d = await r.json();
+                const list = (d && d.data) || [];
+                if (!list.length) {
+                    box.innerHTML = '<div class="hall-empty">名人堂还是空的<br><span style="font-size:12px">等站长评出第一位吧</span></div>';
+                    return;
+                }
+                box.innerHTML = list.map((x, i) => {
+                    const av = x.avatar
+                        ? '<img class="hall-avatar" src="' + esc(x.avatar) + '" alt="">'
+                        : '<div class="hall-avatar" style="background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:22px">🍍</div>';
+                    const tags = (x.titles || []).map((t) => '<span class="utag utag-hall">' + esc(t) + '</span>').join('');
+                    return '<div class="hall-card">' + av +
+                        '<div class="hall-body">' +
+                        '<div class="hall-name">' + esc(x.nickname) + ' <span style="font-size:12px;color:#888">#' + (i + 1) + '</span></div>' +
+                        (tags ? '<div class="hall-tags">' + tags + '</div>' : '') +
+                        '<div class="hall-reason">' + esc(x.reason) + '</div>' +
+                        '</div></div>';
+                }).join('');
+            } catch (e) {
+                box.innerHTML = '<div class="hall-empty">加载失败，稍后再试</div>';
+            }
+        }
+
         // ==========================================
         // 其他交互逻辑
         // ==========================================
@@ -1194,7 +1234,7 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentFilter = e.target.getAttribute('data-filter');
-                renderPosts();
+                if (currentFilter === '名人堂') { renderHall(); } else { renderPosts(); }
             });
         });
 

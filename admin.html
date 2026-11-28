@@ -163,6 +163,18 @@
             <div id="grant-users"><div class="empty">加载中…</div></div>
         </div>
 
+        <div class="card" id="sec-hall" hidden>
+            <h2>名人堂管理 <span class="tag">只有站长</span>
+                <button class="btn ghost" style="float:right;padding:3px 10px;font-size:12px" onclick="loadHall()">刷新</button>
+            </h2>
+            <p style="color:#888;font-size:12px;margin:0 0 10px">把值得记住的人放上去，写清楚为什么</p>
+            <input id="hall-username" placeholder="用户名（不是昵称）" maxlength="24">
+            <textarea id="hall-reason" placeholder="入选理由：他做了什么、为什么值得记住（最多 300 字）" maxlength="300"
+                style="min-height:80px;margin-top:8px"></textarea>
+            <button class="btn" onclick="addHall()" style="margin-top:8px">加入名人堂</button>
+            <div id="hall-list" style="margin-top:14px"><div class="empty">加载中…</div></div>
+        </div>
+
         <div class="card" id="sec-requests" hidden>
             <h2>待审核账号 <span class="cnt" id="cnt-req"></span> <button class="btn ghost" style="float:right;padding:3px 10px;font-size:12px" onclick="loadRequests()">刷新</button></h2>
             <div id="req-list"><div class="empty">加载中…</div></div>
@@ -271,6 +283,50 @@
         showPanel();
     }
 
+    async function loadHall() {
+        const box = document.getElementById('hall-list');
+        if (!box) return;
+        box.innerHTML = '<div class="empty">加载中…</div>';
+        try {
+            const d = await api('adminListHall', {});
+            if (d.code !== 200) { box.innerHTML = '<div class="empty">' + (d.message || '加载失败') + '</div>'; return; }
+            const list = d.data || [];
+            if (!list.length) { box.innerHTML = '<div class="empty">名人堂还是空的</div>'; return; }
+            box.innerHTML = list.map((x) =>
+                '<div style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:8px">' +
+                '<div style="flex:1;min-width:0">' +
+                '<div style="color:#ffd166;font-weight:bold">' + x.username + '</div>' +
+                '<div style="font-size:12px;color:#999;margin-top:4px;line-height:1.6">' + (x.reason || '') + '</div>' +
+                '</div>' +
+                '<button class="btn ghost" style="padding:4px 10px;font-size:12px" onclick="removeHall(\'' + x.username + '\')">移出</button>' +
+                '</div>'
+            ).join('');
+        } catch (e) {
+            box.innerHTML = '<div class="empty">网络请求失败</div>';
+        }
+    }
+
+    async function addHall() {
+        const u = document.getElementById('hall-username').value.trim();
+        const r = document.getElementById('hall-reason').value.trim();
+        if (!u) { alert('要填用户名'); return; }
+        if (!r) { alert('要填入选理由'); return; }
+        const d = await api('adminAddHall', { username: u, reason: r });
+        alert(d.message || (d.code === 200 ? '已添加' : '添加失败'));
+        if (d.code === 200) {
+            document.getElementById('hall-username').value = '';
+            document.getElementById('hall-reason').value = '';
+            loadHall();
+        }
+    }
+
+    async function removeHall(username) {
+        if (!confirm('确定把 ' + username + ' 移出名人堂？')) return;
+        const d = await api('adminRemoveHall', { username });
+        alert(d.message || '已移出');
+        loadHall();
+    }
+
     function showPanel() {
         document.getElementById('login-card').hidden = true;
         document.getElementById('panel').hidden = false;
@@ -282,6 +338,7 @@
         document.getElementById('sec-gate').hidden = !owner;
         document.getElementById('sec-broadcast').hidden = !owner;
         document.getElementById('sec-announce').hidden = !owner;
+        document.getElementById('sec-hall').hidden = !owner;
         var sec = document.getElementById('sec-security');
         if (sec) sec.hidden = !owner;
         var pr = document.getElementById('sec-profreq');
