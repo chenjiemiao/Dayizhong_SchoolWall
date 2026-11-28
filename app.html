@@ -447,13 +447,6 @@
         </div>
     </header>
 
-    <div id="save-banner" class="save-banner">
-        <div class="save-title">⛔ 服务器暂停服务中</div>
-        <div class="save-line">因服务器资源欠费，本站<strong>暂时无法使用</strong>：发帖、评论、点赞、登录均不可用。</div>
-        <div class="save-line">· 账号、帖子、评论等数据均已保留，不会丢失</div>
-        <div class="save-line">· 预计 <b>12 月 17 日</b>恢复服务</div>
-        <div class="save-line">· 恢复后将在群内通知</div>
-    </div>
     </div>
 
     <div id="checkin-pop" class="checkin-pop" hidden>
@@ -676,8 +669,8 @@
         const API_BASE_URL = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api?action=posts';
         // ==== 省流模式：下个月要恢复时，把 true 改成 false，并把 SAVE_UNTIL 清空 ====
         // 恢复：SAVE_MODE = false 并删掉 save-banner 那段 HTML
-        const SAVE_MODE = true;
-        const SAVE_UNTIL = '12 月 1 日';
+        const SAVE_MODE = false;
+        const SAVE_UNTIL = '';
 
         const API_ROOT = 'https://syxpvkhmkvpenogatwkd.supabase.co/functions/v1/api';
 
